@@ -31,7 +31,9 @@ float fov = 90.0f;
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
+
 glm::vec3 cameraPos   = glm::vec3(-2.0f, 8.0f, 6.0f);
+//glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -98,7 +100,7 @@ int main() {
             glDepthMask(GL_TRUE);
         }
 
-        { // Chunk render
+        { // Chunks render
             blockShader.Use();
             int modelLoc = glGetUniformLocation(blockShader.Program, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -107,55 +109,78 @@ int main() {
             int projectionLoc = glGetUniformLocation(blockShader.Program, "projection");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+            static auto cameraBlocksPos = glm::value_ptr(cameraPos);
+
+            // Render chunk
             glBindVertexArray(VAO);
-            
+
             for (int iLayer = 0; iLayer < static_cast<int>(shittedChunk.size()); iLayer++) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
-                for (int iRow = 0; iRow < 16; iRow++) {
+
+                // Functor: Render single row of chunk 
+                static auto rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
-                    for (int iBlock = 0; iBlock < 16; iBlock++) {
-                        bebra::objects::block& block = row[iBlock];
-                        if (block.air) continue;
-                        glm::vec3 blockPos = {float(iBlock), float(iLayer), float(iRow)};
+                    
+                    // Functor: Render single row of chunk
+                    static auto blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
+                        bebra::objects::block* block = row[iBlock];
+
+                        if (block->air) return;
+                        glm::vec3 blockPos = { float(iBlock), float(iLayer), float(iRow) };
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
                         model = glm::translate(model, blockPos);
-                        model = glm::rotate(model, block.rotate, glm::vec3(1.0f, 1.0f, 1.0f));
+                        model = glm::rotate(model, block->rotate, glm::vec3(0.0f, 1.0f, 0.0f));
 
                         int modelLoc = glGetUniformLocation(blockShader.Program, "model");
                         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
                         { // Pass textures to fragment shaders
                             glActiveTexture(GL_TEXTURE0);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.front);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.front);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "front"), 0);
 
                             glActiveTexture(GL_TEXTURE1);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.back);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.back);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
-
+                            
                             glActiveTexture(GL_TEXTURE2);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.up);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.up);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 2);
 
                             glActiveTexture(GL_TEXTURE3);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.down);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.down);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "down"), 3);
 
                             glActiveTexture(GL_TEXTURE4);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.left);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.left);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 4);
 
                             glActiveTexture(GL_TEXTURE5);
-                            glBindTexture(GL_TEXTURE_2D, block.textures.right);
+                            glBindTexture(GL_TEXTURE_2D, block->textures.right);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 5);
 
                             glDrawArrays(GL_TRIANGLES, 0, 36);
                         }
-                    }
-                }
+                    };
+
+                    // [->>Camera   ]
+                    for (int iBlock = 0; iBlock < std::max(0, static_cast<int>(cameraBlocksPos[0])); iBlock++)
+                        blockFunctor(row, iBlock);
+                    // [   Camera<<-]
+                    for (int iBlock = 15; iBlock >= std::max(0, static_cast<int>(cameraBlocksPos[0])); iBlock--) 
+                        blockFunctor(row, iBlock);
+                };
+
+                // [->>Camera   ]   
+                for (int iRow = 0; iRow < std::max(0, static_cast<int>(cameraBlocksPos[2])); iRow++)
+                    rowFunctor(layer, iRow);
+                // [   Camera<<-]
+                for (int iRow = 15; iRow >= std::max(0, static_cast<int>(cameraBlocksPos[2])); iRow--)
+                    rowFunctor(layer, iRow);
             }
+            
             glBindVertexArray(0);
         }
 
