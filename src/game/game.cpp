@@ -45,7 +45,13 @@ int main() {
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
     GLuint VBOsky, VAOsky;
     bebra::graphics::loadObject(VBOsky, VAOsky);
-    auto skyBoxTexture = bebra::graphics::loadCubemap();
+    auto skyBoxTexture = bebra::graphics::loadCubemap(
+            {"textures/skybox/ft.png",
+            "textures/skybox/bk.png",
+            "textures/skybox/up.png",
+            "textures/skybox/dn.png",
+            "textures/skybox/lf.png",
+            "textures/skybox/rt.png"});
 
     // Create blocks
     GLuint VBO, VAO, EBO;

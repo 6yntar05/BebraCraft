@@ -13,15 +13,7 @@ namespace graphics {
     
     struct cubeMap : public bebra::objects::blockTexture {};
 
-    unsigned int loadCubemap() {
-        std::vector<std::string> faces = {
-            "textures/skybox/ft.png",
-            "textures/skybox/bk.png",
-            "textures/skybox/up.png",
-            "textures/skybox/dn.png",
-            "textures/skybox/lf.png",
-            "textures/skybox/rt.png"
-        };
+    GLuint loadCubemap(std::vector<std::string> faces) {
         unsigned int textureID;
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

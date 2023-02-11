@@ -1,4 +1,4 @@
-#version 110
+#version 330 core
 
 #extension GL_ARB_explicit_attrib_location : require
 //#extension GL_EXT_texture_array : require
@@ -20,18 +20,17 @@ uniform sampler2D right;
 void main(void){
     if (TexIndex == 0.0)
         color = texture2D(front, TexCoord);
-    else if (TexIndex == 1.0)
+    else if (TexIndex < 1.1)
         color = texture2D(back, TexCoord);
-    else if (TexIndex == 2.0)
+    else if (TexIndex < 2.1)
         color = texture2D(up, TexCoord);
-    else if (TexIndex == 3.0)
+    else if (TexIndex < 3.1)
         color = texture2D(down, TexCoord);
-    else if (TexIndex == 4.0)
+    else if (TexIndex < 4.1)
         color = texture2D(left, TexCoord);
-    else if (TexIndex == 5.0)
+    else if (TexIndex < 5.1)
         color = texture2D(right, TexCoord);
-    else
-        color = vec4(1.0, 0.0, 1.0, 1.0); // Error
+    //else color = vec4(1.0, 0.0, 1.0, 1.0); // Error
 
     //color = texture2DArray(textures, vec3(TexCoord, 0.0));
     //if (color.a < 0.01) discard;
