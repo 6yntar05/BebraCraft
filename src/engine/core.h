@@ -13,5 +13,5 @@ namespace bebra {
 
     int init(gapi);
     SDL_Window* window(std::string windowName, uint windowWidth, uint windowHeight, uint32_t properties_graphic_api);
-    void contextCreate(SDL_Window* window, uint windowWidth, uint windowHeight, bool debugVerticles = false);
+    void contextCreate(SDL_Window* window, uint windowWidth, uint windowHeight, bool debugVerticles = false, bool nicest = true);
 };

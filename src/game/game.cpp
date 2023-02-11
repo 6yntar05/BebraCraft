@@ -38,7 +38,7 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 int main() {
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
-    bebra::contextCreate(window, windowWidth, windowHeight, false);
+    bebra::contextCreate(window, windowWidth, windowHeight, false, true);
     bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
 

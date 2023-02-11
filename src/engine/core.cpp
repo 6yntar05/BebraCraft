@@ -21,6 +21,7 @@ namespace bebra {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
         
+        /*
         SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
         SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -28,6 +29,7 @@ namespace bebra {
         SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        */
 
         SDL_GL_SetSwapInterval(0);
 
@@ -35,8 +37,8 @@ namespace bebra {
     }
 
     SDL_Window* window(std::string windowName, uint windowWidth, uint windowHeight, uint32_t properties_graphic_api) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+        //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); // It blows mesa zink
+        //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); // It blows mesa zink
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); 
 
         SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
@@ -58,17 +60,19 @@ namespace bebra {
         return window;
     }
     
-    void contextCreate(SDL_Window* window, uint windowWidth, uint windowHeight, bool debugVerticles) {
+    void contextCreate(SDL_Window* window, uint windowWidth, uint windowHeight, bool debugVerticles, bool nicest) {
         //SDL_GLContext Context = 
             SDL_GL_CreateContext(window);
         glewInit();
         glViewport(0, 0, windowWidth, windowHeight);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_MULTISAMPLE);
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_POLYGON_SMOOTH);
+        if (nicest) {
+            glEnable(GL_MULTISAMPLE);
+            glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
+            glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+            glEnable(GL_LINE_SMOOTH);
+            // glEnable(GL_POLYGON_SMOOTH);
+        }
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
