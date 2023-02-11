@@ -102,13 +102,13 @@ namespace objects {
         }
 
         blockTexture textures;
-        bool inited = true;
+        bool air = false;
         glm::vec3 pos = {0.0, 0.0, 0.0}; // Will be ignored if in chunk (Will solving later)
         float rotate = 0.0;
 
         //block(blockTexture textures) : textures(textures) {}
     };
 
-    block air { {}, false };
+    block air { {}, true };
 }
 }

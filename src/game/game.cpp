@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include <cstdint>
 #include <cassert>
-#include <algorithm>
-#include <list>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -14,7 +12,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine/core.h"
-#include "engine/input.h"
 #include "engine/graphics/cubemaps.h"
 #include "engine/graphics/shaders.h"
 #include "engine/objects/block.h"
@@ -42,7 +39,7 @@ int main() {
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight, false);
-    bebra::graphics::Shader ourShader("shaders/block.vs", "shaders/block.frag");
+    bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
@@ -95,13 +92,13 @@ int main() {
             glDepthMask(GL_TRUE);
         }
 
-        { // Blocks render
-            ourShader.Use();
-            int modelLoc = glGetUniformLocation(ourShader.Program, "model");
+        { // Chunk render
+            blockShader.Use();
+            int modelLoc = glGetUniformLocation(blockShader.Program, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            int viewLoc = glGetUniformLocation(ourShader.Program, "view");
+            int viewLoc = glGetUniformLocation(blockShader.Program, "view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            int projectionLoc = glGetUniformLocation(ourShader.Program, "projection");
+            int projectionLoc = glGetUniformLocation(blockShader.Program, "projection");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
             glBindVertexArray(VAO);
@@ -112,8 +109,7 @@ int main() {
                     bebra::objects::chunkRow& row = layer[iRow];
                     for (int iBlock = 0; iBlock < 16; iBlock++) {
                         bebra::objects::block& block = row[iBlock];
-                        if (!block.inited) continue;
-                        // IGNORE block.pos!!! CHUNK WILL OVERRIDE BLOCK POSITION!
+                        if (block.air) continue;
                         glm::vec3 blockPos = {float(iBlock), float(iLayer), float(iRow)};
 
                         // Block space transformation
@@ -121,33 +117,33 @@ int main() {
                         model = glm::translate(model, blockPos);
                         model = glm::rotate(model, block.rotate, glm::vec3(1.0f, 1.0f, 1.0f));
 
-                        int modelLoc = glGetUniformLocation(ourShader.Program, "model");
+                        int modelLoc = glGetUniformLocation(blockShader.Program, "model");
                         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
                         { // Pass textures to fragment shaders
                             glActiveTexture(GL_TEXTURE0);
                             glBindTexture(GL_TEXTURE_2D, block.textures.front);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "front"), 0);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "front"), 0);
 
                             glActiveTexture(GL_TEXTURE1);
                             glBindTexture(GL_TEXTURE_2D, block.textures.back);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "back"), 1);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
 
                             glActiveTexture(GL_TEXTURE2);
                             glBindTexture(GL_TEXTURE_2D, block.textures.up);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "up"), 2);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 2);
 
                             glActiveTexture(GL_TEXTURE3);
                             glBindTexture(GL_TEXTURE_2D, block.textures.down);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "down"), 3);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "down"), 3);
 
                             glActiveTexture(GL_TEXTURE4);
                             glBindTexture(GL_TEXTURE_2D, block.textures.left);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "left"), 4);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 4);
 
                             glActiveTexture(GL_TEXTURE5);
                             glBindTexture(GL_TEXTURE_2D, block.textures.right);
-                            glUniform1i(glGetUniformLocation(ourShader.Program, "right"), 5);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 5);
 
                             glDrawArrays(GL_TRIANGLES, 0, 36);
                         }
