@@ -1,4 +1,3 @@
-#include <SDL2/SDL_keycode.h>
 #include <iostream>
 #include <vector>
 #include <unistd.h>
@@ -15,12 +14,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine/core.h"
+#include "engine/input.h"
 #include "engine/graphics/cubemaps.h"
 #include "engine/graphics/shaders.h"
-// #include "engine/graphics/textures.h"
 #include "engine/objects/block.h"
 #include "engine/objects/chunk.h"
 #include "engine/utils/demoChunkGen.h"
+
+#include "game/control.h"
 
 int windowWidth = 1920;
 int windowHeight = 1080;
@@ -30,6 +31,9 @@ float yaw = 0.0f;
 float pitch = 0.0f;
 float fov = 90.0f;
 
+extern glm::vec3 cameraPos;
+extern glm::vec3 cameraFront;
+extern glm::vec3 cameraUp;
 glm::vec3 cameraPos   = glm::vec3(-2.0f, 8.0f, 6.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -59,92 +63,7 @@ int main() {
     static float speed = 0.05f;
 
     while (window_running) { // Every frame
-
-        {   // Input
-            SDL_Event Event;
-            while (SDL_PollEvent(&Event)) {
-                if (Event.type == SDL_QUIT) {
-                    window_running = false;
-                    break;
-
-                } else if (Event.type == SDL_KEYDOWN) {
-                    if (std::find(keyPressed.begin(), keyPressed.end(), Event.key.keysym.sym) == keyPressed.end()) {
-                        keyPressed.push_back(Event.key.keysym.sym);
-                        if (Event.key.keysym.sym == SDLK_LCTRL)
-                            speed *= 3.0;
-                    }
-
-                } else if (Event.type == SDL_KEYUP) {
-                    if (Event.key.keysym.sym == SDLK_LCTRL)
-                        speed /= 3.0;
-                    keyPressed.remove(Event.key.keysym.sym);
-
-                } else if (Event.type == SDL_MOUSEMOTION) {
-                    yaw += float(Event.motion.xrel) * 0.2;
-                    pitch -= float(Event.motion.yrel) * 0.2;
-                }
-            }
-            for (auto key : keyPressed) {
-                switch (key) {
-                    case SDLK_ESCAPE:
-                        window_running = false;
-                        break;
-
-                    case SDLK_w:
-                        cameraPos += glm::normalize(
-                            glm::cross(
-                                glm::cross(cameraFront, cameraUp), glm::vec3(0.0,-1.0,0.0)
-                            )
-                            ) * speed;
-                        break;
-
-                    case SDLK_a:
-                        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
-                        break;
-
-                    case SDLK_s: //
-                        cameraPos += glm::normalize(
-                            glm::cross(
-                                glm::cross(cameraFront, cameraUp), glm::vec3(0.0,1.0,0.0)
-                            )
-                            ) * speed;
-                        break;
-
-                    case SDLK_d:
-                        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * speed;
-                        break;
-
-                    case SDLK_SPACE:
-                        cameraPos[1] += speed;
-                        break;
-                    
-                    case SDLK_LSHIFT:
-                        cameraPos[1] -= speed;
-                        break;
-
-                    case SDLK_UP:
-                        pitch += 2.0f;
-                        break;
-
-                    case SDLK_LEFT:
-                        yaw -= 2.0f;
-                        break;
-
-                    case SDLK_DOWN:
-                        pitch -= 2.0f;
-                        break;
-
-                    case SDLK_RIGHT:
-                        yaw += 2.0f;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-            if (pitch > 89.0) pitch = 89.0;
-            else if (pitch < -89.0) pitch = -89.0;
-        }
+        handleInput(keyPressed, speed, yaw, pitch, window_running);
 
         // Position calculation
         glm::mat4
