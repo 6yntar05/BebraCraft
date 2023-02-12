@@ -183,10 +183,10 @@ int main() {
                     rowFunctor(layer, iRow);
             };
             //DN[->>Camera   ]UP
-            for (int iLayer = 0; iLayer < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize) ; iLayer++) {
+            for (int iLayer = 0; iLayer < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize) ; iLayer++)
                 layerFunctor(shittedChunk, iLayer);
             //DN[   Camera<<-]UP
-            for (int iLayer = chunkSize-1; iLayer >= std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize); iLayer--) {
+            for (int iLayer = chunkSize-1; iLayer >= std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize); iLayer--)
                 layerFunctor(shittedChunk, iLayer);
         }
 

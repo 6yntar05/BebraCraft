@@ -1,9 +1,11 @@
 # BebraCraft
 Students laboratory work. OpenGL C++ Minecraft (not)clone
 
+![BebraCraft Screenshot](/Screenshot.png?raw=true "BebraCraft")
+
 ## Installation
 ### Archlinux
-- `sudo pacman -S sdl2 sdl2_gfx glew stb`
+- `sudo pacman -S sdl2 glew stb`
 
 ## Building
 - `git clone https://github.com/6yntar05/BebraCraft`
