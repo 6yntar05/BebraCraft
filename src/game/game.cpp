@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <cstdint>
 #include <cassert>
+#include <cmath>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -16,7 +17,7 @@
 #include "engine/graphics/shaders.h"
 #include "engine/objects/block.h"
 #include "engine/objects/chunk.h"
-#include "engine/utils/demoChunkGen.h"
+#include "game/demoChunkGen.h"
 
 #include "game/control.h"
 
@@ -48,12 +49,12 @@ int main() {
     GLuint VBOsky, VAOsky;
     bebra::graphics::loadObject(VBOsky, VAOsky);
     auto skyBoxTexture = bebra::graphics::loadCubemap(
-            {"textures/skybox/ft.png",
-            "textures/skybox/bk.png",
-            "textures/skybox/up.png",
-            "textures/skybox/dn.png",
-            "textures/skybox/lf.png",
-            "textures/skybox/rt.png"});
+        {"textures/skybox/ft.png",
+        "textures/skybox/bk.png",
+        "textures/skybox/up.png",
+        "textures/skybox/dn.png",
+        "textures/skybox/lf.png",
+        "textures/skybox/rt.png"});
 
     // Create blocks
     GLuint VBO, VAO, EBO;
@@ -61,6 +62,7 @@ int main() {
 
     // Load chunks
     auto shittedChunk = bebra::utils::genChunk();
+    int chunkSize = static_cast<int>(shittedChunk.size());
 
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
@@ -102,6 +104,7 @@ int main() {
 
         { // Chunks render
             blockShader.Use();
+            glBindVertexArray(VAO);
             int modelLoc = glGetUniformLocation(blockShader.Program, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             int viewLoc = glGetUniformLocation(blockShader.Program, "view");
@@ -111,17 +114,16 @@ int main() {
 
             static auto cameraBlocksPos = glm::value_ptr(cameraPos);
 
-            // Render chunk
-            glBindVertexArray(VAO);
-
-            for (int iLayer = 0; iLayer < static_cast<int>(shittedChunk.size()); iLayer++) {
+            /// Render chunk
+            // Functor: Render single layer of chunk
+            static auto layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
                 static auto rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
-                    // Functor: Render single row of chunk
+                    // Functor: Render single block of chunk
                     static auto blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::block* block = row[iBlock];
 
@@ -165,23 +167,27 @@ int main() {
                         }
                     };
 
-                    // [->>Camera   ]
-                    for (int iBlock = 0; iBlock < std::max(0, static_cast<int>(cameraBlocksPos[0])); iBlock++)
+                    //-Y[->>Camera   ]+Y
+                    for (int iBlock = 0; iBlock < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[0]))), 16); iBlock++)
                         blockFunctor(row, iBlock);
-                    // [   Camera<<-]
-                    for (int iBlock = 15; iBlock >= std::max(0, static_cast<int>(cameraBlocksPos[0])); iBlock--) 
+                    //-Y[   Camera<<-]+Y
+                    for (int iBlock = 15; iBlock >= std::max(0, static_cast<int>(std::round(cameraBlocksPos[0]))); iBlock--)
                         blockFunctor(row, iBlock);
                 };
 
-                // [->>Camera   ]   
-                for (int iRow = 0; iRow < std::max(0, static_cast<int>(cameraBlocksPos[2])); iRow++)
+                //-X[->>Camera   ]+X
+                for (int iRow = 0; iRow < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[2]))), 16); iRow++)
                     rowFunctor(layer, iRow);
-                // [   Camera<<-]
-                for (int iRow = 15; iRow >= std::max(0, static_cast<int>(cameraBlocksPos[2])); iRow--)
+                //-X[   Camera<<-]+X
+                for (int iRow = 15; iRow >= std::max(0, static_cast<int>(std::round(cameraBlocksPos[2]))); iRow--)
                     rowFunctor(layer, iRow);
-            }
-            
-            glBindVertexArray(0);
+            };
+            //DN[->>Camera   ]UP
+            for (int iLayer = 0; iLayer < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize) ; iLayer++) {
+                layerFunctor(shittedChunk, iLayer);
+            //DN[   Camera<<-]UP
+            for (int iLayer = chunkSize-1; iLayer >= std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize); iLayer--) {
+                layerFunctor(shittedChunk, iLayer);
         }
 
         SDL_GL_SwapWindow(window);

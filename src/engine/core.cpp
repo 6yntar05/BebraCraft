@@ -37,8 +37,8 @@ namespace bebra {
     }
 
     SDL_Window* window(std::string windowName, uint windowWidth, uint windowHeight, uint32_t properties_graphic_api) {
-        //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); // It blows mesa zink
-        //SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); // It blows mesa zink
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); // It blows mesa zink
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8); // It blows mesa zink
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); 
 
         SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable

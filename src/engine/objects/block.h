@@ -26,6 +26,11 @@ namespace objects {
     };
 
     struct block {
+
+        constexpr static uint textureIndexes[] = {
+            0, 1, 2, 3, 4, 5
+        };
+
         constexpr static float verticies[] = { //Coords(3), TexturesPos(2), TextureIndex(1)
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f, // Front
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,
@@ -76,7 +81,7 @@ namespace objects {
         };
 
         static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
-            glGenVertexArrays(2, &VAO);
+            glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glGenBuffers(1, &EBO);
 

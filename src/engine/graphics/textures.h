@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <iostream>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -12,7 +14,7 @@
 namespace bebra {
 namespace graphics {
 
-void loadTexture(GLuint* texture, std::string path, GLenum format = GL_RGBA) {
+void loadTexture(GLuint* texture, std::string path) {
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture); // All upcoming GL_TEXTURE_2D operations now have effect on our texture object
     // Set our texture parameters
