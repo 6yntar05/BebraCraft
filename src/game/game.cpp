@@ -1,9 +1,11 @@
 #include <iostream>
+#include <type_traits>
 #include <vector>
 #include <unistd.h>
 #include <cstdint>
 #include <cassert>
 #include <cmath>
+#include <functional>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -116,15 +118,15 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static auto layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
+            static std::function layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
-                static auto rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
+                static std::function rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
                     // Functor: Render single block of chunk
-                    static auto blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
+                    static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::block* block = row[iBlock];
 
                         if (block->air) return;
