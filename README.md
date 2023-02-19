@@ -5,7 +5,8 @@ Students laboratory work. OpenGL C++ Minecraft (not)clone
 
 ## Installation
 ### Archlinux
-- `sudo pacman -S sdl2 glew stb`
+- `sudo pacman -S sdl2 glew glm stb`
+- `# and glfw-x11 or glfw-wayland`
 
 ## Building
 - `git clone https://github.com/6yntar05/BebraCraft`

@@ -14,8 +14,13 @@ out vec3 ourColor;
 out vec2 TexCoord;
 out float TexIndex;
 
+out vec3 Position;
+out vec4 glPos;
+
 void main(void){
     gl_Position = projection * view * model * vec4(position, 1.0);
+    glPos = gl_Position;
     TexCoord = texCoord;
     TexIndex = texIndex;
+    Position = position;
 }

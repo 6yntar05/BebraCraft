@@ -6,6 +6,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_stdinc.h>
+#include <SDL2/SDL_render.h>
 
 #include "engine/core.h"
 
@@ -39,14 +40,14 @@ namespace bebra {
     SDL_Window* window(std::string windowName, uint windowWidth, uint windowHeight, uint32_t properties_graphic_api) {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); // It blows mesa zink
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8); // It blows mesa zink
-        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1); 
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
         SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
-
+        SDL_GL_SetSwapInterval(0);
         SDL_Window *window = SDL_CreateWindow(windowName.c_str() , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            windowWidth, windowHeight, properties_graphic_api);
+            windowWidth, windowHeight, properties_graphic_api | !SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
         
         if (window == NULL){
             std::cout << "ERROR::SDL::CREATE_WINDOW\n";
