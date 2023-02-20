@@ -9,13 +9,6 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform sampler2D front;
-uniform sampler2D back;
-uniform sampler2D up;
-uniform sampler2D down;
-uniform sampler2D left;
-uniform sampler2D right;
-
 out vec2 TexCoord;
 flat out int vertexID;
 out vec3 Position;

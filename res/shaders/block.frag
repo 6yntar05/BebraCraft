@@ -19,21 +19,33 @@ out vec4 color;
 
 void main(void){
     // Texture choosing (very cringe, i know)
-    if (vertexID < 6)
+    if (vertexID < 6) {
         color = texture2D(front, TexCoord);
-    else if (vertexID < 12)
+        if(gl_FrontFacing)
+            color.a = 0.0;
+    } else if (vertexID < 12) {
         color = texture2D(back, TexCoord);
-    else if (vertexID < 18)
+        if(!gl_FrontFacing)
+            color.a = 0.0;
+    } else if (vertexID < 18) {
         color = texture2D(up, TexCoord);
-    else if (vertexID < 24)
+        if(gl_FrontFacing)
+            color.a = 0.0;
+    } else if (vertexID < 24) {
         color = texture2D(down, TexCoord);
-    else if (vertexID < 30)
+        if(!gl_FrontFacing)
+            color.a = 0.0;
+    } else if (vertexID < 30) {
         color = texture2D(left, TexCoord);
-    else if (vertexID < 36)
+        if(gl_FrontFacing)
+            color.a = 0.0;
+    } else if (vertexID < 36) {
         color = texture2D(right, TexCoord);
-    else // Out of range
+        if(!gl_FrontFacing)
+            color.a = 0.0;
+    }else // Out of range
         color = vec4(1.0, 0.0, 1.0, 1.0);
-    
+
     // Camera shadow
     color.xyz -= vec3((1.0-gl_FragCoord.z)/3.0);
 }
