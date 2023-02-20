@@ -38,8 +38,6 @@ void main(void){
     else // Out of range
         color = vec4(1.0, 0.0, 1.0, 1.0);
 
-    float camShadEase = 3.0;
-
     // Camera shadow
     if (color.w > 0.9)
         color.xyz -= vec3(
