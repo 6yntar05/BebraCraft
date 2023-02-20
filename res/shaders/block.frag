@@ -30,6 +30,6 @@ void main(void){
     else if (TexIndex < 5.1)
         color = texture2D(right, TexCoord);
     else color = vec4(1.0, 0.0, 1.0, 1.0); // Error
-
-    // color += glPos;
+    
+    color.xyz -= vec3((1.0-gl_FragCoord.z)/3.0);
 }

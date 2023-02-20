@@ -89,8 +89,10 @@ int main() {
 
 		// Clear the buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
+		//glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
+		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
 
+        
         { // SkyBox render
             glDepthMask(GL_FALSE);
             skyboxShader.Use();
@@ -118,15 +120,15 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static std::function layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
+            static std::function layerFunctor = [&blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
-                static std::function rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
+                static std::function rowFunctor = [&blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
                     // Functor: Render single block of chunk
-                    static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
+                    static std::function blockFunctor = [&blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::block* block = row[iBlock];
 
                         if (block->air) return;

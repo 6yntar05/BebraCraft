@@ -19,6 +19,7 @@ out vec4 glPos;
 
 void main(void){
     gl_Position = projection * view * model * vec4(position, 1.0);
+
     glPos = gl_Position;
     TexCoord = texCoord;
     TexIndex = texIndex;

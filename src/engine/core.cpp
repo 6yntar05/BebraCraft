@@ -47,7 +47,7 @@ namespace bebra {
         SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
         SDL_GL_SetSwapInterval(0);
         SDL_Window *window = SDL_CreateWindow(windowName.c_str() , SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            windowWidth, windowHeight, properties_graphic_api | !SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+            windowWidth, windowHeight, properties_graphic_api | SDL_RENDERER_ACCELERATED);
         
         if (window == NULL){
             std::cout << "ERROR::SDL::CREATE_WINDOW\n";
