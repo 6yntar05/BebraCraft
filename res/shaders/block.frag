@@ -2,9 +2,9 @@
 
 #extension GL_ARB_explicit_attrib_location : require
 
+// Textures
 in vec2 TexCoord;
 flat in int vertexID;
-
 uniform sampler2D front;
 uniform sampler2D back;
 uniform sampler2D up;
@@ -12,8 +12,12 @@ uniform sampler2D down;
 uniform sampler2D left;
 uniform sampler2D right;
 
+// Raw data
 in vec3 Position;
 in vec4 glPos;
+
+// FX
+float camShadEase = 5.0;
 
 out vec4 color;
 
@@ -34,6 +38,13 @@ void main(void){
     else // Out of range
         color = vec4(1.0, 0.0, 1.0, 1.0);
 
+    float camShadEase = 3.0;
+
     // Camera shadow
-    color.xyz -= vec3((1.0-gl_FragCoord.z)/3.0);
+    if (color.w > 0.9)
+        color.xyz -= vec3(
+            ( 1.0 - gl_FragCoord.z )
+            /*--------------------*/ /
+                   camShadEase
+        );
 }

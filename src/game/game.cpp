@@ -43,7 +43,6 @@ int main() {
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight, false, true);
-    glEnable(GL_CULL_FACE);
     bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
 
