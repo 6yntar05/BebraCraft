@@ -46,17 +46,6 @@ int main() {
     bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
 
-    // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
-    GLuint VBOsky, VAOsky;
-    bebra::graphics::loadObject(VBOsky, VAOsky);
-    auto skyBoxTexture = bebra::graphics::loadCubemap(
-        {"textures/skybox/ft.png",
-        "textures/skybox/bk.png",
-        "textures/skybox/up.png",
-        "textures/skybox/dn.png",
-        "textures/skybox/lf.png",
-        "textures/skybox/rt.png"});
-
     // Create blocks
     GLuint VBO, VAO, EBO;
     bebra::objects::block::loadObject(VBO, VAO, EBO);
@@ -89,20 +78,6 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		// glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
 		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
-
-        
-        { // SkyBox render
-            glDepthMask(GL_FALSE);
-            skyboxShader.Use();
-            int viewLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "view");
-            glUniformMatrix4fv(viewLocIdenpedent, 1, GL_FALSE, glm::value_ptr(viewIdenpedent));
-            int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
-            glUniformMatrix4fv(projectionLocIdenpedent, 1, GL_FALSE, glm::value_ptr(projection));
-            glBindVertexArray(VAOsky);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDepthMask(GL_TRUE);
-        }
 
         { // Chunks render
             blockShader.Use();
