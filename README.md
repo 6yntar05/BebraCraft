@@ -1,5 +1,5 @@
 # BebraCraft (RaspberryPI branch)
-Seems layout didnt work on opengl 2.1, but mesa still compilling this shader even with errors
+Seems layout doesn't work on opengl 2.1, but mesa still compilling this shader
 
 ![BebraCraft Screenshot](/Screenshot.png?raw=true "BebraCraft")
 
