@@ -73,22 +73,21 @@ int main() {
     while (window_running) { // Every frame
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
-        // Position calculation
-        glm::mat4
-            model = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-        glm::mat4
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp),
-            viewIdenpedent = glm::mat4(glm::mat3(view));
+        // Position calculation (This block fuckt CPU)
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
         glm::mat4 projection = glm::perspective(glm::radians(fov), window_aspect_ratio, 0.1f, 300.0f); // 300 - render distance
         glm::vec3 direction;
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
             direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        
         cameraFront = glm::normalize(direction);
 
 		// Clear the buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
+		// glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
 		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
 
         

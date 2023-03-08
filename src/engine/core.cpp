@@ -55,7 +55,7 @@ namespace bebra {
         }
 
         SDL_SetWindowGrab(window, SDL_TRUE);
-        SDL_SetWindowMouseGrab(window, SDL_TRUE);
+        //SDL_SetWindowMouseGrab(window, SDL_TRUE);
         SDL_SetRelativeMouseMode(SDL_TRUE);
 
         return window;
