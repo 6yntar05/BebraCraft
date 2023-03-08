@@ -8,13 +8,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace bebra {
-namespace objects {
+#include <engine/objects/object.h>
 
-    struct blockTexture {
+namespace bebra::objects {
+
+    struct blockTexture : public objectTexture {
         GLuint front, back, up, down, left, right;
 
-        blockTexture() {/*transparent... later*/}
+        objectTexture text;
+
+        blockTexture() {};
 
         blockTexture(GLuint texture)
             : front(texture), back(texture), up(texture), down(texture), left(texture), right(texture)
@@ -112,5 +115,4 @@ namespace objects {
     };
 
     block air { {}, 0.0, true };
-}
 }

@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "engine/objects/block.h"
-#include "engine/objects/fluid.h"
 #include "engine/objects/chunk.h"
 #include "engine/graphics/textures.h"
 

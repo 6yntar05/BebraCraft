@@ -1,4 +1,4 @@
-#version 330 core
+/*#version 330 core
 
 #extension GL_ARB_explicit_attrib_location : require
 
@@ -41,8 +41,19 @@ void main(void){
     // Camera shadow
     if (color.w > 0.9)
         color.xyz -= vec3(
-            ( 1.0 - gl_FragCoord.z )
-            /*--------------------*/ /
-                   camShadEase
+            ( 1.0 - gl_FragCoord.z ) / camShadEase
         );
+}*/
+
+#version 110
+
+#extension GL_ARB_explicit_attrib_location : require
+
+in vec2 TexCoord;
+out vec4 color;
+
+uniform sampler2D ourTexture;
+
+void main(void){
+    color = texture2D(ourTexture, TexCoord);
 }
