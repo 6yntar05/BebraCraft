@@ -1,69 +1,80 @@
 #pragma once
 
-#include "engine/objects/block.h"
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "engine/objects/object.h"
 
 namespace bebra {
 namespace objects {
 
-    //struct fluidTexture : public blockTexture {};
+    struct fluidTexture : objectTexture {
+        fluidTexture() {
+            this->textures.reserve(6);
+        }
 
-    struct fluid : public block {
-        constexpr static float verticies[] = { //Coords, TexturesPos
-           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        fluidTexture(GLuint texture)
+            : fluidTexture()
+        {
+            this->textures = {texture, texture, texture, texture, texture, texture};
+        }
+        
+        fluidTexture(GLuint front, GLuint back, GLuint left, GLuint right, GLuint up, GLuint down)
+            : fluidTexture() 
+        {
+            this->textures = {front, back, left, right, up, down};
+        }
+    };
+
+    class fluid : public object {
+      public:
+        static constexpr float verticies[] = { //Coords(3), TexturesPos(2)
+           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Front
+            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+           -0.5f,  0.4f, -0.5f,  0.0f, 0.8f,
 
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // Back
             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+            0.5f,  0.4f,  0.5f,  1.0f, 0.8f,
+            0.5f,  0.4f,  0.5f,  1.0f, 0.8f,
+           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-           -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-
-            0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.4f,  0.5f,  0.0f, 0.8f, // Left
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+            0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
             0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
 
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f, // Right
+           -0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
+           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
+
+           -0.5f,  0.4f, -0.5f,  0.0f, 1.0f, // Up
+            0.5f,  0.4f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.4f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.4f,  0.5f,  1.0f, 0.0f,
+           -0.5f,  0.4f, -0.5f,  0.0f, 1.0f,
+           -0.5f,  0.4f,  0.5f,  0.0f, 0.0f,
+
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // Down
             0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
             0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f
         };
 
-        constexpr static GLuint indices[] = {
+        static constexpr GLuint indices[] = {
             0, 1, 3, // First Poly
             1, 2, 3  // Second Poly
         };
 
+        // Render
         static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
@@ -80,20 +91,23 @@ namespace objects {
             // Position attribute
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
             glEnableVertexAttribArray(0);
-            // Color attribute
+            // texturePosition attribute
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
             glEnableVertexAttribArray(1);
-            // TextureIndex attribute
-            // Later...
+            
             glBindVertexArray(0); // Unbind VAO
         }
 
-        blockTexture textures;
-        bool inited = true;
-        glm::vec3 pos = {0.0, 0.0, 0.0}; // Will be ignored if in chunk (Will solving later)
-        float rotate = 0.0;
-
-        //fluid(fluidTexture textures) : textures(textures) {}
+        // Service
+        static constexpr objIdent id = objIdent::efluid;
+        fluid() : object(id) {};
+        fluid(fluidTexture texture, float rotate = 0.0) 
+            : fluid()
+        {
+            this->texture = texture;
+            this->rotate = rotate;
+        }
     };
+
 }
 }

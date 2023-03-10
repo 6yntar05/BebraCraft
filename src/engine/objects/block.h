@@ -99,8 +99,11 @@ namespace objects {
         }
 
         // Service
-        block() {};
-        block(blockTexture texture, float rotate = 0.0) {
+        static constexpr objIdent id = objIdent::eblock;
+        block() : object(id) {};
+        block(blockTexture texture, float rotate = 0.0)
+            : block()
+        {
             this->texture = texture;
             this->rotate = rotate;
         }

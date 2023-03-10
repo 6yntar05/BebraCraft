@@ -86,8 +86,11 @@ namespace objects {
         }
 
         // Service
-        plant() {};
-        plant(plantTexture texture, float rotate = 0.0) {
+        static constexpr objIdent id = objIdent::eplant;
+        plant() : object(id) {};
+        plant(plantTexture texture, float rotate = 0.0)
+            : plant()
+        {
             this->texture = texture;
             this->rotate = rotate;
         }

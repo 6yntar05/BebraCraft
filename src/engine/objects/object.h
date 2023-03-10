@@ -12,6 +12,13 @@
 namespace bebra {
 namespace objects {
 
+    enum objIdent {
+        ebase,
+        eblock,
+        eplant,
+        efluid
+    };
+
     struct objectTexture {
         std::vector<GLuint> textures;
     };
@@ -40,7 +47,9 @@ namespace objects {
         };
 
         // Service
+        objIdent id;
         object() {};
+        object(objIdent id) : id(id) {};
         object(objectTexture texture, float rotate = 0.0)
             : texture(texture), rotate(rotate) {}
     };

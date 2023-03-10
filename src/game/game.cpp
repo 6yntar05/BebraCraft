@@ -1,4 +1,3 @@
-#include <glm/fwd.hpp>
 #include <iostream>
 #include <type_traits>
 #include <vector>
@@ -7,6 +6,7 @@
 #include <cassert>
 #include <cmath>
 #include <functional>
+#include <typeinfo>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -16,9 +16,15 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine/core.h"
+
 #include "engine/graphics/cubemaps.h"
 #include "engine/graphics/shaders.h"
+
+#include "engine/objects/object.h"
 #include "engine/objects/block.h"
+#include "engine/objects/fluid.h"
+#include "engine/objects/plant.h"
+
 #include "engine/world/chunk.h"
 #include "game/demoChunkGen.h"
 
@@ -59,9 +65,10 @@ int main() {
         "textures/skybox/rt.png"});
 
     // Create objects
-    GLuint VBO, blockVAO, plantVAO, EBO;
-    bebra::objects::block::loadObject(VBO, blockVAO, EBO);
+    GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
+    bebra::objects::block::loadObject(VBO, blockVAO, EBO);
+    bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
 
     // Load chunks
     auto shittedChunk = bebra::utils::genChunk();
@@ -119,15 +126,15 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static std::function layerFunctor = [&blockVAO, &plantVAO, &blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
+            static std::function layerFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
-                static std::function rowFunctor = [&blockVAO, &plantVAO, &blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
+                static std::function rowFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
                     // Functor: Render single block of chunk
-                    static std::function blockFunctor = [&blockVAO, &plantVAO, &blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
+                    static std::function blockFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::object* block = row[iBlock];
                         
                         if (!block->texture.textures.size()) return;
@@ -140,11 +147,23 @@ int main() {
                         if (block->rotate != 0.0)
                             model = glm::rotate(model, glm::radians(block->rotate), {0.0, 1.0, 0.0});
 
-                        if (block->texture.textures.size() > 4) // Temporary
-                            glBindVertexArray(blockVAO);
-                        else {
-                            glBindVertexArray(plantVAO);
-                            glDepthMask(GL_FALSE);
+                        switch(block->id) {
+                            case bebra::objects::eblock:
+                                glBindVertexArray(blockVAO);
+                                break;
+
+                            case bebra::objects::eplant:
+                                glBindVertexArray(plantVAO);
+                                glDepthMask(GL_FALSE);
+                                break;
+
+                            case bebra::objects::efluid:
+                                glBindVertexArray(fluidVAO);
+                                break;
+
+                            default:
+                                glBindVertexArray(blockVAO);
+                                break;
                         }
 
                         int modelLoc = glGetUniformLocation(blockShader.Program, "model");
@@ -167,7 +186,7 @@ int main() {
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
                             glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 3);
 
-                            if (block->texture.textures.size() > 4) {
+                            if (block->id != bebra::objects::eplant) {
                                 glActiveTexture(GL_TEXTURE4);
                                 glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
                                 glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 4);
@@ -179,9 +198,9 @@ int main() {
                                 glDrawArrays(GL_TRIANGLES, 0, 36);
                             } else {
                                 glDrawArrays(GL_TRIANGLES, 0, 24);
+                                glDepthMask(GL_TRUE);
                             }
                         }
-                        glDepthMask(GL_TRUE);
                     };
 
                     //-Y[->>Camera   ]+Y

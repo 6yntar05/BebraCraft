@@ -3,9 +3,11 @@
 #include <array>
 #include <vector>
 
+#include "engine/objects/object.h"
 #include "engine/objects/block.h"
 #include "engine/objects/plant.h"
-#include "engine/objects/object.h"
+#include "engine/objects/fluid.h"
+
 #include "engine/world/chunk.h"
 #include "engine/graphics/textures.h"
 
@@ -120,7 +122,7 @@ namespace utils {
 
         GLuint water;
         bebra::graphics::loadTexture(&water, "textures/blocks/water.png");
-        bebra::objects::blockTexture waterTexture { water };
+        bebra::objects::fluidTexture waterTexture { water };
 
         /// Create blocks object
         objects::block* furnaceBlock1 = new objects::block { furnaceTexture, -90.0f };
@@ -144,7 +146,7 @@ namespace utils {
         objects::block* gravelBlock = new objects::block { gravelTexture };
         objects::block* crafting_tableBlock = new objects::block { crafting_tableTexture };
         objects::plant* tallgrassBlock = new objects::plant { tallgrassTexture };
-        objects::block* waterBlock = new objects::block { waterTexture };
+        objects::fluid* waterBlock = new objects::fluid { waterTexture };
         objects::block* quartz_block_chiseledBlock = new objects::block { quartz_block_chiseledTexture };
 
         static const std::array<objects::object*, 24> b {
