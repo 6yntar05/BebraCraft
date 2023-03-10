@@ -1,37 +1,31 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "engine/objects/object.h"
 
 namespace bebra {
 namespace objects {
 
-    struct blockTexture {
-        GLuint front, back, up, down, left, right;
-
-        blockTexture() {/*transparent... later*/}
+    struct blockTexture : objectTexture {
+        blockTexture() {
+            this->textures.reserve(6);
+        }
 
         blockTexture(GLuint texture)
-            : front(texture), back(texture), up(texture), down(texture), left(texture), right(texture)
-            {}
+            : blockTexture()
+        {
+            this->textures = {texture, texture, texture, texture, texture, texture};
+        }
         
         blockTexture(GLuint front, GLuint back, GLuint up, GLuint down, GLuint left, GLuint right)
-            : front(front), back(back), up(up), down(down), left(left), right(right)
-            {}
+            : blockTexture() 
+        {
+            this->textures = {front, back, up, down, left, right};
+        }
     };
 
-    struct block {
-
-        constexpr static uint textureIndexes[] = {
-            0, 1, 2, 3, 4, 5
-        };
-
-        constexpr static float verticies[] = { //Coords(3), TexturesPos(2)
+    class block : public object {
+      public:
+        static constexpr float verticies[] = { //Coords(3), TexturesPos(2)
            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Front
             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -75,11 +69,12 @@ namespace objects {
            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f
         };
 
-        constexpr static GLuint indices[] = {
+        static constexpr GLuint indices[] = {
             0, 1, 3, // First Poly
             1, 2, 3  // Second Poly
         };
 
+        // Render
         static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
@@ -103,14 +98,13 @@ namespace objects {
             glBindVertexArray(0); // Unbind VAO
         }
 
-        blockTexture textures;
-        float rotate = 0.0;
-        bool air = false;
-        glm::vec3 pos = {0.0, 0.0, 0.0}; // Will be ignored if in chunk (Will solving later)
-
-        //block(blockTexture textures) : textures(textures) {}
+        // Service
+        block() {};
+        block(blockTexture texture, float rotate = 0.0) {
+            this->texture = texture;
+            this->rotate = rotate;
+        }
     };
 
-    block air { {}, 0.0, true };
 }
 }

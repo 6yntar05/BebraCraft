@@ -67,6 +67,7 @@ namespace bebra {
         glewInit();
         glViewport(0, 0, windowWidth, windowHeight);
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
         if (nicest) {
             glEnable(GL_MULTISAMPLE);
             glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );

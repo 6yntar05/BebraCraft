@@ -5,7 +5,8 @@
 
 #include "engine/objects/block.h"
 #include "engine/objects/fluid.h"
-#include "engine/objects/chunk.h"
+#include "engine/objects/object.h"
+#include "engine/world/chunk.h"
 #include "engine/graphics/textures.h"
 
 
@@ -122,7 +123,8 @@ namespace utils {
         bebra::objects::blockTexture waterTexture { water };
 
         /// Create blocks object
-        objects::block* furnaceBlock = new objects::block { furnaceTexture };
+        objects::block* furnaceBlock1 = new objects::block { furnaceTexture, -90.0f };
+        objects::block* furnaceBlock2 = new objects::block { furnaceTexture, 180.0f };
         objects::block* stoneBlock = new objects::block { stoneTexture };
         objects::block* dirtBlock = new objects::block { dirtTexture };
         objects::block* grassBlock = new objects::block { grassTexture };
@@ -141,14 +143,14 @@ namespace utils {
         objects::block* glowstoneBlock = new objects::block { glowstoneTexture };
         objects::block* gravelBlock = new objects::block { gravelTexture };
         objects::block* crafting_tableBlock = new objects::block { crafting_tableTexture };
-        objects::block* tallgrassBlock = new objects::block { tallgrassTexture , 45.0 };
+        objects::block* tallgrassBlock = new objects::block { tallgrassTexture, 45.0f };
         objects::block* waterBlock = new objects::block { waterTexture };
         objects::block* quartz_block_chiseledBlock = new objects::block { quartz_block_chiseledTexture };
 
-        static const std::array<objects::block*, 23> b {
-            &objects::air, stoneBlock, grassBlock, dirtBlock, leaves_oakBlock, oakBlock, planks_birchBlock, big_oakBlock, planks_big_oakBlock, glassBlock,
-            glowstoneBlock, glass_grayBlock, gravelBlock, crafting_tableBlock, furnaceBlock, jukeboxBlock, iron_oreBlock, coal_oreBlock, gold_oreBlock, diamond_oreBlock,
-            tallgrassBlock, waterBlock, quartz_block_chiseledBlock
+        static const std::array<objects::object*, 24> b {
+            new objects::object {}, stoneBlock, grassBlock, dirtBlock, leaves_oakBlock, oakBlock, planks_birchBlock, big_oakBlock, planks_big_oakBlock, glassBlock,
+            glowstoneBlock, glass_grayBlock, gravelBlock, crafting_tableBlock, furnaceBlock1, jukeboxBlock, iron_oreBlock, coal_oreBlock, gold_oreBlock, diamond_oreBlock,
+            tallgrassBlock, waterBlock, quartz_block_chiseledBlock, furnaceBlock2
         };
 
         {// CREATE LAYERS!
@@ -306,7 +308,7 @@ namespace utils {
             layer = {
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[7],b[6],b[6],b[6],b[6],b[6],b[6],b[6],b[7],b[0],b[0],b[20] },
-                row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[14],b[6],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[23],b[6],b[0],b[0],b[0] },
                 row { b[0],b[20],b[0],b[0],b[6],b[13],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
                 row { b[0],b[0],b[20],b[0],b[6],b[14],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[6],b[15],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
@@ -321,7 +323,6 @@ namespace utils {
                 row { b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
             };
-            //layer[2][11]->rotate = 2.0;
             chunk.push_back(layer);
 
             // 9
@@ -373,8 +374,8 @@ namespace utils {
                 row { b[0],b[0],b[0],b[0],b[7],b[22],b[22],b[22],b[22],b[22],b[22],b[22],b[7],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[7],b[22],b[10],b[22],b[22],b[22],b[10],b[22],b[7],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[7],b[22],b[10],b[22],b[22],b[22],b[10],b[22],b[7],b[0],b[0],b[0] },
-                row { b[0],b[0],b[0],b[0],b[7],b[22],b[22],b[22],b[22],b[22],b[22],b[0],b[7],b[7],b[0],b[0] },
-                row { b[0],b[0],b[0],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[0],b[7],b[22],b[22],b[22],b[22],b[22],b[22],b[0],b[7],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[7],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[7],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
@@ -394,8 +395,8 @@ namespace utils {
                 row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
-                row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[7],b[0],b[0] },
-                row { b[0],b[0],b[0],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[6],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[7],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[7],b[8],b[8],b[8],b[8],b[8],b[8],b[8],b[7],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
