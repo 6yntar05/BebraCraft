@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/objects/object.h"
+#include "engine/objects/base.h"
 
 namespace bebra {
 namespace objects {
@@ -101,6 +101,7 @@ namespace objects {
         // Service
         static constexpr objIdent id = objIdent::eblock;
         block() : object(id) {};
+        block(objIdent id) : object(id) {};
         block(blockTexture texture, float rotate = 0.0)
             : block()
         {

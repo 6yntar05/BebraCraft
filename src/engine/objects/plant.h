@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/objects/object.h"
+#include "engine/objects/base.h"
 #include <cmath>
 
 namespace bebra {

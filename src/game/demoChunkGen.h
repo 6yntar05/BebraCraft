@@ -3,10 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "engine/objects/object.h"
-#include "engine/objects/block.h"
-#include "engine/objects/plant.h"
-#include "engine/objects/fluid.h"
+#include "engine/objects/objects.h"
 
 #include "engine/world/chunk.h"
 #include "engine/graphics/textures.h"
@@ -15,14 +12,11 @@
 namespace bebra {
 namespace utils {
 
-    objects::chunk genChunk() {
+    inline objects::chunk genChunk() {
         objects::chunk chunk;
 
         // LOAD BLOCKS!
         /// Load textures
-        GLuint alpha;
-        bebra::graphics::loadTexture(&alpha, "textures/blocks/alpha.png");
-
         GLuint furnace_top, furnace_side, furnace_front_on;
         bebra::graphics::loadTexture(&furnace_top, "textures/blocks/furnace_top.png");
         bebra::graphics::loadTexture(&furnace_side, "textures/blocks/furnace_side.png");
@@ -134,14 +128,14 @@ namespace utils {
         objects::block* planks_birchBlock = new objects::block { planks_birchTexture };
         objects::block* big_oakBlock = new objects::block { big_oakTexture };
         objects::block* planks_big_oakBlock = new objects::block { planks_big_oakTexture };
-        objects::block* leaves_oakBlock = new objects::block { leaves_oakTexture };
-        objects::block* glass_grayBlock = new objects::block { glass_grayTexture };
+        objects::glass* leaves_oakBlock = new objects::glass { leaves_oakTexture }; // temporary
+        objects::glass* glass_grayBlock = new objects::glass { glass_grayTexture };
         objects::block* jukeboxBlock = new objects::block { jukeboxTexture };
         objects::block* iron_oreBlock = new objects::block { iron_ore };
         objects::block* diamond_oreBlock = new objects::block { diamond_oreTexture };
         objects::block* coal_oreBlock = new objects::block { coal_oreTexture };
         objects::block* gold_oreBlock = new objects::block { gold_oreTexture };
-        objects::block* glassBlock = new objects::block { glassTexture };
+        objects::glass* glassBlock = new objects::glass { glassTexture };
         objects::block* glowstoneBlock = new objects::block { glowstoneTexture };
         objects::block* gravelBlock = new objects::block { gravelTexture };
         objects::block* crafting_tableBlock = new objects::block { crafting_tableTexture };

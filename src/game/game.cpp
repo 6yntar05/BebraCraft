@@ -1,12 +1,6 @@
 #include <iostream>
-#include <type_traits>
 #include <vector>
-#include <unistd.h>
-#include <cstdint>
-#include <cassert>
-#include <cmath>
 #include <functional>
-#include <typeinfo>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -16,18 +10,11 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine/core.h"
-
 #include "engine/graphics/cubemaps.h"
 #include "engine/graphics/shaders.h"
+#include "engine/objects/base.h"
 
-#include "engine/objects/object.h"
-#include "engine/objects/block.h"
-#include "engine/objects/fluid.h"
-#include "engine/objects/plant.h"
-
-#include "engine/world/chunk.h"
 #include "game/demoChunkGen.h"
-
 #include "game/control.h"
 
 int windowWidth = 1920;
@@ -69,6 +56,8 @@ int main() {
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
     bebra::objects::block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
+    GLuint alphaTexture;    // For culling of extra edges
+    bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
     auto shittedChunk = bebra::utils::genChunk();
@@ -126,24 +115,23 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static std::function layerFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
+            static std::function layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
-                static std::function rowFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
+                static std::function rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
                     // Functor: Render single block of chunk
-                    static std::function blockFunctor = [&blockVAO, &plantVAO, &fluidVAO, &blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
+                    static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::object* block = row[iBlock];
                         
-                        if (!block->texture.textures.size()) return;
-                        glm::vec3 blockPos = { float(iBlock), float(iLayer), float(iRow) };
+                        if (!block->texture.textures.size())
+                            return;
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, blockPos);
-
+                        model = glm::translate(model, {iBlock,iLayer,iRow});
                         if (block->rotate != 0.0)
                             model = glm::rotate(model, glm::radians(block->rotate), {0.0, 1.0, 0.0});
 
@@ -179,11 +167,17 @@ int main() {
                             glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
 
                             glActiveTexture(GL_TEXTURE2);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
+                            if ((iBlock == 15) || ( (iBlock < 15) && (row[++iBlock]->id!=block->id) ))
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 2);
 
                             glActiveTexture(GL_TEXTURE3);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
+                            if ((iBlock <= 1) || ((iBlock > 0) && (row[iBlock-2]->id!=block->id)))
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 3);
 
                             if (block->id != bebra::objects::eplant) {

@@ -3,8 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "engine/objects/block.h"
-#include "engine/objects/object.h"
+#include "engine/objects/base.h"
 
 namespace bebra {
 namespace objects {
