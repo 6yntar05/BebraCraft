@@ -48,8 +48,8 @@ int main() {
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
-    GLuint VBOsky, VAOsky;
-    bebra::graphics::loadObject(VBOsky, VAOsky);
+    GLuint skyVBO, skyVAO;
+    bebra::graphics::loadObject(skyVBO, skyVAO);
     auto skyBoxTexture = bebra::graphics::loadCubemap(
         {"textures/skybox/ft.png",
         "textures/skybox/bk.png",
@@ -59,8 +59,9 @@ int main() {
         "textures/skybox/rt.png"});
 
     // Create objects
-    GLuint VBO, VAO, EBO;
-    bebra::objects::block::loadObject(VBO, VAO, EBO);
+    GLuint VBO, blockVAO, plantVAO, EBO;
+    bebra::objects::block::loadObject(VBO, blockVAO, EBO);
+    bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
 
     // Load chunks
     auto shittedChunk = bebra::utils::genChunk();
@@ -99,7 +100,7 @@ int main() {
             glUniformMatrix4fv(viewLocIdenpedent, 1, GL_FALSE, glm::value_ptr(viewIdenpedent));
             int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
             glUniformMatrix4fv(projectionLocIdenpedent, 1, GL_FALSE, glm::value_ptr(projection));
-            glBindVertexArray(VAOsky);
+            glBindVertexArray(skyVAO);
             glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glDepthMask(GL_TRUE);
@@ -107,7 +108,6 @@ int main() {
 
         { // Chunks render
             blockShader.Use();
-            glBindVertexArray(VAO);
             int modelLoc = glGetUniformLocation(blockShader.Program, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             int viewLoc = glGetUniformLocation(blockShader.Program, "view");
@@ -119,15 +119,15 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static std::function layerFunctor = [&VAO, &blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
+            static std::function layerFunctor = [&blockVAO, &plantVAO, &blockShader](bebra::objects::chunk& shittedChunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
 
                 // Functor: Render single row of chunk 
-                static std::function rowFunctor = [&VAO, &blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
+                static std::function rowFunctor = [&blockVAO, &plantVAO, &blockShader, &iLayer](bebra::objects::chunkLayer& layer, int iRow) {
                     bebra::objects::chunkRow& row = layer[iRow];
                     
                     // Functor: Render single block of chunk
-                    static std::function blockFunctor = [&VAO, &blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
+                    static std::function blockFunctor = [&blockVAO, &plantVAO, &blockShader, &iLayer, &iRow](bebra::objects::chunkRow& row, int iBlock) {
                         bebra::objects::object* block = row[iBlock];
                         
                         if (!block->texture.textures.size()) return;
@@ -140,6 +140,13 @@ int main() {
                         if (block->rotate != 0.0)
                             model = glm::rotate(model, glm::radians(block->rotate), {0.0, 1.0, 0.0});
 
+                        if (block->texture.textures.size() > 4) // Temporary
+                            glBindVertexArray(blockVAO);
+                        else {
+                            glBindVertexArray(plantVAO);
+                            glDepthMask(GL_FALSE);
+                        }
+
                         int modelLoc = glGetUniformLocation(blockShader.Program, "model");
                         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -151,25 +158,30 @@ int main() {
                             glActiveTexture(GL_TEXTURE1);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
                             glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
-                            
+
                             glActiveTexture(GL_TEXTURE2);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
-                            glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 2);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 2);
 
                             glActiveTexture(GL_TEXTURE3);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
-                            glUniform1i(glGetUniformLocation(blockShader.Program, "down"), 3);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 3);
 
-                            glActiveTexture(GL_TEXTURE4);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
-                            glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 4);
+                            if (block->texture.textures.size() > 4) {
+                                glActiveTexture(GL_TEXTURE4);
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
+                                glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 4);
 
-                            glActiveTexture(GL_TEXTURE5);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
-                            glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 5);
+                                glActiveTexture(GL_TEXTURE5);
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
+                                glUniform1i(glGetUniformLocation(blockShader.Program, "down"), 5);
 
-                            glDrawArrays(GL_TRIANGLES, 0, 36);
+                                glDrawArrays(GL_TRIANGLES, 0, 36);
+                            } else {
+                                glDrawArrays(GL_TRIANGLES, 0, 24);
+                            }
                         }
+                        glDepthMask(GL_TRUE);
                     };
 
                     //-Y[->>Camera   ]+Y

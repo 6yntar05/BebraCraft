@@ -16,10 +16,10 @@ namespace objects {
             this->textures = {texture, texture, texture, texture, texture, texture};
         }
         
-        blockTexture(GLuint front, GLuint back, GLuint up, GLuint down, GLuint left, GLuint right)
+        blockTexture(GLuint front, GLuint back, GLuint left, GLuint right, GLuint up, GLuint down)
             : blockTexture() 
         {
-            this->textures = {front, back, up, down, left, right};
+            this->textures = {front, back, left, right, up, down};
         }
     };
 
@@ -40,20 +40,6 @@ namespace objects {
            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // Up
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // Down
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
             0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // Left
             0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
             0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -66,7 +52,21 @@ namespace objects {
            -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
            -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f
+           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+
+           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // Up
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // Down
+            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f
         };
 
         static constexpr GLuint indices[] = {

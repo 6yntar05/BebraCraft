@@ -28,13 +28,13 @@ void main(void){
     else if (vertexID < 12)
         color = texture2D(back, TexCoord);
     else if (vertexID < 18)
-        color = texture2D(up, TexCoord);
-    else if (vertexID < 24)
-        color = texture2D(down, TexCoord);
-    else if (vertexID < 30)
         color = texture2D(left, TexCoord);
-    else if (vertexID < 36)
+    else if (vertexID < 24)
         color = texture2D(right, TexCoord);
+    else if (vertexID < 30)
+        color = texture2D(up, TexCoord);
+    else if (vertexID < 36)
+        color = texture2D(down, TexCoord);
     else // Out of range
         color = vec4(1.0, 0.0, 1.0, 1.0);
 

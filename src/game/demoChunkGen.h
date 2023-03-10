@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "engine/objects/block.h"
-#include "engine/objects/fluid.h"
+#include "engine/objects/plant.h"
 #include "engine/objects/object.h"
 #include "engine/world/chunk.h"
 #include "engine/graphics/textures.h"
@@ -26,7 +26,7 @@ namespace utils {
         bebra::graphics::loadTexture(&furnace_side, "textures/blocks/furnace_side.png");
         bebra::graphics::loadTexture(&furnace_front_on, "textures/blocks/furnace_front_on.png");
         bebra::objects::blockTexture furnaceTexture
-            { furnace_front_on, furnace_side, furnace_top, furnace_top, furnace_side, furnace_side };
+            { furnace_front_on, furnace_side, furnace_side, furnace_side, furnace_top, furnace_top };
         
         GLuint stone;
         bebra::graphics::loadTexture(&stone, "textures/blocks/stone.png");
@@ -39,7 +39,7 @@ namespace utils {
         GLuint grass_side, grass_top;
         bebra::graphics::loadTexture(&grass_side, "textures/blocks/grass_side.png");
         bebra::graphics::loadTexture(&grass_top, "textures/blocks/grass_top.png");
-        bebra::objects::blockTexture grassTexture { grass_side, grass_side, grass_top, dirt, grass_side, grass_side };
+        bebra::objects::blockTexture grassTexture { grass_side, grass_side, grass_side, grass_side, grass_top, dirt };
 
         GLuint glass_gray;
         bebra::graphics::loadTexture(&glass_gray, "textures/blocks/glass_gray.png");
@@ -55,7 +55,7 @@ namespace utils {
 
         GLuint tallgrass;
         bebra::graphics::loadTexture(&tallgrass, "textures/blocks/tallgrass.png");
-        bebra::objects::blockTexture tallgrassTexture { tallgrass, tallgrass, alpha, alpha, tallgrass, tallgrass };
+        bebra::objects::plantTexture tallgrassTexture { tallgrass };
 
         GLuint stonebrick;
         bebra::graphics::loadTexture(&stonebrick, "textures/blocks/stonebrick.png");
@@ -68,7 +68,7 @@ namespace utils {
         GLuint log_big_oak, log_big_oak_top;
         bebra::graphics::loadTexture(&log_big_oak, "textures/blocks/log_big_oak.png");
         bebra::graphics::loadTexture(&log_big_oak_top, "textures/blocks/log_big_oak_top.png");
-        bebra::objects::blockTexture big_oakTexture { log_big_oak, log_big_oak, log_big_oak_top, log_big_oak_top, log_big_oak, log_big_oak };
+        bebra::objects::blockTexture big_oakTexture { log_big_oak, log_big_oak, log_big_oak, log_big_oak, log_big_oak_top, log_big_oak_top };
 
         GLuint planks_birch;
         bebra::graphics::loadTexture(&planks_birch, "textures/blocks/planks_birch.png");
@@ -77,12 +77,12 @@ namespace utils {
         GLuint log_oak, log_oak_top;
         bebra::graphics::loadTexture(&log_oak, "textures/blocks/log_oak.png");
         bebra::graphics::loadTexture(&log_oak_top, "textures/blocks/log_oak_top.png");
-        bebra::objects::blockTexture oakTexture { log_oak, log_oak, log_oak_top, log_oak_top, log_oak, log_oak };
+        bebra::objects::blockTexture oakTexture { log_oak, log_oak, log_oak, log_oak, log_oak_top, log_oak_top };
  
         GLuint jukebox_side, jukebox_top;
         bebra::graphics::loadTexture(&jukebox_side, "textures/blocks/jukebox_side.png");
         bebra::graphics::loadTexture(&jukebox_top, "textures/blocks/jukebox_top.png");
-        bebra::objects::blockTexture jukeboxTexture { jukebox_side, jukebox_side, jukebox_top, jukebox_side, jukebox_side, jukebox_side };
+        bebra::objects::blockTexture jukeboxTexture { jukebox_side, jukebox_side, jukebox_side, jukebox_side, jukebox_top, jukebox_side };
 
         GLuint iron_ore, gold_ore, diamond_ore, coal_ore;
         bebra::graphics::loadTexture(&iron_ore, "textures/blocks/iron_ore.png");
@@ -112,7 +112,7 @@ namespace utils {
         bebra::graphics::loadTexture(&crafting_table_front, "textures/blocks/crafting_table_front.png");
         bebra::graphics::loadTexture(&crafting_table_side, "textures/blocks/crafting_table_side.png");
         bebra::graphics::loadTexture(&crafting_table_top, "textures/blocks/crafting_table_top.png");
-        bebra::objects::blockTexture crafting_tableTexture { crafting_table_front, crafting_table_side, crafting_table_top, planks_birch, crafting_table_side, crafting_table_side };
+        bebra::objects::blockTexture crafting_tableTexture { crafting_table_front, crafting_table_side, crafting_table_side, crafting_table_side, crafting_table_top, planks_birch };
 
         GLuint quartz_block_chiseled;
         bebra::graphics::loadTexture(&quartz_block_chiseled, "textures/blocks/quartz_block_chiseled.png");
@@ -143,7 +143,7 @@ namespace utils {
         objects::block* glowstoneBlock = new objects::block { glowstoneTexture };
         objects::block* gravelBlock = new objects::block { gravelTexture };
         objects::block* crafting_tableBlock = new objects::block { crafting_tableTexture };
-        objects::block* tallgrassBlock = new objects::block { tallgrassTexture, 45.0f };
+        objects::plant* tallgrassBlock = new objects::plant { tallgrassTexture };
         objects::block* waterBlock = new objects::block { waterTexture };
         objects::block* quartz_block_chiseledBlock = new objects::block { quartz_block_chiseledTexture };
 
@@ -316,9 +316,9 @@ namespace utils {
                 row { b[0],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[20] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
-                row { b[0],b[20],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0],b[0] },
+                row { b[0],b[20],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
-                row { b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[0],b[5],b[0],b[0],b[0] },
+                row { b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[5],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[20],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
                 row { b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0],b[0] },
