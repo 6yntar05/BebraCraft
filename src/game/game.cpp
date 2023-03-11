@@ -60,8 +60,8 @@ int main() {
     bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
-    auto shittedChunk = bebra::utils::genChunk();
-    int chunkSize = static_cast<int>(shittedChunk.size());
+    auto chunk = bebra::utils::genChunk();
+    int chunkSize = static_cast<int>(chunk.size());
 
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
@@ -115,16 +115,16 @@ int main() {
 
             /// Render chunk
             // Functor: Render single layer of chunk
-            static std::function layerFunctor = [&](bebra::objects::chunk& shittedChunk, int iLayer) {
-                bebra::objects::chunkLayer& layer = shittedChunk[iLayer];
+            static std::function layerFunctor = [&](bebra::objects::chunk& chunk, int iLayer) {
+                bebra::objects::chunkLayer& layer = chunk.at(iLayer);
 
                 // Functor: Render single row of chunk 
                 static std::function rowFunctor = [&](bebra::objects::chunkLayer& layer, int iRow) {
-                    bebra::objects::chunkRow& row = layer[iRow];
+                    bebra::objects::chunkRow& row = layer.at(iRow);
                     
                     // Functor: Render single block of chunk
                     static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
-                        bebra::objects::object* block = row[iBlock];
+                        bebra::objects::object* block = row.at(iBlock);
                         
                         if (!block->texture.textures.size())
                             return;
@@ -142,7 +142,6 @@ int main() {
 
                             case bebra::objects::eplant:
                                 glBindVertexArray(plantVAO);
-                                glDepthMask(GL_FALSE);
                                 break;
 
                             case bebra::objects::efluid:
@@ -157,13 +156,19 @@ int main() {
                         int modelLoc = glGetUniformLocation(blockShader.Program, "model");
                         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-                        { // Pass textures to fragment shaders
+                        if ((block->id == bebra::objects::eglass) || (block->id == bebra::objects::efluid)) { // Pass textures to fragment shaders
                             glActiveTexture(GL_TEXTURE0);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
+                            if ((iRow == 0) || ((iRow > 0) && (chunk.at(iLayer).at(iRow-1).at(iBlock)->id != block->id)))
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "front"), 0);
 
                             glActiveTexture(GL_TEXTURE1);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
+                            if ((chunk.at(iLayer).at(iRow+1).at(iBlock)->id != block->id))
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
 
                             glActiveTexture(GL_TEXTURE2);
@@ -180,7 +185,42 @@ int main() {
                                 glBindTexture(GL_TEXTURE_2D, alphaTexture);
                             glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 3);
 
+                            glActiveTexture(GL_TEXTURE4);
+                            if ((iLayer == (static_cast<int>(chunk.size()))) || ((iLayer < static_cast<int>(chunk.size()-1)) && (chunk.at(iLayer+1).at(iRow).at(iBlock-1)->id != block->id)) )
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 4);
+
+                            glActiveTexture(GL_TEXTURE5);
+                            if ((iLayer == 0) || ((iLayer > 0) && (chunk.at(iLayer-1).at(iRow).at(iBlock-1)->id != block->id)))
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
+                            else
+                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "down"), 5);
+
+                            glDepthMask(GL_FALSE);
+                            glDrawArrays(GL_TRIANGLES, 0, 36);
+                            glDepthMask(GL_TRUE);              
+                            
+                        } else {
+                            glActiveTexture(GL_TEXTURE0);
+                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "front"), 0);
+
+                            glActiveTexture(GL_TEXTURE1);
+                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
+                            glUniform1i(glGetUniformLocation(blockShader.Program, "back"), 1);
+
                             if (block->id != bebra::objects::eplant) {
+                                glActiveTexture(GL_TEXTURE2);
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
+                                glUniform1i(glGetUniformLocation(blockShader.Program, "left"), 2);
+
+                                glActiveTexture(GL_TEXTURE3);
+                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
+                                glUniform1i(glGetUniformLocation(blockShader.Program, "right"), 3);
+                            
                                 glActiveTexture(GL_TEXTURE4);
                                 glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
                                 glUniform1i(glGetUniformLocation(blockShader.Program, "up"), 4);
@@ -191,8 +231,11 @@ int main() {
 
                                 glDrawArrays(GL_TRIANGLES, 0, 36);
                             } else {
-                                glDrawArrays(GL_TRIANGLES, 0, 24);
+                                glDisable(GL_CULL_FACE);
+                                glDepthMask(GL_FALSE);
+                                glDrawArrays(GL_TRIANGLES, 0, 12);
                                 glDepthMask(GL_TRUE);
+                                glEnable(GL_CULL_FACE);
                             }
                         }
                     };
@@ -214,10 +257,10 @@ int main() {
             };
             //DN[->>Camera   ]UP
             for (int iLayer = 0; iLayer < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize) ; iLayer++)
-                layerFunctor(shittedChunk, iLayer);
+                layerFunctor(chunk, iLayer);
             //DN[   Camera<<-]UP
             for (int iLayer = chunkSize-1; iLayer >= std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize); iLayer--)
-                layerFunctor(shittedChunk, iLayer);
+                layerFunctor(chunk, iLayer);
         }
 
         SDL_GL_SwapWindow(window);

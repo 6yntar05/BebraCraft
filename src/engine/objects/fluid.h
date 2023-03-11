@@ -1,6 +1,7 @@
 #pragma once
 
-#include "engine/objects/base.h"
+//#include "engine/objects/base.h"
+#include "engine/objects/block.h"
 
 namespace bebra {
 namespace objects {
@@ -23,58 +24,54 @@ namespace objects {
         }
     };
 
-    class fluid : public object {
+    class fluid : public block {
       public:
-        static constexpr float verticies[] = { //Coords(3), TexturesPos(2)
-           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Front
-            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-           -0.5f,  0.4f, -0.5f,  0.0f, 0.8f,
+        static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
+           -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front
+            0.5f,  0.4f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 0.8f,
+            0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
+            0.5f,  0.4f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 0.8f,
+           -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+           -0.5f,  0.4f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.8f,
 
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // Back
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.4f,  0.5f,  1.0f, 0.8f,
-            0.5f,  0.4f,  0.5f,  1.0f, 0.8f,
-           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back
+            0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
+            0.5f,  0.4f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 0.8f,
+            0.5f,  0.4f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 0.8f,
+           -0.5f,  0.4f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.8f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
 
-            0.5f,  0.4f,  0.5f,  0.0f, 0.8f, // Left
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.4f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 0.8f, // Left
+            0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.4f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.8f,
+            0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.4f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 0.8f,
+            0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
 
-           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f, // Right
-           -0.5f,  0.4f, -0.5f,  1.0f, 0.8f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f,  0.4f,  0.5f,  0.0f, 0.8f,
+           -0.5f,  0.4f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 0.8f, // Right
+           -0.5f,  0.4f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.8f,
+           -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+           -0.5f,  0.4f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 0.8f,
 
-           -0.5f,  0.4f, -0.5f,  0.0f, 1.0f, // Up
-            0.5f,  0.4f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.4f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.4f,  0.5f,  1.0f, 0.0f,
-           -0.5f,  0.4f, -0.5f,  0.0f, 1.0f,
-           -0.5f,  0.4f,  0.5f,  0.0f, 0.0f,
+           -0.5f,  0.4f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f, // Up
+            0.5f,  0.4f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.4f, -0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
+            0.5f,  0.4f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f,  0.4f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
+           -0.5f,  0.4f,  0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
 
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // Down
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f
-        };
-
-        static constexpr GLuint indices[] = {
-            0, 1, 3, // First Poly
-            1, 2, 3  // Second Poly
+           -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f, // Down
+            0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f
         };
 
         // Render
+        
         static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
@@ -89,18 +86,24 @@ namespace objects {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(bebra::objects::fluid::indices), bebra::objects::fluid::indices, GL_STATIC_DRAW);
 
             // Position attribute
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
             glEnableVertexAttribArray(0);
-            // texturePosition attribute
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+
+            // Normal attribute
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
             glEnableVertexAttribArray(1);
+
+            // texturePosition attribute
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+            glEnableVertexAttribArray(2);
             
             glBindVertexArray(0); // Unbind VAO
         }
+        
 
         // Service
         static constexpr objIdent id = objIdent::efluid;
-        fluid() : object(id) {};
+        fluid() : block(id) {};
         fluid(fluidTexture texture, float rotate = 0.0) 
             : fluid()
         {

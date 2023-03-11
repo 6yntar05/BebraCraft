@@ -128,7 +128,7 @@ namespace utils {
         objects::block* planks_birchBlock = new objects::block { planks_birchTexture };
         objects::block* big_oakBlock = new objects::block { big_oakTexture };
         objects::block* planks_big_oakBlock = new objects::block { planks_big_oakTexture };
-        objects::glass* leaves_oakBlock = new objects::glass { leaves_oakTexture }; // temporary
+        objects::block* leaves_oakBlock = new objects::block { leaves_oakTexture };
         objects::glass* glass_grayBlock = new objects::glass { glass_grayTexture };
         objects::block* jukeboxBlock = new objects::block { jukeboxTexture };
         objects::block* iron_oreBlock = new objects::block { iron_ore };

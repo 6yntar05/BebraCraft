@@ -25,48 +25,48 @@ namespace objects {
 
     class block : public object {
       public:
-        static constexpr float verticies[] = { //Coords(3), TexturesPos(2)
-           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Front
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
+           -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front
+            0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
 
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // Back
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back
+            0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
 
-            0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // Left
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 1.0f, // Left
+            0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
 
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // Right
-           -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 1.0f, // Right
+           -0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+           -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+           -0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
 
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // Up
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-           -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f, // Up
+            0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+            0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
+           -0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
 
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // Down
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-           -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-           -0.5f, -0.5f, -0.5f,  0.0f, 1.0f
+           -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f, // Down
+            0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+            0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+           -0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
+           -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f
         };
 
         static constexpr GLuint indices[] = {
@@ -89,11 +89,16 @@ namespace objects {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(bebra::objects::block::indices), bebra::objects::block::indices, GL_STATIC_DRAW);
 
             // Position attribute
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
             glEnableVertexAttribArray(0);
-            // texturePosition attribute
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+
+            // Normal attribute
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
             glEnableVertexAttribArray(1);
+
+            // texturePosition attribute
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+            glEnableVertexAttribArray(2);
             
             glBindVertexArray(0); // Unbind VAO
         }
