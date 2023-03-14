@@ -39,6 +39,7 @@ int main() {
     bebra::contextCreate(window, windowWidth, windowHeight, false, true);
     bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
     bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
+    bebra::graphics::Shader faceShader("shaders/face.vs", "shaders/face.frag");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
     GLuint skyVBO, skyVAO;
@@ -63,12 +64,58 @@ int main() {
     auto chunk = bebra::utils::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
 
+    // Create renderbuffer
+    float quadVertices[] = { // атрибуты вершин в нормализованных координатах устройства для прямоугольника, который имеет размеры экрана 
+         // координаты // текстурные координаты
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+	// VAO прямоугольника
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    // Конфигурация фреймбуфера
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // Создание текстуры для прикрепляемого объекта цвета
+    GLuint textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+    // Создание объекта рендербуфера дла прикрепляемых объектов глубины и трафарета (сэмплирование мы не будет здесь проводить)
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight); // использование одного объекта рендербуфера для буферов глубины и трафарета
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // теперь прикрепляем это дело
+	// Теперь, когда мы создали фреймбуфер и прикрепили все необходимые объекты, проверяем завершение формирования фреймбуфера
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
     bool window_running = true;
     static float speed = 0.05f;
-
-    while (window_running) { // Every frame
+    
+    while (window_running) { // Render cycle
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
         // Position calculation (This block fuckt CPU)
@@ -85,9 +132,9 @@ int main() {
 
 		// Clear the buffers
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
 		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
-
+        glEnable(GL_DEPTH_TEST);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         
         { // SkyBox render
             glDepthMask(GL_FALSE);
@@ -263,8 +310,24 @@ int main() {
                 layerFunctor(chunk, iLayer);
         }
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        faceShader.Use();
+        glBindVertexArray(quadVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glUniform1i(glGetUniformLocation(faceShader.Program, "screenTexture"), 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_DEPTH_TEST);
+
         SDL_GL_SwapWindow(window);
     }
 
+    glDeleteVertexArrays(1, &quadVAO);
+    glDeleteBuffers(1, &quadVBO);
     return 0;
 }
