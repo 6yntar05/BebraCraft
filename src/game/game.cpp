@@ -11,14 +11,16 @@
 
 #include "engine/core.h"
 #include "engine/graphics/cubemaps.h"
+#include "engine/graphics/framebuffer.h"
 #include "engine/graphics/shaders.h"
+#include "engine/graphics/textures.h"
 #include "engine/objects/base.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
 
-int windowWidth = 1920;
-int windowHeight = 1080;
+unsigned int windowWidth = 1920;
+unsigned int windowHeight = 1080;
 float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
 float yaw = 0.0f;
@@ -34,18 +36,18 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main() {
+    // Init
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight, false, true);
-    bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
-    bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
-    bebra::graphics::Shader faceShader("shaders/face.vs", "shaders/face.frag");
+    bebra::graphics::Shader blockShader("shaders/block.vert", "shaders/block.frag");
+    bebra::graphics::Shader skyboxShader("shaders/skybox.vert", "shaders/skybox.frag");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
     GLuint skyVBO, skyVAO;
     bebra::graphics::loadObject(skyVBO, skyVAO);
-    auto skyBoxTexture = bebra::graphics::loadCubemap(
-        {"textures/skybox/ft.png",
+    auto skyBoxTexture = bebra::graphics::loadCubemap({
+        "textures/skybox/ft.png",
         "textures/skybox/bk.png",
         "textures/skybox/up.png",
         "textures/skybox/dn.png",
@@ -64,58 +66,20 @@ int main() {
     auto chunk = bebra::utils::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
 
-    // Create renderbuffer
-    float quadVertices[] = { // атрибуты вершин в нормализованных координатах устройства для прямоугольника, который имеет размеры экрана 
-         // координаты // текстурные координаты
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+    // Create screen object and G-Buffer
+    bebra::graphics::screenObject screen {
+        windowWidth, windowHeight, 
+        bebra::graphics::Shader("shaders/screen.vert", "shaders/screen.frag")
     };
-	// VAO прямоугольника
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    // Конфигурация фреймбуфера
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    // Создание текстуры для прикрепляемого объекта цвета
-    GLuint textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, windowWidth, windowHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-    //glBindTexture(GL_TEXTURE_2D, 0);
-    // Создание объекта рендербуфера дла прикрепляемых объектов глубины и трафарета (сэмплирование мы не будет здесь проводить)
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight); // использование одного объекта рендербуфера для буферов глубины и трафарета
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // теперь прикрепляем это дело
-	// Теперь, когда мы создали фреймбуфер и прикрепили все необходимые объекты, проверяем завершение формирования фреймбуфера
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Runtime vars
-    std::list<SDL_Keycode> keyPressed;
-    bool window_running = true;
-    static float speed = 0.05f;
+    std::list<SDL_Keycode>      keyPressed;
+    static bool  window_running = true;
+    static float speed          = 0.05f;
+    static float worldTime      = 0;
     
     while (window_running) { // Render cycle
+        //worldTime += 0.001;
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
         // Position calculation (This block fuckt CPU)
@@ -130,11 +94,8 @@ int main() {
         
         cameraFront = glm::normalize(direction);
 
-		// Clear the buffers
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        // Offscreen rendering in G-Buffer
+		screen.gbuffer->bind();
         
         { // SkyBox render
             glDepthMask(GL_FALSE);
@@ -144,6 +105,7 @@ int main() {
             int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
             glUniformMatrix4fv(projectionLocIdenpedent, 1, GL_FALSE, glm::value_ptr(projection));
             glBindVertexArray(skyVAO);
+            glUniform1f(glGetUniformLocation(skyboxShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
             glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glDepthMask(GL_TRUE);
@@ -151,12 +113,11 @@ int main() {
 
         { // Chunks render
             blockShader.Use();
-            int modelLoc = glGetUniformLocation(blockShader.Program, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            int viewLoc = glGetUniformLocation(blockShader.Program, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            int projectionLoc = glGetUniformLocation(blockShader.Program, "projection");
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+            glUniform1f(glGetUniformLocation(blockShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
 
             static auto cameraBlocksPos = glm::value_ptr(cameraPos);
 
@@ -248,8 +209,7 @@ int main() {
 
                             glDepthMask(GL_FALSE);
                             glDrawArrays(GL_TRIANGLES, 0, 36);
-                            glDepthMask(GL_TRUE);              
-                            
+                            glDepthMask(GL_TRUE);
                         } else {
                             glActiveTexture(GL_TEXTURE0);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
@@ -279,14 +239,12 @@ int main() {
                                 glDrawArrays(GL_TRIANGLES, 0, 36);
                             } else {
                                 glDisable(GL_CULL_FACE);
-                                glDepthMask(GL_FALSE);
                                 glDrawArrays(GL_TRIANGLES, 0, 12);
-                                glDepthMask(GL_TRUE);
                                 glEnable(GL_CULL_FACE);
                             }
                         }
+                        
                     };
-
                     //-Y[->>Camera   ]+Y
                     for (int iBlock = 0; iBlock < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[0]))), 16); iBlock++)
                         blockFunctor(row, iBlock);
@@ -310,24 +268,12 @@ int main() {
                 layerFunctor(chunk, iLayer);
         }
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glDisable(GL_DEPTH_TEST);
-        glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        faceShader.Use();
-        glBindVertexArray(quadVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-        glUniform1i(glGetUniformLocation(faceShader.Program, "screenTexture"), 0);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glEnable(GL_DEPTH_TEST);
+        // Render from G-Buffer
+        screen.gbuffer->unbind();
+        screen.render();
 
         SDL_GL_SwapWindow(window);
     }
 
-    glDeleteVertexArrays(1, &quadVAO);
-    glDeleteBuffers(1, &quadVBO);
     return 0;
 }
