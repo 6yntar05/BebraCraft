@@ -51,7 +51,7 @@ namespace objects {
         };
 
         // Service
-        objIdent id;
+        objIdent id = objIdent::ebase;
         object() {};
         object(objIdent id) : id(id) {};
         object(objectTexture texture, float rotate = 0.0)

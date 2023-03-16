@@ -11,14 +11,16 @@
 
 #include "engine/core.h"
 #include "engine/graphics/cubemaps.h"
+#include "engine/graphics/framebuffer.h"
 #include "engine/graphics/shaders.h"
+#include "engine/graphics/textures.h"
 #include "engine/objects/base.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
 
-int windowWidth = 1920;
-int windowHeight = 1080;
+unsigned int windowWidth = 1920;
+unsigned int windowHeight = 1080;
 float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
 float yaw = 0.0f;
@@ -34,17 +36,18 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main() {
+    // Init
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight, false, true);
-    bebra::graphics::Shader blockShader("shaders/block.vs", "shaders/block.frag");
-    bebra::graphics::Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.frag");
+    bebra::graphics::Shader blockShader("shaders/block.vert", "shaders/block.frag");
+    bebra::graphics::Shader skyboxShader("shaders/skybox.vert", "shaders/skybox.frag");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
     GLuint skyVBO, skyVAO;
     bebra::graphics::loadObject(skyVBO, skyVAO);
-    auto skyBoxTexture = bebra::graphics::loadCubemap(
-        {"textures/skybox/ft.png",
+    auto skyBoxTexture = bebra::graphics::loadCubemap({
+        "textures/skybox/ft.png",
         "textures/skybox/bk.png",
         "textures/skybox/up.png",
         "textures/skybox/dn.png",
@@ -63,12 +66,20 @@ int main() {
     auto chunk = bebra::utils::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
 
-    // Runtime vars
-    std::list<SDL_Keycode> keyPressed;
-    bool window_running = true;
-    static float speed = 0.05f;
+    // Create screen object and G-Buffer
+    bebra::graphics::screenObject screen {
+        windowWidth, windowHeight, 
+        bebra::graphics::Shader("shaders/screen.vert", "shaders/screen.frag")
+    };
 
-    while (window_running) { // Every frame
+    // Runtime vars
+    std::list<SDL_Keycode>      keyPressed;
+    static bool  window_running = true;
+    static float speed          = 0.05f;
+    static float worldTime      = 0;
+    
+    while (window_running) { // Render cycle
+        //worldTime += 0.001;
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
         // Position calculation (This block fuckt CPU)
@@ -83,11 +94,8 @@ int main() {
         
         cameraFront = glm::normalize(direction);
 
-		// Clear the buffers
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// glClearColor(54.0/255.0, 58.0/255.0, 61.0/255.0, 1.0f);
-		glClearColor(15.0/255.0, 15.0/255.0, 15.0/255.0, 1.0f);
-
+        // Offscreen rendering in G-Buffer
+		screen.gbuffer->bind();
         
         { // SkyBox render
             glDepthMask(GL_FALSE);
@@ -97,6 +105,7 @@ int main() {
             int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
             glUniformMatrix4fv(projectionLocIdenpedent, 1, GL_FALSE, glm::value_ptr(projection));
             glBindVertexArray(skyVAO);
+            glUniform1f(glGetUniformLocation(skyboxShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
             glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glDepthMask(GL_TRUE);
@@ -104,12 +113,11 @@ int main() {
 
         { // Chunks render
             blockShader.Use();
-            int modelLoc = glGetUniformLocation(blockShader.Program, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            int viewLoc = glGetUniformLocation(blockShader.Program, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            int projectionLoc = glGetUniformLocation(blockShader.Program, "projection");
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+            glUniform1f(glGetUniformLocation(blockShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
 
             static auto cameraBlocksPos = glm::value_ptr(cameraPos);
 
@@ -201,8 +209,7 @@ int main() {
 
                             glDepthMask(GL_FALSE);
                             glDrawArrays(GL_TRIANGLES, 0, 36);
-                            glDepthMask(GL_TRUE);              
-                            
+                            glDepthMask(GL_TRUE);
                         } else {
                             glActiveTexture(GL_TEXTURE0);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
@@ -232,14 +239,12 @@ int main() {
                                 glDrawArrays(GL_TRIANGLES, 0, 36);
                             } else {
                                 glDisable(GL_CULL_FACE);
-                                glDepthMask(GL_FALSE);
                                 glDrawArrays(GL_TRIANGLES, 0, 12);
-                                glDepthMask(GL_TRUE);
                                 glEnable(GL_CULL_FACE);
                             }
                         }
+                        
                     };
-
                     //-Y[->>Camera   ]+Y
                     for (int iBlock = 0; iBlock < std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[0]))), 16); iBlock++)
                         blockFunctor(row, iBlock);
@@ -262,6 +267,10 @@ int main() {
             for (int iLayer = chunkSize-1; iLayer >= std::min(std::max(0, static_cast<int>(std::round(cameraBlocksPos[1]))), chunkSize); iLayer--)
                 layerFunctor(chunk, iLayer);
         }
+
+        // Render from G-Buffer
+        screen.gbuffer->unbind();
+        screen.render();
 
         SDL_GL_SwapWindow(window);
     }

@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 #extension GL_ARB_explicit_attrib_location : require
 
@@ -28,5 +28,4 @@ void main(void){
     
     vertexID = gl_VertexID;
     glPos = gl_Position;
-
 }

@@ -14,6 +14,16 @@
 namespace bebra {
 namespace graphics {
 
+GLuint createTexture(GLint internalformat, unsigned int width, unsigned int height, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE) {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, GL_RGBA, type, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    return texture;
+}
+
 void loadTexture(GLuint* texture, std::string path) {
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture); // All upcoming GL_TEXTURE_2D operations now have effect on our texture object

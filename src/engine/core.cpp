@@ -53,7 +53,6 @@ namespace bebra {
         }
 
         SDL_SetWindowGrab(window, SDL_TRUE);
-        //SDL_SetWindowMouseGrab(window, SDL_TRUE);
         SDL_SetRelativeMouseMode(SDL_TRUE);
 
         return window;
@@ -70,7 +69,6 @@ namespace bebra {
             glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
             glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
             glEnable(GL_LINE_SMOOTH);
-            // glEnable(GL_POLYGON_SMOOTH);
         }
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glEnable(GL_CULL_FACE);
