@@ -14,7 +14,7 @@
 namespace bebra {
 namespace graphics {
 
-GLuint createTexture(GLint internalformat, unsigned int width, unsigned int height, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE) {
+inline GLuint createTexture(GLint internalformat, unsigned int width, unsigned int height, GLenum format = GL_RGBA, GLenum type = GL_UNSIGNED_BYTE) {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -24,7 +24,7 @@ GLuint createTexture(GLint internalformat, unsigned int width, unsigned int heig
     return texture;
 }
 
-void loadTexture(GLuint* texture, std::string path) {
+inline void loadTexture(GLuint* texture, std::string path) {
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture); // All upcoming GL_TEXTURE_2D operations now have effect on our texture object
     // Set our texture parameters

@@ -23,10 +23,6 @@ unsigned int windowWidth = 1920;
 unsigned int windowHeight = 1080;
 float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
-float yaw = 0.0f;
-float pitch = 0.0f;
-float fov = 90.0f;
-
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
@@ -40,8 +36,17 @@ int main() {
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight, false, true);
-    bebra::graphics::Shader blockShader("shaders/block.vert", "shaders/block.frag");
-    bebra::graphics::Shader skyboxShader("shaders/skybox.vert", "shaders/skybox.frag");
+
+    bebra::graphics::Shader blockShader("shaders/block.vert", "shaders/block.frag");    // Todo
+    int modelLoc = glGetUniformLocation(blockShader.Program, "model");
+    int viewLoc = glGetUniformLocation(blockShader.Program, "view");
+    int projLoc = glGetUniformLocation(blockShader.Program, "projection");
+    int blockTime = glGetUniformLocation(blockShader.Program, "worldTime");
+
+    bebra::graphics::Shader skyboxShader("shaders/skybox.vert", "shaders/skybox.frag");    // Todo
+    int viewLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "view");
+    int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
+    int skyboxTime = glGetUniformLocation(skyboxShader.Program, "worldTime");
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
     GLuint skyVBO, skyVAO;
@@ -77,9 +82,12 @@ int main() {
     static bool  window_running = true;
     static float speed          = 0.05f;
     static float worldTime      = 0;
+    static float yaw    = 0.0f;
+    static float pitch  = 0.0f;
+    static float fov    = 90.0f;
     
     while (window_running) { // Render cycle
-        //worldTime += 0.001;
+        worldTime += 0.001;
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
         // Position calculation (This block fuckt CPU)
@@ -91,7 +99,7 @@ int main() {
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
             direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        
+
         cameraFront = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
@@ -100,12 +108,10 @@ int main() {
         { // SkyBox render
             glDepthMask(GL_FALSE);
             skyboxShader.Use();
-            int viewLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "view");
             glUniformMatrix4fv(viewLocIdenpedent, 1, GL_FALSE, glm::value_ptr(viewIdenpedent));
-            int projectionLocIdenpedent = glGetUniformLocation(skyboxShader.Program, "projection");
             glUniformMatrix4fv(projectionLocIdenpedent, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniform1f(skyboxTime, 0.5 + (glm::cos(worldTime) / 2.0));
             glBindVertexArray(skyVAO);
-            glUniform1f(glGetUniformLocation(skyboxShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
             glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glDepthMask(GL_TRUE);
@@ -113,11 +119,10 @@ int main() {
 
         { // Chunks render
             blockShader.Use();
-            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-            glUniformMatrix4fv(glGetUniformLocation(blockShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-            glUniform1f(glGetUniformLocation(blockShader.Program, "worldTime"), 0.5 + (glm::cos(worldTime) / 2.0));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            glUniform1f(blockTime, 0.5 + (glm::cos(worldTime) / 2.0));
 
             static auto cameraBlocksPos = glm::value_ptr(cameraPos);
 
@@ -161,7 +166,6 @@ int main() {
                                 break;
                         }
 
-                        int modelLoc = glGetUniformLocation(blockShader.Program, "model");
                         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
                         if ((block->id == bebra::objects::eglass) || (block->id == bebra::objects::efluid)) { // Pass textures to fragment shaders
