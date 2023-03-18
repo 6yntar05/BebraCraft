@@ -12,7 +12,7 @@
 
 namespace bebra {
 
-    int init(gapi GAPI) {
+    int init(const gapi GAPI) {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
             std::cout << "[ERROR] SDL::INIT" << std::endl << SDL_GetError() << std::endl;
             return 1;
@@ -35,7 +35,7 @@ namespace bebra {
         return 0;
     }
 
-    SDL_Window* window(std::string windowName, uint windowWidth, uint windowHeight, uint32_t properties_graphic_api) {
+    SDL_Window* window(const std::string windowName, const uint windowWidth, const uint windowHeight, const uint32_t properties_graphic_api) {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1); // It blows mesa zink
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8); // It blows mesa zink
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -58,7 +58,7 @@ namespace bebra {
         return window;
     }
     
-    void contextCreate(SDL_Window* window, uint windowWidth, uint windowHeight, bool debugVerticles, bool nicest) {
+    void contextCreate(SDL_Window* const window, const uint windowWidth, const uint windowHeight, const bool nicest) {
         SDL_GL_CreateContext(window);
         glewInit();
         glViewport(0, 0, windowWidth, windowHeight);
@@ -74,7 +74,6 @@ namespace bebra {
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        if (debugVerticles)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 }

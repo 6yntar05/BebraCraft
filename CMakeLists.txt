@@ -9,8 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -fdiagnostics-color=always -O0 -fprofile-generate) # -fsanitize=undefined -fsanitize=address)
-add_link_options(-fprofile-generate)
+add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -fdiagnostics-color=always -O3) # -fsanitize=undefined -fsanitize=address)
 # add_link_options(-fsanitize=undefined -fsanitize=address)
 
 project(${PROJECT_NAME} LANGUAGES ${PROG_LANG})

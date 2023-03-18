@@ -20,21 +20,11 @@ namespace craft {
         GLint worldTimeLoc;
 
       public:
-        void view(glm::mat4 view) {
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        }
-        void projection(glm::mat4 projection) {
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-        }
-        void worldTime(double time) {
-            glUniform1f(worldTimeLoc, time);
-        }
+        void view(const glm::mat4 view);
+        void projection(const glm::mat4 projection);
+        void worldTime(const double time);
 
-        skyboxShaderApi(bebra::graphics::shaderProgram shaderProgram) : program(shaderProgram) {
-            viewLoc       = glGetUniformLocation(program.program, "view");
-            projectionLoc = glGetUniformLocation(program.program, "projection");
-            worldTimeLoc  = glGetUniformLocation(program.program, "worldTime");
-        }
+        skyboxShaderApi(const bebra::graphics::shaderProgram shaderProgram);
     };
 
     class blockShaderApi : public skyboxShaderApi {
@@ -45,14 +35,9 @@ namespace craft {
         GLint modelLoc;
 
       public:
-        void model(glm::mat4 model) {
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        }
+        void model(const glm::mat4 model);
 
-        blockShaderApi(bebra::graphics::shaderProgram shaderProgram)
-        : skyboxShaderApi(shaderProgram), program(shaderProgram) {
-            modelLoc = glGetUniformLocation(program.program, "model");
-        }
+        blockShaderApi(const bebra::graphics::shaderProgram shaderProgram);
     };
 
 }

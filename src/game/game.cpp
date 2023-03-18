@@ -1,3 +1,14 @@
+#include "engine/core.h"
+#include "engine/graphics/shaders.h"
+#include "engine/graphics/cubemaps.h"
+#include "engine/graphics/framebuffer.h"
+#include "engine/graphics/textures.h"
+#include "engine/objects/objects.h"
+
+#include "game/demoChunkGen.h"
+#include "game/control.h"
+#include "game/shaders.h"
+
 #include <iostream>
 #include <vector>
 #include <functional>
@@ -7,48 +18,33 @@
 #include <GL/glu.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "engine/core.h"
-#include "engine/graphics/cubemaps.h"
-#include "engine/graphics/framebuffer.h"
-#include "engine/graphics/shaders.h"
-#include "engine/graphics/textures.h"
-#include "engine/objects/base.h"
-
-#include "game/demoChunkGen.h"
-#include "game/control.h"
-#include "game/shaders.h"
-
-unsigned int windowWidth = 1920;
-unsigned int windowHeight = 1080;
-float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
-
 glm::vec3 cameraPos   = glm::vec3(-2.0f, 8.0f, 6.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main() {
+    unsigned int windowWidth = 1920;
+    unsigned int windowHeight = 1080;
+    float window_aspect_ratio = float(windowWidth) / float(windowHeight);
     // Init
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
-    bebra::contextCreate(window, windowWidth, windowHeight, false, true);
+    bebra::contextCreate(window, windowWidth, windowHeight);
 
     // Loading shaders
-    bebra::graphics::shaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
-    craft::blockShaderApi blockShaderSet {blockShader};
-
-    bebra::graphics::shaderProgram skyboxShader("shaders/skybox.vert", "shaders/skybox.frag");
-    craft::blockShaderApi skyboxShaderSet {skyboxShader};
+    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
+    bebra::graphics::shaderProgram skyboxShader {"shaders/skybox.vert", "shaders/skybox.frag"};
+    craft::blockShaderApi blockShaderSet    {blockShader};
+    craft::blockShaderApi skyboxShaderSet   {skyboxShader};
 
     // Create screen object and G-Buffer
     bebra::graphics::screenObject screen {
         windowWidth, windowHeight, 
-        bebra::graphics::shaderProgram("shaders/screen.vert", "shaders/screen.frag")
+        bebra::graphics::shaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
     };
 
     // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
@@ -71,25 +67,28 @@ int main() {
     bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
-    auto chunk = bebra::utils::genChunk();
+    auto chunk = craft::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
 
     // Runtime vars
-    std::list<SDL_Keycode>      keyPressed;
-    static bool  window_running = true;
-    static float speed          = 0.05f;
-    static float worldTime      = 0;
-    static float rawTime        = 0;
-    static float yaw    = 0.0f;
-    static float pitch  = 0.0f;
-    static float fov    = 90.0f;
+        // SDL & Window
+    std::list<SDL_Keycode> keyPressed;
+    bool window_running = true;
+        // Time
+    float worldTime = 0;
+    float rawTime   = 0;
+        // Camera
+    float yaw    = 0.0f;
+    float pitch  = 0.0f;
+    float fov    = 90.0f;
+    float speed  = 0.05f;
     
     while (window_running) { // Render cycle
         worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
-        // Position calculation (This block fuckt CPU)
+        // Position calculation
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
         glm::mat4 view           = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
@@ -98,7 +97,6 @@ int main() {
             direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
             direction.y = sin(glm::radians(pitch));
             direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-
         cameraFront = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
@@ -116,6 +114,7 @@ int main() {
             glDepthMask(GL_TRUE);
         }
 
+        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
         { // Chunks render
             blockShader.use();
             blockShaderSet.model(model);
@@ -136,16 +135,17 @@ int main() {
                     
                     // Functor: Render single block of chunk
                     static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
-                        bebra::objects::object* block = row.at(iBlock);
+                        const bebra::objects::object* block = row.at(iBlock);
                         
                         // Check for visible
                         if (!block->texture.textures.size()) return;
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, {iBlock,iLayer,iRow});
+                        model = glm::translate(model, { iBlock, iLayer, iRow });
+                        //model = glm::translate(model, { iBlock + 16*x, iLayer, iRow + 16*y });
                         if (block->rotate != 0.0)
-                            model = glm::rotate(model, glm::radians(block->rotate), {0.0, 1.0, 0.0});
+                            model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
                         blockShaderSet.model(model);
 
                         // Pick right buffers for current object
