@@ -53,13 +53,12 @@ namespace graphics {
             GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
             glDrawBuffers(3, DrawBuffers);
 
-            // создаем текстуру
-            GLuint rbo;
-            glGenRenderbuffers(1, &rbo);
-            glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+            // Creating renderbuffer for depth
+            glGenRenderbuffers(1, &depth);
+            glBindRenderbuffer(GL_RENDERBUFFER, depth);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);  
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
 
             GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -67,13 +66,14 @@ namespace graphics {
         }
 
         ~gbuffer() {
-            //glDeleteFramebuffers TODO
+            GLuint toDelete[] = {color, normal, position};
+            glDeleteFramebuffers(3, toDelete);
         }
     };
 
     class screenObject {
       private:
-        graphics::Shader shader;
+        graphics::shaderProgram shader;
 
         GLuint VBO;
         GLuint VAO;
@@ -93,18 +93,18 @@ namespace graphics {
         bebra::graphics::gbuffer* gbuffer;
         
         void render() {
-            this->shader.Use();
+            this->shader.use();
 
             glBindVertexArray(this->VAO);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, this->gbuffer->color);
-            glUniform1i(glGetUniformLocation(this->shader.Program, "colorbuffer"), 0);
+            glUniform1i(glGetUniformLocation(this->shader.program, "colorbuffer"), 0);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, this->gbuffer->normal);
-            glUniform1i(glGetUniformLocation(this->shader.Program, "normalbuffer"), 1);
+            glUniform1i(glGetUniformLocation(this->shader.program, "normalbuffer"), 1);
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, this->gbuffer->position);
-            glUniform1i(glGetUniformLocation(this->shader.Program, "positionbuffer"), 2);
+            glUniform1i(glGetUniformLocation(this->shader.program, "positionbuffer"), 2);
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
@@ -113,7 +113,7 @@ namespace graphics {
             glEnable(GL_DEPTH_TEST);
         }
 
-        screenObject(unsigned int width, unsigned int height, graphics::Shader shader)
+        screenObject(unsigned int width, unsigned int height, graphics::shaderProgram shader)
             : shader(shader)
         {
             this->gbuffer = new bebra::graphics::gbuffer {width, height};
