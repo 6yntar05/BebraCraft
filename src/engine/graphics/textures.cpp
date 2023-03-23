@@ -1,6 +1,5 @@
 #include "engine/graphics/textures.h"
 
-#define STB_IMAGE_STATIC
 #include <stb/stb_image.h>
 
 namespace bebra {
