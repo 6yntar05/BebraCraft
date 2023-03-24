@@ -114,11 +114,11 @@ namespace craft {
         }};
 
         objects::objectTexture quartz_block_chiseledTexture {
-            "textures/blocks/quartz_block_chiseled.png",
+            "textures/blocks/quartz_block_chiseled.png"
         };
 
         objects::objectTexture waterTexture {
-            "textures/blocks/water.png",
+            "textures/blocks/water.png"
         };
 
         objects::objectTexture iron_oreTexture { "textures/blocks/iron_ore.png" };

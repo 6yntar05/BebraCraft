@@ -51,7 +51,7 @@ namespace graphics {
 
         int width, height, channels;
         stbi_load(pathes.at(0).c_str(), &width, &height, &channels, 0);
-        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA, width, height, pathes.size());
+        //glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA, width, height, pathes.size());
         glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, pathes.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         for (uint i = 0; i < pathes.size(); i++) {

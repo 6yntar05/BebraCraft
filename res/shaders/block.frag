@@ -51,7 +51,7 @@ void main(void){
 
     color = texture(textureArray, vec3(TexCoord, vertexID/6));
 
-    if (color.w < 1.0) discard;
+    //if (color.w < 1.0) discard;
 
     // Camera shadow
     if (color.w > 0.9)
@@ -86,5 +86,5 @@ void main(void){
     // G-Buffer filling
     normal = vec4(Normal, color.w);
     position = vec4(glPos.xyz, gl_FragCoord.w);
-        
+    
 }
