@@ -1,7 +1,15 @@
 project('BebraCraft', 'cpp')
 src_dir = 'src'
 
-warning_args = ['-Wall', '-Wextra', '-Wpedantic', '-Wno-unused-parameter']
+compiller_args = ['-Wall', '-Wextra', '-Wpedantic', '-Wno-unused-parameter', '-fdiagnostics-color=always']
+linker_args = ['-lGL', '-lGLEW', '-lSDL2']
+
+if get_option('buildtype') == 'debug'
+    compiller_args += ['-fsanitize=address', '-O0', '-g']
+    linker_args += '-fsanitize=address'
+else
+    compiller_args += '-O3'
+endif
 
 subdir('src') # -> src_files
 
@@ -20,21 +28,9 @@ executable(
         'res',
     ],
 
-    link_args: [
-        '-lGL',
-        '-lGLEW',
-        '-lSDL2',
-    ],
-
-    c_args: warning_args + [
-        '-fdiagnostics-color=always',
-        '-O3',
-    ],
-    cpp_args: warning_args + [
-        '-fdiagnostics-color=always',
-        '-O3',
-        '-std=c++20'
-    ]
+    link_args: linker_args,
+    c_args: compiller_args,
+    cpp_args: compiller_args + '-std=c++20'
 )
 
 run_command(find_program('meson.py'), check: true)
