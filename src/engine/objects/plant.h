@@ -7,24 +7,6 @@
 namespace bebra {
 namespace objects {
 
-    struct plantTexture : objectTexture {
-        plantTexture() {
-            this->textures.reserve(4);
-        }
-
-        plantTexture(GLuint texture)
-            : plantTexture()
-        {
-            this->textures = {texture, texture, texture, texture};
-        }
-        
-        plantTexture(GLuint front, GLuint back, GLuint left, GLuint right)
-            : plantTexture() 
-        {
-            this->textures = {front, back, left, right};
-        }
-    };
-
     class plant : public block {
       public:
         static constexpr const float psize = 0.5f / M_SQRT2;
@@ -83,7 +65,7 @@ namespace objects {
         // Service
         static constexpr objIdent id = objIdent::eplant;
         plant() : block(id) {};
-        plant(plantTexture texture, float rotate = 0.0)
+        plant(objectTexture texture, float rotate = 0.0)
             : plant()
         {
             this->texture = texture;

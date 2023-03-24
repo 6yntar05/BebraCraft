@@ -10,7 +10,7 @@
 namespace bebra {
 namespace graphics {
     
-    struct cubeMap : public bebra::objects::blockTexture {};
+    struct cubeMap : public bebra::objects::objectTexture {};
 
     GLuint loadCubemap(const std::vector<std::string>& faces);
     void loadObject(GLuint& VBO, GLuint& VAO);

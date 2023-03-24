@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 #include <iostream>
 
@@ -9,6 +10,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <engine/graphics/textures.h>
 
 namespace bebra {
 namespace objects {
@@ -23,7 +26,21 @@ namespace objects {
     };
 
     struct objectTexture {
-        std::vector<GLuint> textures;
+        GLuint textureArray;
+        uint arraySize;
+        
+        objectTexture() : arraySize(0) {}
+        objectTexture(std::vector<std::string> pathes)
+            : arraySize(pathes.size()) {
+            this->textureArray = graphics::loadTextureArray(pathes);
+        }
+        objectTexture(std::string path, uint count = 6)
+            : arraySize(count) {
+            std::vector<std::string> pathes;
+            for (uint i = 0; i < count; i++)
+                pathes.push_back(path);
+            this->textureArray = graphics::loadTextureArray(pathes);
+        }
     };
 
     class object {

@@ -5,24 +5,6 @@
 namespace bebra {
 namespace objects {
 
-    struct blockTexture : objectTexture {
-        blockTexture() {
-            this->textures.reserve(6);
-        }
-
-        blockTexture(GLuint texture)
-            : blockTexture()
-        {
-            this->textures = {texture, texture, texture, texture, texture, texture};
-        }
-        
-        blockTexture(GLuint front, GLuint back, GLuint left, GLuint right, GLuint up, GLuint down)
-            : blockTexture() 
-        {
-            this->textures = {front, back, left, right, up, down};
-        }
-    };
-
     class block : public object {
       public:
         static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
@@ -107,7 +89,7 @@ namespace objects {
         static constexpr objIdent id = objIdent::eblock;
         block() : object(id) {};
         block(objIdent id) : object(id) {};
-        block(blockTexture texture, float rotate = 0.0)
+        block(objectTexture texture, float rotate = 0.0)
             : block()
         {
             this->texture = texture;

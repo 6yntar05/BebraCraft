@@ -13,6 +13,7 @@ uniform sampler2D up;
 uniform sampler2D down;
 uniform sampler2D left;
 uniform sampler2D right;
+uniform sampler2DArray textureArray;
 
 // Vertex input
 in vec4 glPos;
@@ -32,6 +33,7 @@ const float downShading = 0.2;
 
 void main(void){
     // Texture choosing (very cringe, i know)
+    /*
     if (vertexID < 6)
         color = texture2D(front, TexCoord);
     else if (vertexID < 12)
@@ -45,9 +47,11 @@ void main(void){
     else if (vertexID < 36)
         color = texture2D(down, TexCoord);
     else // Out of range
-        color = vec4(1.0, 0.0, 1.0, 1.0);
+        color = vec4(1.0, 0.0, 1.0, 1.0);*/
 
-    //if (color.w < 1.0) discard;
+    color = texture(textureArray, vec3(TexCoord, vertexID/6));
+
+    if (color.w < 1.0) discard;
 
     // Camera shadow
     if (color.w > 0.9)

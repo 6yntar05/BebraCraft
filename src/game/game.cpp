@@ -19,6 +19,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <stb/stb_image.h>
+
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
@@ -138,7 +140,7 @@ int main() {
                         const bebra::objects::object* block = row.at(iBlock);
                         
                         // Check for visible
-                        if (!block->texture.textures.size()) return;
+                        if (!block->texture.arraySize) return;
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
@@ -156,87 +158,14 @@ int main() {
                             default: { glBindVertexArray(blockVAO); break; }
                         }
 
-                        // Cringe... temporary
                         // TODO: texture sets manager, non-cringe alpha blending, instance manager, multithreading
-                        if ((block->id == bebra::objects::eglass) || (block->id == bebra::objects::efluid)) { // Pass textures to fragment shaders
-                            glActiveTexture(GL_TEXTURE0);
-                            if ((iRow == 0) || ((iRow > 0) && (chunk.at(iLayer).at(iRow-1).at(iBlock)->id != block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "front"), 0);
-
-                            glActiveTexture(GL_TEXTURE1);
-                            if ((chunk.at(iLayer).at(iRow+1).at(iBlock)->id != block->id))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "back"), 1);
-
-                            glActiveTexture(GL_TEXTURE2);
-                            if ((iBlock == 15) || ( (iBlock < 15) && (row[++iBlock]->id!=block->id) ))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "left"), 2);
-
-                            glActiveTexture(GL_TEXTURE3);
-                            if ((iBlock <= 1) || ((iBlock > 0) && (row[iBlock-2]->id!=block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "right"), 3);
-
-                            glActiveTexture(GL_TEXTURE4);
-                            if ((iLayer == (static_cast<int>(chunk.size()))) || ((iLayer < static_cast<int>(chunk.size()-1)) && (chunk.at(iLayer+1).at(iRow).at(iBlock-1)->id != block->id)) )
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "up"), 4);
-
-                            glActiveTexture(GL_TEXTURE5);
-                            if ((iLayer == 0) || ((iLayer > 0) && (chunk.at(iLayer-1).at(iRow).at(iBlock-1)->id != block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "down"), 5);
-
-                            glDepthMask(GL_FALSE);
+                        glActiveTexture(GL_TEXTURE0);
+                        glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
+                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 0);
+                        if (block->id == bebra::objects::eplant)
+                            glDrawArrays(GL_TRIANGLES, 0, 12);
+                        else
                             glDrawArrays(GL_TRIANGLES, 0, 36);
-                            glDepthMask(GL_TRUE);
-                        } else {
-                            glActiveTexture(GL_TEXTURE0);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
-                            glUniform1i(glGetUniformLocation(blockShader.program, "front"), 0);
-
-                            glActiveTexture(GL_TEXTURE1);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
-                            glUniform1i(glGetUniformLocation(blockShader.program, "back"), 1);
-
-                            if (block->id != bebra::objects::eplant) {
-                                glActiveTexture(GL_TEXTURE2);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "left"), 2);
-
-                                glActiveTexture(GL_TEXTURE3);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "right"), 3);
-                            
-                                glActiveTexture(GL_TEXTURE4);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "up"), 4);
-
-                                glActiveTexture(GL_TEXTURE5);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "down"), 5);
-
-                                glDrawArrays(GL_TRIANGLES, 0, 36);
-                            } else {
-                                glDisable(GL_CULL_FACE);
-                                glDrawArrays(GL_TRIANGLES, 0, 12);
-                                glEnable(GL_CULL_FACE);
-                            }
-                        }
                         
                     };
                     // TODO: inverse for depth-test optimization

@@ -26,7 +26,7 @@ namespace graphics {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 14);
         //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL , 10);
-        
+
         // Load, create texture and generate mipmaps
         int width, height, nrChannels;
         stbi_set_flip_vertically_on_load(true);
@@ -37,6 +37,36 @@ namespace graphics {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         stbi_image_free(image);
+    }
+
+    void loadTextureArray(GLuint* const texture, const std::vector<std::string> pathes) {
+        glGenTextures(1, texture);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
+
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+
+        int width, height, channels;
+        stbi_load(pathes.at(0).c_str(), &width, &height, &channels, 0);
+        glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA, width, height, pathes.size());
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, pathes.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+        for (uint i = 0; i < pathes.size(); i++) {
+            unsigned char* data = stbi_load(pathes.at(i).c_str(), &width, &height, &channels, 0);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
+        }
+        glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    }
+
+    GLuint loadTextureArray(const std::vector<std::string> pathes) {
+        GLuint texture;
+        loadTextureArray(&texture, pathes);
+        return texture;
     }
 
 }

@@ -6,24 +6,6 @@
 namespace bebra {
 namespace objects {
 
-    struct fluidTexture : objectTexture {
-        fluidTexture() {
-            this->textures.reserve(6);
-        }
-
-        fluidTexture(GLuint texture)
-            : fluidTexture()
-        {
-            this->textures = {texture, texture, texture, texture, texture, texture};
-        }
-        
-        fluidTexture(GLuint front, GLuint back, GLuint left, GLuint right, GLuint up, GLuint down)
-            : fluidTexture() 
-        {
-            this->textures = {front, back, left, right, up, down};
-        }
-    };
-
     class fluid : public block {
       public:
         static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
@@ -69,8 +51,6 @@ namespace objects {
            -0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
            -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f
         };
-
-        // Render
         
         static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
             glGenVertexArrays(1, &VAO);
@@ -104,7 +84,7 @@ namespace objects {
         // Service
         static constexpr objIdent id = objIdent::efluid;
         fluid() : block(id) {};
-        fluid(fluidTexture texture, float rotate = 0.0) 
+        fluid(objectTexture texture, float rotate = 0.0) 
             : fluid()
         {
             this->texture = texture;
