@@ -1,6 +1,5 @@
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
-#include "engine/graphics/cubemaps.h"
 #include "engine/graphics/framebuffer.h"
 #include "engine/graphics/textures.h"
 #include "engine/objects/objects.h"
@@ -8,6 +7,7 @@
 #include "game/demoChunkGen.h"
 #include "game/control.h"
 #include "game/shaders.h"
+#include "game/skybox.h"
 
 #include <iostream>
 #include <vector>
@@ -29,19 +29,15 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main() {
+    // TODO: window resize
     unsigned int windowWidth = 1920;
     unsigned int windowHeight = 1080;
     float window_aspect_ratio = float(windowWidth) / float(windowHeight);
+
     // Init
     bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-
-    // Loading shaders
-    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
-    bebra::graphics::shaderProgram skyboxShader {"shaders/skybox.vert", "shaders/skybox.frag"};
-    craft::blockShaderApi blockShaderSet    {blockShader};
-    craft::blockShaderApi skyboxShaderSet   {skyboxShader};
 
     // Create screen object and G-Buffer
     bebra::graphics::screenObject screen {
@@ -49,18 +45,13 @@ int main() {
         bebra::graphics::shaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
     };
 
-    // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
-    GLuint skyVBO, skyVAO;
-    bebra::graphics::loadObject(skyVBO, skyVAO);
-    auto skyBoxTexture = bebra::graphics::loadCubemap({
-        "textures/skybox/ft.png",
-        "textures/skybox/bk.png",
-        "textures/skybox/up.png",
-        "textures/skybox/dn.png",
-        "textures/skybox/lf.png",
-        "textures/skybox/rt.png"});
-
-    // Create objects
+    // Objects
+        // Loading shaders
+    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
+    craft::blockShaderApi blockShaderSet    {blockShader};
+        // Creating
+    craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // TODO: texture manager
+        //
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
     bebra::objects::block::loadObject(VBO, blockVAO, EBO);
@@ -103,19 +94,7 @@ int main() {
 
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
-        
-        { // SkyBox render
-            glDepthMask(GL_FALSE);
-            skyboxShader.use();
-            skyboxShaderSet.view(viewIdenpedent);
-            skyboxShaderSet.projection(projection);
-            skyboxShaderSet.worldTime(rawTime);
-            glBindVertexArray(skyVAO);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDepthMask(GL_TRUE);
-        }
-
+        skybox.render(viewIdenpedent, projection, rawTime);
         //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
         { // Chunks render
             blockShader.use();
