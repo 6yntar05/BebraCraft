@@ -141,9 +141,11 @@ int main() {
                         glActiveTexture(GL_TEXTURE1);
                         glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
                         glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 1);
-                        if (block->id == bebra::objects::eplant)
+                        if (block->id == bebra::objects::eplant) {
+                            glDisable(GL_CULL_FACE);
                             glDrawArrays(GL_TRIANGLES, 0, 12);
-                        else
+                            glEnable(GL_CULL_FACE);
+                        } else
                             glDrawArrays(GL_TRIANGLES, 0, 36);
                         
                     };
