@@ -1,13 +1,12 @@
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
-#include "engine/graphics/cubemaps.h"
 #include "engine/graphics/framebuffer.h"
-#include "engine/graphics/textures.h"
 #include "engine/objects/objects.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
 #include "game/shaders.h"
+#include "game/skybox.h"
 
 #include <iostream>
 #include <vector>
@@ -19,6 +18,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <stb/stb_image.h>
+
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
 extern glm::vec3 cameraUp;
@@ -27,44 +28,36 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main() {
+    // TODO: window resize
     unsigned int windowWidth = 1920;
     unsigned int windowHeight = 1080;
     float window_aspect_ratio = float(windowWidth) / float(windowHeight);
+
     // Init
-    bebra::init(bebra::gapi::OpenGL);
+    bebra::hardwareSpecs hadrware = bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-
-    // Loading shaders
-    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
-    bebra::graphics::shaderProgram skyboxShader {"shaders/skybox.vert", "shaders/skybox.frag"};
-    craft::blockShaderApi blockShaderSet    {blockShader};
-    craft::blockShaderApi skyboxShaderSet   {skyboxShader};
-
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
     // Create screen object and G-Buffer
     bebra::graphics::screenObject screen {
         windowWidth, windowHeight, 
         bebra::graphics::shaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
     };
 
-    // Create skyBox (Keep it higher then other texture loadings, otherwise you get a flipped textures)
-    GLuint skyVBO, skyVAO;
-    bebra::graphics::loadObject(skyVBO, skyVAO);
-    auto skyBoxTexture = bebra::graphics::loadCubemap({
-        "textures/skybox/ft.png",
-        "textures/skybox/bk.png",
-        "textures/skybox/up.png",
-        "textures/skybox/dn.png",
-        "textures/skybox/lf.png",
-        "textures/skybox/rt.png"});
-
-    // Create objects
+    // Objects // TODO: texture manager
+        // Creating skybox
+    craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
+        // Loading shaders
+    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
+    craft::blockShaderApi blockShaderSet    {blockShader};
+        //
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
     bebra::objects::block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
-    GLuint alphaTexture;    // For culling of extra edges
-    bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
+    //GLuint alphaTexture;    // For culling of extra edges
+    //bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
     auto chunk = craft::genChunk();
@@ -101,19 +94,7 @@ int main() {
 
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
-        
-        { // SkyBox render
-            glDepthMask(GL_FALSE);
-            skyboxShader.use();
-            skyboxShaderSet.view(viewIdenpedent);
-            skyboxShaderSet.projection(projection);
-            skyboxShaderSet.worldTime(rawTime);
-            glBindVertexArray(skyVAO);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glDepthMask(GL_TRUE);
-        }
-
+        skybox.render(viewIdenpedent, projection, rawTime);
         //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
         { // Chunks render
             blockShader.use();
@@ -138,7 +119,7 @@ int main() {
                         const bebra::objects::object* block = row.at(iBlock);
                         
                         // Check for visible
-                        if (!block->texture.textures.size()) return;
+                        if (!block->texture.arraySize) return;
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
@@ -156,87 +137,16 @@ int main() {
                             default: { glBindVertexArray(blockVAO); break; }
                         }
 
-                        // Cringe... temporary
                         // TODO: texture sets manager, non-cringe alpha blending, instance manager, multithreading
-                        if ((block->id == bebra::objects::eglass) || (block->id == bebra::objects::efluid)) { // Pass textures to fragment shaders
-                            glActiveTexture(GL_TEXTURE0);
-                            if ((iRow == 0) || ((iRow > 0) && (chunk.at(iLayer).at(iRow-1).at(iBlock)->id != block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "front"), 0);
-
-                            glActiveTexture(GL_TEXTURE1);
-                            if ((chunk.at(iLayer).at(iRow+1).at(iBlock)->id != block->id))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "back"), 1);
-
-                            glActiveTexture(GL_TEXTURE2);
-                            if ((iBlock == 15) || ( (iBlock < 15) && (row[++iBlock]->id!=block->id) ))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "left"), 2);
-
-                            glActiveTexture(GL_TEXTURE3);
-                            if ((iBlock <= 1) || ((iBlock > 0) && (row[iBlock-2]->id!=block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "right"), 3);
-
-                            glActiveTexture(GL_TEXTURE4);
-                            if ((iLayer == (static_cast<int>(chunk.size()))) || ((iLayer < static_cast<int>(chunk.size()-1)) && (chunk.at(iLayer+1).at(iRow).at(iBlock-1)->id != block->id)) )
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "up"), 4);
-
-                            glActiveTexture(GL_TEXTURE5);
-                            if ((iLayer == 0) || ((iLayer > 0) && (chunk.at(iLayer-1).at(iRow).at(iBlock-1)->id != block->id)))
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
-                            else
-                                glBindTexture(GL_TEXTURE_2D, alphaTexture);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "down"), 5);
-
-                            glDepthMask(GL_FALSE);
+                        glActiveTexture(GL_TEXTURE1);
+                        glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
+                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 1);
+                        if (block->id == bebra::objects::eplant) {
+                            glDisable(GL_CULL_FACE);
+                            glDrawArrays(GL_TRIANGLES, 0, 12);
+                            glEnable(GL_CULL_FACE);
+                        } else
                             glDrawArrays(GL_TRIANGLES, 0, 36);
-                            glDepthMask(GL_TRUE);
-                        } else {
-                            glActiveTexture(GL_TEXTURE0);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(0));
-                            glUniform1i(glGetUniformLocation(blockShader.program, "front"), 0);
-
-                            glActiveTexture(GL_TEXTURE1);
-                            glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(1));
-                            glUniform1i(glGetUniformLocation(blockShader.program, "back"), 1);
-
-                            if (block->id != bebra::objects::eplant) {
-                                glActiveTexture(GL_TEXTURE2);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(2));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "left"), 2);
-
-                                glActiveTexture(GL_TEXTURE3);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(3));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "right"), 3);
-                            
-                                glActiveTexture(GL_TEXTURE4);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(4));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "up"), 4);
-
-                                glActiveTexture(GL_TEXTURE5);
-                                glBindTexture(GL_TEXTURE_2D, block->texture.textures.at(5));
-                                glUniform1i(glGetUniformLocation(blockShader.program, "down"), 5);
-
-                                glDrawArrays(GL_TRIANGLES, 0, 36);
-                            } else {
-                                glDisable(GL_CULL_FACE);
-                                glDrawArrays(GL_TRIANGLES, 0, 12);
-                                glEnable(GL_CULL_FACE);
-                            }
-                        }
                         
                     };
                     // TODO: inverse for depth-test optimization

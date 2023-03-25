@@ -11,7 +11,7 @@ namespace objects {
         // Service
         static constexpr objIdent id = objIdent::eglass;
         glass() : block(id) {};
-        glass(blockTexture texture, float rotate = 0.0)
+        glass(objectTexture texture, float rotate = 0.0)
             : glass()
         {
             this->texture = texture;
