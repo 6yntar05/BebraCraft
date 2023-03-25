@@ -9,8 +9,8 @@ namespace objects {
 
     class plant : public block {
       public:
-        static constexpr const float psize = 0.5f / M_SQRT2;
-        static constexpr const float dsize = 0.5 * std::sin(0.5);
+        static constexpr float psize = 0.5f / M_SQRT2;
+        static constexpr float dsize = psize;
 
         static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
            -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front halfinverted z
