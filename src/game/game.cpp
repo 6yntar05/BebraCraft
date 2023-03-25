@@ -1,7 +1,6 @@
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
-#include "engine/graphics/textures.h"
 #include "engine/objects/objects.h"
 
 #include "game/demoChunkGen.h"
@@ -35,29 +34,30 @@ int main() {
     float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
     // Init
-    bebra::init(bebra::gapi::OpenGL);
+    bebra::hardwareSpecs hadrware = bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
     // Create screen object and G-Buffer
     bebra::graphics::screenObject screen {
         windowWidth, windowHeight, 
         bebra::graphics::shaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
     };
 
-    // Objects
+    // Objects // TODO: texture manager
+        // Creating skybox
+    craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
     bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
     craft::blockShaderApi blockShaderSet    {blockShader};
-        // Creating
-    craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // TODO: texture manager
         //
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
     bebra::objects::block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
-    GLuint alphaTexture;    // For culling of extra edges
-    bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
+    //GLuint alphaTexture;    // For culling of extra edges
+    //bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
     auto chunk = craft::genChunk();

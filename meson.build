@@ -30,7 +30,7 @@ executable(
 
     link_args: linker_args,
     c_args: compiller_args,
-    cpp_args: compiller_args + '-std=c++20'
+    cpp_args: compiller_args + '-std=c++23'
 )
 
 run_command(find_program('meson.py'), check: true)

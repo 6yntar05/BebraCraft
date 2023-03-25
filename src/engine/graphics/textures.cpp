@@ -51,6 +51,7 @@ namespace graphics {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
 
         int width, height, channels;
+        stbi_set_flip_vertically_on_load(true);
         stbi_load(pathes.at(0).c_str(), &width, &height, &channels, 0); // Getting width and height; All array texture sizes must be equal
         glTexStorage3D(GL_TEXTURE_2D_ARRAY, 5, GL_RGBA16, width, height, pathes.size()); // mips
         //glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA16, width, height, pathes.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
