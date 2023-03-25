@@ -14,6 +14,10 @@ namespace graphics {
         const GLint internalformat, const uint width, const uint height,
         const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
     );
+    GLuint createMultisampleTexture(
+        const GLint internalformat, const uint width, const uint height,
+        const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
+    );
     void loadTexture(GLuint* const texture, const std::string path);
     void loadTextureArray(GLuint* const texture, std::vector<std::string> pathes);
     GLuint loadTextureArray(std::vector<std::string> pathes);

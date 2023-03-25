@@ -138,9 +138,9 @@ int main() {
                         }
 
                         // TODO: texture sets manager, non-cringe alpha blending, instance manager, multithreading
-                        glActiveTexture(GL_TEXTURE1);
+                        glActiveTexture(GL_TEXTURE0);
                         glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
-                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 1);
+                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 0);
                         if (block->id == bebra::objects::eplant) {
                             glDisable(GL_CULL_FACE);
                             glDrawArrays(GL_TRIANGLES, 0, 12);

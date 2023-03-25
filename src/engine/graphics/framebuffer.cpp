@@ -24,7 +24,7 @@ namespace graphics {
         glGenFramebuffers(1, &this->descriptor);
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
 
-        color = bebra::graphics::createTexture(GL_RGBA16F, width, height);
+        color = bebra::graphics::createTexture(GL_RGBA16F, width, height); // TODO: Multisample
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
         normal = bebra::graphics::createTexture(GL_RGBA, width, height);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal, 0);
@@ -56,12 +56,16 @@ namespace graphics {
         this->shader.use();
 
         glBindVertexArray(this->VAO);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->gbuffer->color);
+        // glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA, 1920, 1080, GL_TRUE); // TODO
         glUniform1i(glGetUniformLocation(this->shader.program, "colorbuffer"), 0);
+        
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, this->gbuffer->normal);
         glUniform1i(glGetUniformLocation(this->shader.program, "normalbuffer"), 1);
+
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, this->gbuffer->position);
         glUniform1i(glGetUniformLocation(this->shader.program, "positionbuffer"), 2);
