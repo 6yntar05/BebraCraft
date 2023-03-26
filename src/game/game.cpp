@@ -34,11 +34,12 @@ int main() {
     float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
     // Init
-    bebra::hardwareSpecs hadrware = bebra::init(bebra::gapi::OpenGL);
+    bebra::init(bebra::gapi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    
+#ifdef DEVELOP
+    GLint test; glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &test); std::cerr << test << '\n';
+#endif
     // Create screen object and G-Buffer
     bebra::graphics::screenObject screen {
         windowWidth, windowHeight, 
@@ -49,15 +50,13 @@ int main() {
         // Creating skybox
     craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
-    bebra::graphics::shaderProgram blockShader  {"shaders/block.vert", "shaders/block.frag"};
-    craft::blockShaderApi blockShaderSet    {blockShader};
+    bebra::graphics::shaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
+    craft::blockShaderApi blockShaderSet {blockShader};
         //
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
     bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
     bebra::objects::block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
-    //GLuint alphaTexture;    // For culling of extra edges
-    //bebra::graphics::loadTexture(&alphaTexture, "textures/blocks/alpha.png");
 
     // Load chunks
     auto chunk = craft::genChunk();
@@ -95,7 +94,10 @@ int main() {
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
         skybox.render(viewIdenpedent, projection, rawTime);
-        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
+#ifdef DEVELOP
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
+#endif
         { // Chunks render
             blockShader.use();
             blockShaderSet.model(model);
@@ -123,8 +125,11 @@ int main() {
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
+#ifdef DEVELOP
+                        model = glm::translate(model, { iBlock + 16*x, iLayer, iRow + 16*y });
+#else
                         model = glm::translate(model, { iBlock, iLayer, iRow });
-                        //model = glm::translate(model, { iBlock + 16*x, iLayer, iRow + 16*y });
+#endif
                         if (block->rotate != 0.0)
                             model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
                         blockShaderSet.model(model);
@@ -138,9 +143,11 @@ int main() {
                         }
 
                         // TODO: texture sets manager, non-cringe alpha blending, instance manager, multithreading
-                        glActiveTexture(GL_TEXTURE0);
+                        GLint textureSlot = GL_TEXTURE31;
+                        GLint textureSlotIndex = 31; // < Max texture slots
+                        glActiveTexture(textureSlot + textureSlotIndex);
                         glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
-                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), 0);
+                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                         if (block->id == bebra::objects::eplant) {
                             glDisable(GL_CULL_FACE);
                             glDrawArrays(GL_TRIANGLES, 0, 12);
@@ -174,6 +181,9 @@ int main() {
         }
 
         // Render from G-Buffer
+#ifdef DEVELOP
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+#endif
         screen.gbuffer->unbind();
         screen.render();
 

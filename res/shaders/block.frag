@@ -27,8 +27,8 @@ const float downShading = 0.2;
 
 void main(void){
     color = texture(textureArray, vec3(TexCoord, vertexID/6));
-
-    //if (color.w < 1.0) discard; 
+    
+    if (color.w < 0.001) discard; // Dirty 'hack'
 
     // Camera shadow
     if (color.w > 0.9)

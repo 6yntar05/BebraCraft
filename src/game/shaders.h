@@ -6,11 +6,26 @@
 
 namespace craft {
 
-    class shaderApi {
-        // Base object for shader API construction
+    class blockShaderApi  {
+      private:
+        bebra::graphics::shaderProgram program;
+
+      protected:
+	    GLint viewLoc;
+        GLint projectionLoc;
+        GLint worldTimeLoc;
+        GLint modelLoc;
+
+      public:
+	    void view(const glm::mat4 view);
+        void projection(const glm::mat4 projection);
+        void worldTime(const double time);
+        void model(const glm::mat4 model);
+
+        blockShaderApi(const bebra::graphics::shaderProgram shaderProgram);
     };
 
-    class skyboxShaderApi : public shaderApi {
+	class skyboxShaderApi {
       private:
         bebra::graphics::shaderProgram program;
 
@@ -25,19 +40,6 @@ namespace craft {
         void worldTime(const double time);
 
         skyboxShaderApi(const bebra::graphics::shaderProgram shaderProgram);
-    };
-
-    class blockShaderApi : public skyboxShaderApi {
-      private:
-        bebra::graphics::shaderProgram program;
-
-      protected:
-        GLint modelLoc;
-
-      public:
-        void model(const glm::mat4 model);
-
-        blockShaderApi(const bebra::graphics::shaderProgram shaderProgram);
     };
 
 }

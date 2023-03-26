@@ -13,21 +13,15 @@ namespace graphics {
     {
         if (type == enone) return;
         if (path.size() == 0) return;
+        // Reading shader
         const GLchar* shaderCode;
-        // Read shader
-        std::string code;
         std::ifstream file;
         file.exceptions(std::ifstream::badbit);
-        try {
-            file.open(path);
-            std::stringstream stream;
-            stream << file.rdbuf();
-            file.close();
-            code = stream.str();
-        } catch (std::ifstream::failure const& e) {
-            std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
-
+        file.open(path);
+        std::stringstream stream;
+        stream << file.rdbuf();
+        file.close();
+        std::string code {stream.str()};
         shaderCode = code.c_str();
             
         // Compile shader
@@ -47,20 +41,20 @@ namespace graphics {
                 break;
             default:
                 shaderName = "?(";
-                std::cerr << "WTF?\n";
+                std::cerr << "UNKNOWN\n";
         }
         shaderName = shaderName + path + ")";
-
         glShaderSource(blob, 1, &shaderCode, NULL);
         glCompileShader(blob);
 
         // Check for errors
         GLint success;
-        GLchar infoLog[512];
         glGetShaderiv(blob, GL_COMPILE_STATUS, &success);
         if (!success) {
+            GLchar infoLog[512];
             glGetShaderInfoLog(blob, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog << std::endl; // TODO
+            std::cerr << "ERROR::SHADER::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog << '\n'
+                << "Ignoring..." << std::endl;
         }
     }
 
@@ -73,11 +67,12 @@ namespace graphics {
         glLinkProgram(program);
         // Print linking errors if any
         GLint success;
-        GLchar infoLog[512];
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         if (!success) {
+            GLchar infoLog[512];
             glGetProgramInfoLog(program, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::program::LINKING_FAILED\n" << infoLog << std::endl;
+            std::cerr << "ERROR::SHADER::program::LINKING_FAILED\n" << infoLog << '\n'
+                << "Ignoring..." << std::endl;
         }
     }
 

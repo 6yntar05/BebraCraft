@@ -13,9 +13,7 @@
 
 namespace bebra {
 
-    hardwareSpecs init(const gapi gApi) {
-        int texturSlotsCount = 0; // Max texture slots count in ogl fragment shaders hardware realisation (GL_TEXTUREi)
-
+    void init(const gapi gApi) {
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
             std::cout << "[ERROR] SDL::INIT" << std::endl << SDL_GetError() << std::endl;
             throw std::exception();
@@ -39,17 +37,11 @@ namespace bebra {
 
                 // Other SDL OpenGL attributes
                 SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-                // Get hardware specs
-                glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texturSlotsCount);
                 break;
 
             default:
                 throw std::invalid_argument("Not implemented gapi, or null");
         }
-        
-        // Returning hardware specs
-        return { static_cast<uint>(texturSlotsCount) };
     }
 
     SDL_Window* window(const std::string windowName, const uint windowWidth, const uint windowHeight, const uint32_t properties_graphic_api) {
