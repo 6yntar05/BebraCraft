@@ -7,13 +7,9 @@
 #include <string>
 #include <iostream>
 
-namespace bebra {
-namespace graphics {
-    
-    struct cubeMap : public bebra::objects::objectTexture {};
+namespace bebra::graphics {
 
-    GLuint loadCubemap(const std::vector<std::string>& faces);
-    void loadObject(GLuint& VBO, GLuint& VAO);
+void loadObject(GLuint& VBO, GLuint& VAO);
+// TODO: sky manager
 
-}
-}
+} // namespace bebra::graphics

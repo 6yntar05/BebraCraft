@@ -7,6 +7,6 @@
 
 namespace craft {
 
-    bebra::objects::chunk genChunk();
+bebra::objects::chunk genChunk();
 
-}
+} // namespace craft

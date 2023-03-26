@@ -34,29 +34,29 @@ int main() {
     float window_aspect_ratio = float(windowWidth) / float(windowHeight);
 
     // Init
-    bebra::init(bebra::gapi::OpenGL);
+    bebra::init(bebra::GApi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
 #ifdef DEVELOP
     GLint test; glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &test); std::cerr << test << '\n';
 #endif
     // Create screen object and G-Buffer
-    bebra::graphics::screenObject screen {
+    bebra::graphics::ScreenObject screen {
         windowWidth, windowHeight, 
-        bebra::graphics::shaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
+        bebra::graphics::ShaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
     };
 
     // Objects // TODO: texture manager
         // Creating skybox
-    craft::skybox skybox { bebra::graphics::shaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
+    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
-    bebra::graphics::shaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
-    craft::blockShaderApi blockShaderSet {blockShader};
-        //
-    GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;  // VBO & EBO is the same for every object
-    bebra::objects::plant::loadObject(VBO, plantVAO, EBO);
-    bebra::objects::block::loadObject(VBO, blockVAO, EBO);
-    bebra::objects::fluid::loadObject(VBO, fluidVAO, EBO);
+    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
+    craft::BlockShaderApi blockShaderSet {blockShader};
+        // Buffers
+    GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
+    bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
+    bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
+    bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
 
     // Load chunks
     auto chunk = craft::genChunk();
@@ -80,7 +80,7 @@ int main() {
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 
-        // Position calculation
+        // Position calculation // Todo: camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
         glm::mat4 view           = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
@@ -118,7 +118,7 @@ int main() {
                     
                     // Functor: Render single block of chunk
                     static std::function blockFunctor = [&](bebra::objects::chunkRow& row, int iBlock) {
-                        const bebra::objects::object* block = row.at(iBlock);
+                        const bebra::objects::Object* block = row.at(iBlock);
                         
                         // Check for visible
                         if (!block->texture.arraySize) return;

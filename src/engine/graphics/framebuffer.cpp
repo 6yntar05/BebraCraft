@@ -7,20 +7,20 @@
 namespace bebra {
 namespace graphics {
 
-// class gbuffer
-    void gbuffer::bind() {
+// class GBuffer
+    void GBuffer::bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.356, 0.6, 0.98, 1.0f);
     }
 
-    void gbuffer::unbind() {
+    void GBuffer::unbind() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    gbuffer::gbuffer(const uint width, const uint height) {
+    GBuffer::GBuffer(const uint width, const uint height) {
         glGenFramebuffers(1, &this->descriptor);
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
 
@@ -46,13 +46,13 @@ namespace graphics {
             std::cerr << "Error creating FBO\n";
     }
 
-    gbuffer::~gbuffer() {
+    GBuffer::~GBuffer() {
         GLuint toDelete[] = {color, normal, position};
         glDeleteFramebuffers(3, toDelete);
     }
 
-// class screenObject
-    void screenObject::render() const {
+// class ScreenObject
+    void ScreenObject::render() const {
         this->shader.use();
 
         glBindVertexArray(this->VAO);
@@ -77,10 +77,10 @@ namespace graphics {
         glEnable(GL_DEPTH_TEST);
     }
 
-    screenObject::screenObject(const uint width, const uint height, const graphics::shaderProgram shader)
+    ScreenObject::ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader)
         : shader(shader)
     {
-        this->gbuffer = new bebra::graphics::gbuffer {width, height};
+        this->gbuffer = new bebra::graphics::GBuffer {width, height};
 
         glGenVertexArrays(1, &this->VAO);
         glGenBuffers(1, &this->VBO);
@@ -94,7 +94,7 @@ namespace graphics {
         glBindVertexArray(0);
     }
 
-    screenObject::~screenObject() {
+    ScreenObject::~ScreenObject() {
         delete this->gbuffer;
 
         glDeleteVertexArrays(1, &this->VAO);

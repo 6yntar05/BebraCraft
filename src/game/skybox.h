@@ -8,18 +8,18 @@ namespace craft {
 
 class skybox { // TODO
   private:
-    bebra::graphics::shaderProgram shader;
-    craft::skyboxShaderApi shaderApi;
+    bebra::graphics::ShaderProgram shader;
+    craft::SkyboxShaderApi shaderApi;
     GLuint VBO;
     GLuint VAO;
     GLuint texture;
 
   public:
-    skybox(bebra::graphics::shaderProgram shader = {"shaders/skybox.vert", "shaders/skybox.frag"}) 
+    skybox(bebra::graphics::ShaderProgram shader = {"shaders/skybox.vert", "shaders/skybox.frag"}) 
         : shader(shader), shaderApi(shader)
     {
         bebra::graphics::loadObject(this->VBO, this->VAO);
-        this->texture = bebra::graphics::loadCubemap({
+        this->texture = bebra::graphics::loadCubemapTexture({
         "textures/skybox/ft.png",
         "textures/skybox/bk.png",
         "textures/skybox/up.png",

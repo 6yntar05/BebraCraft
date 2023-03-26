@@ -3,39 +3,39 @@
 
 namespace craft {
 
-// class skyboxShaderApi
-    void skyboxShaderApi::view(const glm::mat4 view) {
+// class SkyboxShaderApi
+    void SkyboxShaderApi::view(const glm::mat4 view) {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     }
-    void skyboxShaderApi::projection(const glm::mat4 projection) {
+    void SkyboxShaderApi::projection(const glm::mat4 projection) {
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     }
-    void skyboxShaderApi::worldTime(const double time) {
+    void SkyboxShaderApi::worldTime(const double time) {
         glUniform1f(worldTimeLoc, time);
     }
 
-    skyboxShaderApi::skyboxShaderApi(const bebra::graphics::shaderProgram shaderProgram)
+    SkyboxShaderApi::SkyboxShaderApi(const bebra::graphics::ShaderProgram shaderProgram)
     : program(shaderProgram) {
         viewLoc       = glGetUniformLocation(program.program, "view");
         projectionLoc = glGetUniformLocation(program.program, "projection");
         worldTimeLoc  = glGetUniformLocation(program.program, "worldTime");
     }
 
-//class blockShaderApi
-    void blockShaderApi::view(const glm::mat4 view) {
+//class BlockShaderApi
+    void BlockShaderApi::view(const glm::mat4 view) {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     }
-    void blockShaderApi::projection(const glm::mat4 projection) {
+    void BlockShaderApi::projection(const glm::mat4 projection) {
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     }
-    void blockShaderApi::worldTime(const double time) {
+    void BlockShaderApi::worldTime(const double time) {
         glUniform1f(worldTimeLoc, time);
     }
-    void blockShaderApi::model(const glm::mat4 model) {
+    void BlockShaderApi::model(const glm::mat4 model) {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     }
 
-    blockShaderApi:: blockShaderApi(const bebra::graphics::shaderProgram shaderProgram)
+    BlockShaderApi:: BlockShaderApi(const bebra::graphics::ShaderProgram shaderProgram)
     : program(shaderProgram) {
         viewLoc       = glGetUniformLocation(program.program, "view");
         projectionLoc = glGetUniformLocation(program.program, "projection");

@@ -6,10 +6,10 @@
 namespace bebra {
 namespace graphics {
 
-    class shader {
+    class Shader {
       public:
         // Nested type
-        enum shaderType {
+        enum ShaderType {
             evertex,
             egeometry,
             efragment,
@@ -18,15 +18,15 @@ namespace graphics {
 
         // Shader parameters
         GLuint blob;
-        const shaderType type;
+        const ShaderType type;
 
         // Service
-        shader() : type(enone) {}
-        shader(const shaderType type, const std::string path);
-        ~shader() { glDeleteShader(blob); }
+        Shader() : type(enone) {}
+        Shader(const ShaderType type, const std::string path);
+        ~Shader() { glDeleteShader(blob); }
     };
 
-    class shaderProgram {
+    class ShaderProgram {
       public:
         const GLuint program;
 
@@ -34,16 +34,16 @@ namespace graphics {
             glUseProgram(program); 
         }
 
-        shaderProgram(const std::string vertexPath, const std::string fragmentPath)
-        : shaderProgram(vertexPath, {}, fragmentPath) {}
+        ShaderProgram(const std::string vertexPath, const std::string fragmentPath)
+        : ShaderProgram(vertexPath, {}, fragmentPath) {}
 
-        shaderProgram(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
-        : shaderProgram({shader::evertex, vertexPath}, {shader::egeometry, geometryPath}, {shader::efragment, fragmentPath}) {}
+        ShaderProgram(const std::string vertexPath, const std::string geometryPath, const std::string fragmentPath)
+        : ShaderProgram({Shader::evertex, vertexPath}, {Shader::egeometry, geometryPath}, {Shader::efragment, fragmentPath}) {}
 
-        shaderProgram(const shader vertex, const shader fragment)
-        : shaderProgram(vertex, {}, fragment) {}
+        ShaderProgram(const Shader vertex, const Shader fragment)
+        : ShaderProgram(vertex, {}, fragment) {}
 
-        shaderProgram(const shader vertex, const shader geometry, const shader fragment);
+        ShaderProgram(const Shader vertex, const Shader geometry, const Shader fragment);
     };
 
 }

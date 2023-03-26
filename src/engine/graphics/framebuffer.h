@@ -10,7 +10,7 @@
 namespace bebra {
 namespace graphics {
 
-    class gbuffer {
+    class GBuffer {
       public:
         GLuint descriptor;
 
@@ -26,13 +26,13 @@ namespace graphics {
         void bind();
         void unbind();
 
-        gbuffer(const uint width, const uint height);
-        ~gbuffer();
+        GBuffer(const uint width, const uint height);
+        ~GBuffer();
     };
 
-    class screenObject {
+    class ScreenObject {
       private:
-        graphics::shaderProgram shader;
+        graphics::ShaderProgram shader;
 
         GLuint VBO;
         GLuint VAO;
@@ -49,12 +49,12 @@ namespace graphics {
         };
 
         // Service
-        bebra::graphics::gbuffer* gbuffer;
+        bebra::graphics::GBuffer* gbuffer;
         
         void render() const;
 
-        screenObject(const uint width, const uint height, const graphics::shaderProgram shader);
-        ~screenObject();
+        ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader);
+        ~ScreenObject();
     };
 
 }

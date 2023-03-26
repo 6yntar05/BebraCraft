@@ -8,7 +8,7 @@ namespace bebra {
 namespace graphics {
 
 // class shader
-    shader::shader(const shaderType type, const std::string path) 
+    Shader::Shader(const ShaderType type, const std::string path) 
     : type(path.size() == 0 ? type : enone)
     {
         if (type == enone) return;
@@ -53,13 +53,13 @@ namespace graphics {
         if (!success) {
             GLchar infoLog[512];
             glGetShaderInfoLog(blob, 512, NULL, infoLog);
-            std::cerr << "ERROR::SHADER::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog << '\n'
+            std::cerr << "ERROR::Shader::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog << '\n'
                 << "Ignoring..." << std::endl;
         }
     }
 
-// class shaderProgram
-    shaderProgram::shaderProgram(shader vertex, shader geometry, shader fragment)
+// class ShaderProgram
+    ShaderProgram::ShaderProgram(Shader vertex, Shader geometry, Shader fragment)
     : program( glCreateProgram() ) {
         // Shader program
         glAttachShader(program, vertex.blob);
@@ -71,7 +71,7 @@ namespace graphics {
         if (!success) {
             GLchar infoLog[512];
             glGetProgramInfoLog(program, 512, NULL, infoLog);
-            std::cerr << "ERROR::SHADER::program::LINKING_FAILED\n" << infoLog << '\n'
+            std::cerr << "ERROR::Shader::program::LINKING_FAILED\n" << infoLog << '\n'
                 << "Ignoring..." << std::endl;
         }
     }
