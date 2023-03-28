@@ -1,0 +1,11 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    //"C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
+    "clang.cxxflags": [
+        "-I/usr/include/freetype2"
+    ],
+    "C_Cpp.default.systemIncludePath": [
+        "/usr/include/freetype2"
+    ],
+    "mesonbuild.configureOnOpen": true
+}

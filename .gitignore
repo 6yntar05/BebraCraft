@@ -3,7 +3,6 @@ build*
 cmake-build-*
 .cache
 CMakeLists.txt.user
-.vscode
 .kdev4
 
 # Prerequisites

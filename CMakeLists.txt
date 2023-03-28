@@ -6,11 +6,11 @@ set(PROJECT_NAME BebraCraft)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(OpenGL_GL_PREFERENCE GLVND)
 
-add_compile_options(-Wall -Wextra -Wpedantic -Wno-unused-parameter -fdiagnostics-color=always -O3) # -fsanitize=undefined -fsanitize=address)
-# add_link_options(-fsanitize=undefined -fsanitize=address)
+add_compile_options(-I/usr/include/freetype2 -Wall -Wextra -Wpedantic -Wno-unused-parameter -fdiagnostics-color=always -O3)
+include_directories(/usr/include/freetype2 SYSTEM)
 
 project(${PROJECT_NAME} LANGUAGES ${PROG_LANG})
 file(GLOB_RECURSE SRCFILES "${SRC_DIR}/*.cpp")

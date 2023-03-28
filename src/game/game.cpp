@@ -2,6 +2,7 @@
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
 #include "engine/objects/objects.h"
+#include "engine/utils/font.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
@@ -37,7 +38,6 @@ int main(int argc, char* argv[]) {
     bebra::init(bebra::GApi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Create screen object and G-Buffer
     bebra::graphics::ScreenObject screen {
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     float speed  = 0.05f;
     
     while (window_running) { // Render cycle
-        worldTime += 0.001;
+        //worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
         handleInput(keyPressed, speed, yaw, pitch, window_running);
 

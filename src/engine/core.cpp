@@ -15,10 +15,12 @@
 namespace bebra {
 
 void init(const GApi gapi) {
+    SDL_DisplayMode displayMode;
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         std::cout << "[ERROR] SDL::INIT" << std::endl << SDL_GetError() << std::endl;
         throw std::exception();
     }
+    SDL_GetDesktopDisplayMode(0,&displayMode);
 
     switch (gapi) {
         case OpenGL:
@@ -62,10 +64,10 @@ SDL_Window* window(const std::string windowName, const uint windowWidth, const u
     // SDL hints
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     // -1 - Adaptive VSYNC, 
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(-1);
 
     // Creating window
     SDL_Window *window = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
