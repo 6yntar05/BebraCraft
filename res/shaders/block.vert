@@ -17,7 +17,7 @@ uniform mat4 view;
 uniform mat4 projection;
 out vec4 glPos;
 
-void main(void){
+void main(void) {
     // Calculate position
     gl_Position = projection * view * model * vec4(position, 1.0);
 

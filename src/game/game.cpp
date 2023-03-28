@@ -18,7 +18,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <stb/stb_image.h>
+#include <stb/stb_truetype.h>
 
 extern glm::vec3 cameraPos;
 extern glm::vec3 cameraFront;
@@ -27,7 +27,7 @@ glm::vec3 cameraPos   = glm::vec3(-2.0f, 8.0f, 6.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
-int main() {
+int main(int argc, char* argv[]) {
     // TODO: window resize
     unsigned int windowWidth = 1920;
     unsigned int windowHeight = 1080;
@@ -37,9 +37,8 @@ int main() {
     bebra::init(bebra::GApi::OpenGL);
     auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
     bebra::contextCreate(window, windowWidth, windowHeight);
-#ifdef DEVELOP
-    GLint test; glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &test); std::cerr << test << '\n';
-#endif
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     // Create screen object and G-Buffer
     bebra::graphics::ScreenObject screen {
         windowWidth, windowHeight, 
@@ -94,10 +93,7 @@ int main() {
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
         skybox.render(viewIdenpedent, projection, rawTime);
-#ifdef DEVELOP
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
-#endif
+        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
         { // Chunks render
             blockShader.use();
             blockShaderSet.model(model);
@@ -125,11 +121,8 @@ int main() {
 
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
-#ifdef DEVELOP
-                        model = glm::translate(model, { iBlock + 16*x, iLayer, iRow + 16*y });
-#else
+                        //model = glm::translate(model, { iBlock + 16*x, iLayer, iRow + 16*y });
                         model = glm::translate(model, { iBlock, iLayer, iRow });
-#endif
                         if (block->rotate != 0.0)
                             model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
                         blockShaderSet.model(model);
@@ -181,9 +174,6 @@ int main() {
         }
 
         // Render from G-Buffer
-#ifdef DEVELOP
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-#endif
         screen.gbuffer->unbind();
         screen.render();
 

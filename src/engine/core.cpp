@@ -14,7 +14,7 @@
 namespace bebra {
 
 void init(const GApi gapi) {
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         std::cout << "[ERROR] SDL::INIT" << std::endl << SDL_GetError() << std::endl;
         throw std::exception();
     }
@@ -22,7 +22,7 @@ void init(const GApi gapi) {
     switch (gapi) {
         case OpenGL:
             // Setting OpenGL version
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
             
@@ -34,9 +34,22 @@ void init(const GApi gapi) {
             SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
             SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
             SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
+            break;
+        
+        case OpenGLES:
+            // Setting OpenGLES version
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-            // Other SDL OpenGL attributes
-            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+            // Setting SDL buffers
+            SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
+            SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
+            SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
+            SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
+            SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
+            SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
             break;
 
         default:
@@ -80,12 +93,13 @@ void contextCreate(SDL_Window* const window, const uint windowWidth, const uint 
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Sometime earlier, without it, it was bad with textures
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Sometime earlier, without it, it was bad with textures
 
     if (nicest) {
         glEnable(GL_MULTISAMPLE);
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST );
-        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST );
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_LINE_SMOOTH);
     }
 }

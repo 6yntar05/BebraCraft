@@ -7,7 +7,8 @@ namespace bebra {
 
 enum GApi {
     OpenGL,
-    Vulkan, // long todo
+    OpenGLES, // TODO
+    Vulkan, // TODO
     None
 };
 

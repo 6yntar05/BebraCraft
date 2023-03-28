@@ -53,7 +53,7 @@ namespace graphics {
         if (!success) {
             GLchar infoLog[512];
             glGetShaderInfoLog(blob, 512, NULL, infoLog);
-            std::cerr << "ERROR::Shader::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog << '\n'
+            std::cerr << "ERROR::Shader::"<<shaderName<<"::COMPILATION_FAILED\n" << infoLog
                 << "Ignoring..." << std::endl;
         }
     }
@@ -71,7 +71,7 @@ namespace graphics {
         if (!success) {
             GLchar infoLog[512];
             glGetProgramInfoLog(program, 512, NULL, infoLog);
-            std::cerr << "ERROR::Shader::program::LINKING_FAILED\n" << infoLog << '\n'
+            std::cerr << "ERROR::Shader::program::LINKING_FAILED\n" << infoLog
                 << "Ignoring..." << std::endl;
         }
     }

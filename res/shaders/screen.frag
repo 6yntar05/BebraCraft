@@ -8,8 +8,6 @@ uniform sampler2D positionbuffer;
 
 out vec4 color;
 
-void main() {
-
+void main(void) {
     color = texture(colorbuffer, TexCoords);
-
 }

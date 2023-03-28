@@ -1,7 +1,5 @@
 #include "engine/graphics/cubemaps.h"
 
-#include <stb/stb_image.h>
-
 namespace bebra::graphics {
 
 void loadObject(GLuint& VBO, GLuint& VAO) {

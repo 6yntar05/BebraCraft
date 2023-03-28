@@ -25,8 +25,8 @@ const float camShadEase = 5.0;
 const float sideShading = 0.1;
 const float downShading = 0.2;
 
-void main(void){
-    color = texture(textureArray, vec3(TexCoord, vertexID/6));
+void main(void) {
+    color = texture(textureArray, vec3(TexCoord, (vertexID%36)/6)); // Use VAO texture indexes
     
     if (color.w < 0.001) discard; // Dirty 'hack'
 

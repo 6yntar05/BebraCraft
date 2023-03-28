@@ -12,19 +12,19 @@ class Plant : public Block {
     static constexpr float dsize = psize;
 
     static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
-        -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front halfinverted z
+       -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front halfinverted z
         psize,  dsize, psize,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
         psize, -0.5f,  psize,   0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
         psize,  dsize, psize,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
-        -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
-        -psize,  dsize,-psize,   0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+       -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+       -psize,  dsize,-psize,   0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
         
-        -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back halfinverted z
+       -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back halfinverted z
         psize, -0.5f, -psize,   0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
         psize,  dsize,-psize,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
         psize,  dsize,-psize,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
-        -psize,  dsize, psize,   0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
-        -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
+       -psize,  dsize, psize,   0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
+       -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
     };
 
     static constexpr GLuint indices[] = {
@@ -65,8 +65,7 @@ class Plant : public Block {
     static constexpr ObjIdent id = ObjIdent::eplant;
     Plant() : Block(id) {};
     Plant(ObjectTexture texture, float rotate = 0.0)
-        : Plant()
-    {
+    : Plant() {
         this->texture = texture;
         this->rotate = rotate;
     }

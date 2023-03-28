@@ -12,7 +12,7 @@ out vec3 Normal;
 out vec3 TexCoords;
 out vec4 glPos;
 
-void main() {
+void main(void) {
     TexCoords = aPos;
     gl_Position = projection * view * vec4(aPos, 1.0);
     gl_Position = gl_Position.xyww; // zbuffer optimisation (requies GL_EQUAL-like blend func)

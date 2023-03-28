@@ -17,7 +17,7 @@ out vec4 color;
 out vec4 normal;
 out vec4 position;
 
-void main() {
+void main(void) {
     color = texture(skybox, TexCoords);
 
     color = vec4(
