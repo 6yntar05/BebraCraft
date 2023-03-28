@@ -5,10 +5,10 @@ Students laboratory work. OpenGL C++ Minecraft (not)clone
 
 ## Installation
 ### Archlinux
-- `sudo pacman -S cmake gcc sdl2 glew glm stb`
+- `sudo pacman -S cmake gcc sdl2 sdl2_image glew glm`
 ### Debian/Ubuntu
 - `sudo apt update # && sudo apt upgrade`
-- `sudo apt install build-essential cmake extra-cmake-modules libopengl-dev libglx-dev libglu1-mesa-dev libglm-dev libglew-dev glew-utils libsdl2-dev libstb-dev`
+- `sudo apt install build-essential cmake extra-cmake-modules libopengl-dev libglx-dev libglu1-mesa-dev libglm-dev libglew-dev glew-utils libsdl2-dev`
 ### RaspberryPi
 - Look at 'raspberrypi' branch
 

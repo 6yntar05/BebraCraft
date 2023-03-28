@@ -8,6 +8,7 @@
 #include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_stdinc.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_image.h>
 
 #include "engine/core.h"
 
