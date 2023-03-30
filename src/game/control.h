@@ -1,10 +1,11 @@
 #pragma once
 
-#include <engine/input.h>
+#include "engine/camera.h"
+#include "engine/core.h"
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_video.h>
 #include <glm/glm.hpp>
+#include <list>
 
-extern glm::vec3 cameraPos;
-extern glm::vec3 cameraFront;
-extern glm::vec3 cameraUp;
-
-void handleInput(std::list<SDL_Keycode>& keyPressed, float& speed, float& yaw, float& pitch, bool& window_running);
+void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebra::Window& window, bool& isModeChanged);

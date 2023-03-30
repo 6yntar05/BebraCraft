@@ -8,19 +8,7 @@ namespace bebra {
 namespace graphics {
 
 // class GBuffer
-    void GBuffer::bind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.356, 0.6, 0.98, 1.0f);
-    }
-
-    void GBuffer::unbind() {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-
-    GBuffer::GBuffer(const uint width, const uint height) {
+    void GBuffer::init(const uint width, const uint height) {
         glGenFramebuffers(1, &this->descriptor);
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
 
@@ -40,15 +28,34 @@ namespace graphics {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);  
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
-
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE)
             std::cerr << "Error creating FBO\n";
     }
 
-    GBuffer::~GBuffer() {
-        GLuint toDelete[] = {color, normal, position};
-        glDeleteFramebuffers(3, toDelete);
+    void GBuffer::deinit() {
+        glGenFramebuffers(1, &this->descriptor);
+        glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
+    }
+
+    void GBuffer::bind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.356, 0.6, 0.98, 1.0f);
+    }
+
+    void GBuffer::unbind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    GBuffer::GBuffer(const uint width, const uint height) { this->init(width, height); }
+    GBuffer::~GBuffer() { this->deinit(); }
+
+    void GBuffer::updateMode(uint width, uint height) {
+        this->deinit();
+        this->init(width, height);
     }
 
 // class ScreenObject

@@ -2,7 +2,7 @@ project('BebraCraft', 'cpp')
 src_dir = 'src'
 
 compiller_args = ['-I/usr/include/freetype2', '-Wall', '-Wextra', '-Wpedantic', '-Wno-unused-parameter', '-fdiagnostics-color=always']
-linker_args = ['-lGL', '-lGLEW', '-lSDL2', '-lSDL2_image', '-lSDL2_ttf']
+linker_args = ['-lGL', '-lGLEW', '-lSDL2', '-lSDL2_image', '-lSDL2_ttf', '-lfreetype']
 
 if get_option('buildtype') == 'debug'
     compiller_args += ['-fsanitize=address', '-O0', '-g']

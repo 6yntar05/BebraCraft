@@ -1,5 +1,4 @@
 #pragma once
-
 #include "engine/graphics/textures.h"
 #include "engine/objects/block.h"
 

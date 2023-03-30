@@ -1,7 +1,8 @@
 #pragma once
-
-#include <string>
 #include <SDL2/SDL.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <string>
 
 namespace bebra {
 
@@ -12,15 +13,16 @@ enum GApi {
     None
 };
 
-struct window {
+struct Window {
     SDL_Window* itself;
     std::string windowName;
-    uint windowWidth;
-    uint windowHeight;
+    SDL_DisplayMode mode;
+    bool isRunning;
+
+    Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api);
 };
 
-void init(GApi);
-SDL_Window* window(const std::string windowName, const uint windowWidth, const uint windowHeight, const uint32_t properties_graphic_api);
-void contextCreate(SDL_Window* const window, const uint windowWidth, const uint windowHeight, const bool nicest = true);
+SDL_DisplayMode init(const GApi);
+void contextCreate(const Window& window, const bool nicest = true);
 
 }; // namespace bebra

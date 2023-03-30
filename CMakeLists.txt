@@ -20,6 +20,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 include_directories(src res libs)
-target_link_libraries(${PROJECT_NAME} GL GLEW SDL2 SDL2_image)
+target_link_libraries(${PROJECT_NAME} GL GLEW SDL2 SDL2_image freetype)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/res $<TARGET_FILE_DIR:${PROJECT_NAME}>/)

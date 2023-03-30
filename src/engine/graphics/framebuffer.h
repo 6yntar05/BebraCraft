@@ -22,12 +22,16 @@ namespace graphics {
       private:
         GLuint depth;   // RBO
 
-      public:
-        void bind();
-        void unbind();
+		void init(const uint width, const uint height);
+		void deinit();
 
+      public:
         GBuffer(const uint width, const uint height);
         ~GBuffer();
+        void updateMode(uint width, uint height);
+
+		void bind();
+        void unbind();
     };
 
     class ScreenObject {
@@ -52,6 +56,9 @@ namespace graphics {
         bebra::graphics::GBuffer* gbuffer;
         
         void render() const;
+        void updateMode(uint width, uint height) {
+            gbuffer->updateMode(width, height);
+        }
 
         ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader);
         ~ScreenObject();

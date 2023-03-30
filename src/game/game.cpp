@@ -1,8 +1,10 @@
+#include "engine/camera.h"
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
 #include "engine/objects/objects.h"
 #include "engine/utils/font.h"
+#include "engine/utils/glerrors.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
@@ -12,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <functional>
+#include <map>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -19,37 +22,27 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <stb/stb_truetype.h>
-
-extern glm::vec3 cameraPos;
-extern glm::vec3 cameraFront;
-extern glm::vec3 cameraUp;
-glm::vec3 cameraPos   = glm::vec3(-2.0f, 8.0f, 6.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 0.0f);
-glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
-
 int main(int argc, char* argv[]) {
-    // TODO: window resize
-    unsigned int windowWidth = 1920;
-    unsigned int windowHeight = 1080;
-    float window_aspect_ratio = float(windowWidth) / float(windowHeight);
+    // Init & Creating window
+    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL);
+    bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
+    bebra::contextCreate(window);
 
-    // Init
-    bebra::init(bebra::GApi::OpenGL);
-    auto window = bebra::window("BebraCraft", windowWidth, windowHeight, SDL_WINDOW_OPENGL);
-    bebra::contextCreate(window, windowWidth, windowHeight);
+    // Creating camera:
+    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
+    camera.speed = 0.05;
 
     // Create screen object and G-Buffer
+    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"}; // GL::ERROR::1281 -> INVALID_VALUE
     bebra::graphics::ScreenObject screen {
-        windowWidth, windowHeight, 
-        bebra::graphics::ShaderProgram {"shaders/screen.vert", "shaders/screen.frag"}
+        (uint)window.mode.w, (uint)window.mode.h, screenShader
     };
 
     // Objects // TODO: texture manager
         // Creating skybox
-    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
+    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // GL::ERROR::1281 -> INVALID_VALUE
         // Loading shaders
-    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
+    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"}; // GL::ERROR::1281 -> INVALID_VALUE
     craft::BlockShaderApi blockShaderSet {blockShader};
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
@@ -62,38 +55,47 @@ int main(int argc, char* argv[]) {
     int chunkSize = static_cast<int>(chunk.size());
 
     // Runtime vars
-        // SDL & Window
     std::list<SDL_Keycode> keyPressed;
-    bool window_running = true;
-        // Time
-    float worldTime = 0;
-    float rawTime   = 0;
-        // Camera
-    float yaw    = 0.0f;
-    float pitch  = 0.0f;
-    float fov    = 90.0f;
-    float speed  = 0.05f;
-    
-    while (window_running) { // Render cycle
+    float worldTime = 0.0, rawTime = 0.0;
+
+    // Load font
+    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
+    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
+
+    while (window.isRunning) { // Render cycle
+        // Calculate shadertime
         //worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
-        handleInput(keyPressed, speed, yaw, pitch, window_running);
+
+        // Handling input and window events
+        bool isModeChanged = false;
+        handleInput(keyPressed, camera, window, isModeChanged);
+        if (isModeChanged) {
+            screen.updateMode(window.mode.w, window.mode.h);
+            glViewport(0, 0, window.mode.w, window.mode.h);
+        }
 
         // Position calculation // Todo: camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-        glm::mat4 view           = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view           = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
         glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
-        glm::mat4 projection     = glm::perspective(glm::radians(fov), window_aspect_ratio, 0.1f, 300.0f); // 300 - render distance
+        glm::mat4 projection     = glm::perspective(
+                                        glm::radians(camera.fov),
+                                        float(window.mode.w) / float(window.mode.h),
+                                        0.1f, 300.0f
+                                    ); // 300 - render distance
+        glm::mat4 projectionFont = glm::ortho(0.0f, float(window.mode.w), 0.0f, float(window.mode.h));
+
         glm::vec3 direction;
-            direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-            direction.y = sin(glm::radians(pitch));
-            direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
+            direction.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+            direction.y = sin(glm::radians(camera.pitch));
+            direction.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+        camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
         skybox.render(viewIdenpedent, projection, rawTime);
-        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: fix CPU utilization
+        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: rewrite this shit
         { // Chunks render
             blockShader.use();
             blockShaderSet.model(model);
@@ -101,7 +103,7 @@ int main(int argc, char* argv[]) {
             blockShaderSet.projection(projection);
             blockShaderSet.worldTime(rawTime);
 
-            static auto cameraBlocksPos = glm::value_ptr(cameraPos);
+            static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
             /// Render chunk
             // Functor: Render single layer of chunk
@@ -177,7 +179,11 @@ int main(int argc, char* argv[]) {
         screen.gbuffer->unbind();
         screen.render();
 
-        SDL_GL_SwapWindow(window);
+        // Render HUD
+        text.render("BebraCraft pre-alpha-1", projectionFont, 10.0, float(window.mode.h) - float(std::max(text.width, text.height)) - 5.0);
+
+        bebra::utils::glHandleError(glGetError());
+        SDL_GL_SwapWindow(window.itself);
     }
 
     return 0;
