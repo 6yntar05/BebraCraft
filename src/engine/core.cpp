@@ -3,13 +3,13 @@
 
 #include <GL/glew.h>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_stdinc.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include <SDL_events.h>
+#include <SDL_keycode.h>
+#include <SDL_stdinc.h>
+#include <SDL_render.h>
+#include <SDL_image.h>
 
 #include "engine/core.h"
 
@@ -44,7 +44,7 @@ SDL_DisplayMode init(const GApi gapi) {
             SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
             SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
             SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0); // 2
             break;
         
         case OpenGLES:
@@ -75,10 +75,10 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     // SDL hints
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
 
-    // -1 - Adaptive VSYNC, 
-    SDL_GL_SetSwapInterval(-1);
+    // -1 - Adaptive VSYNC,
+    //SDL_GL_SetSwapInterval(0);
 
     // Creating window
     this->itself = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -93,7 +93,7 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
-void contextCreate(const Window& window, const bool nicest) {
+void glContextCreate(const Window& window, const bool nicest) {
     // Creating context itself
     SDL_GL_CreateContext(window.itself);
     glewInit();
@@ -105,7 +105,7 @@ void contextCreate(const Window& window, const bool nicest) {
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Sometime earlier, without it, it was bad with textures
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // For fonts rendering
 
     if (nicest) {
         glEnable(GL_MULTISAMPLE);

@@ -9,6 +9,9 @@ namespace graphics {
 
 // class GBuffer
     void GBuffer::init(const uint width, const uint height) {
+        this->width = width;
+        this->height = height;
+
         glGenFramebuffers(1, &this->descriptor);
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
 
@@ -59,11 +62,15 @@ namespace graphics {
     }
 
 // class ScreenObject
-    void ScreenObject::render() const {
+    void ScreenObject::render(bool renderHud) const {
+        // Shader and VAO
         this->shader.use();
-
+        glUniform1i(glGetUniformLocation(this->shader.program, "renderHUD"), renderHud);
+        glUniform1i(glGetUniformLocation(this->shader.program, "width"), this->gbuffer->width);
+        glUniform1i(glGetUniformLocation(this->shader.program, "height"), this->gbuffer->height);
         glBindVertexArray(this->VAO);
 
+        // Textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, this->gbuffer->color);
         // glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA, 1920, 1080, GL_TRUE); // TODO
@@ -77,6 +84,7 @@ namespace graphics {
         glBindTexture(GL_TEXTURE_2D, this->gbuffer->position);
         glUniform1i(glGetUniformLocation(this->shader.program, "positionbuffer"), 2);
 
+        // Render
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         glDrawArrays(GL_TRIANGLES, 0, 6);

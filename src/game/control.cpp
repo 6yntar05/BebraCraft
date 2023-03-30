@@ -1,12 +1,9 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keycode.h>
+#include "game/control.h"
+#include <SDL.h>
+#include <SDL_log.h>
 #include <algorithm>
 
-#include "game/control.h"
-
 void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebra::Window& window, bool& isModeChanged) {
-
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT)
@@ -17,6 +14,10 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
                 keyPressed.push_back(event.key.keysym.sym);
                 if (event.key.keysym.sym == SDLK_LCTRL)
                     camera.speed *= 3.0;
+                if (event.key.keysym.sym == SDLK_F2)
+                    window.debug.lines ^= true;
+                if (event.key.keysym.sym == SDLK_F1)
+                    window.debug.nohud ^= true;
             }
 
         } else if (event.type == SDL_KEYUP) {
@@ -34,7 +35,7 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
                 case SDL_WINDOWEVENT_RESIZED:
                     window.mode.w = event.window.data1;
                     window.mode.h = event.window.data2;
-                    SDL_Log("Window %d resized to %dx%d",
+                    SDL_Log ("Window %d resized to %dx%d",
                             event.window.windowID, event.window.data1,
                             event.window.data2);
                     break;
@@ -70,9 +71,7 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
     
     for (auto key : keyPressed) {
         switch (key) {
-            case SDLK_ESCAPE:
-                window.isRunning = false;
-                break;
+            case SDLK_ESCAPE: window.isRunning = false; break;
 
             case SDLK_w:
                 camera.pos += glm::normalize(
@@ -82,9 +81,6 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
                     ) * camera.speed;
                 break;
 
-            case SDLK_a:
-                camera.pos -= glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
-                break;
 
             case SDLK_s: //
                 camera.pos += glm::normalize(
@@ -94,36 +90,18 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
                     ) * camera.speed;
                 break;
 
-            case SDLK_d:
-                camera.pos += glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed;
-                break;
+            case SDLK_a: camera.pos -= glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed; break;
+            case SDLK_d: camera.pos += glm::normalize(glm::cross(camera.front, camera.up)) * camera.speed; break;
 
-            case SDLK_SPACE:
-                camera.pos[1] += camera.speed;
-                break;
-            
-            case SDLK_LSHIFT:
-                camera.pos[1] -= camera.speed;
-                break;
+            case SDLK_SPACE: camera.pos[1] += camera.speed; break;
+            case SDLK_LSHIFT: camera.pos[1] -= camera.speed; break;
 
-            case SDLK_UP:
-                camera.pitch += 2.0f;
-                break;
+            case SDLK_UP: camera.pitch += 2.0f; break;
+            case SDLK_LEFT: camera.yaw -= 2.0f; break;
+            case SDLK_DOWN: camera.pitch -= 2.0f; break;
+            case SDLK_RIGHT: camera.yaw += 2.0f; break;
 
-            case SDLK_LEFT:
-                camera.yaw -= 2.0f;
-                break;
-
-            case SDLK_DOWN:
-                camera.pitch -= 2.0f;
-                break;
-
-            case SDLK_RIGHT:
-                camera.yaw += 2.0f;
-                break;
-
-            default:
-                break;
+            default: break;
         }
     }
     if (camera.pitch > 89.0) camera.pitch = 89.0;

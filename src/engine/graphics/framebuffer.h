@@ -19,6 +19,9 @@ namespace graphics {
         GLuint normal;
         GLuint position;
 
+        uint width;
+        uint height;
+
       private:
         GLuint depth;   // RBO
 
@@ -55,7 +58,7 @@ namespace graphics {
         // Service
         bebra::graphics::GBuffer* gbuffer;
         
-        void render() const;
+        void render(bool renderHud = true) const;
         void updateMode(uint width, uint height) {
             gbuffer->updateMode(width, height);
         }

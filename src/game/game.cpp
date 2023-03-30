@@ -3,8 +3,8 @@
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
 #include "engine/objects/objects.h"
-#include "engine/utils/font.h"
 #include "engine/utils/glerrors.h"
+#include "engine/utils/font.h"
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
@@ -12,6 +12,7 @@
 #include "game/skybox.h"
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <functional>
 #include <map>
@@ -21,12 +22,15 @@
 #include <GL/glu.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <SDL_log.h>
 
 int main(int argc, char* argv[]) {
     // Init & Creating window
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL);
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
-    bebra::contextCreate(window);
+    bebra::glContextCreate(window);
+
+    SDL_LogDebug(SDL_LogCategory::SDL_LOG_CATEGORY_APPLICATION, "aboba");
 
     // Creating camera:
     bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
@@ -62,6 +66,7 @@ int main(int argc, char* argv[]) {
     bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
     bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
 
+    Uint64 start = SDL_GetPerformanceCounter();
     while (window.isRunning) { // Render cycle
         // Calculate shadertime
         //worldTime += 0.001;
@@ -74,6 +79,8 @@ int main(int argc, char* argv[]) {
             screen.updateMode(window.mode.w, window.mode.h);
             glViewport(0, 0, window.mode.w, window.mode.h);
         }
+        if (window.debug.lines)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         // Position calculation // Todo: camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -102,10 +109,8 @@ int main(int argc, char* argv[]) {
             blockShaderSet.view(view);
             blockShaderSet.projection(projection);
             blockShaderSet.worldTime(rawTime);
-
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
-            /// Render chunk
             // Functor: Render single layer of chunk
             static std::function layerFunctor = [&](bebra::objects::chunk& chunk, int iLayer) {
                 bebra::objects::chunkLayer& layer = chunk.at(iLayer);
@@ -176,15 +181,29 @@ int main(int argc, char* argv[]) {
         }
 
         // Render from G-Buffer
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         screen.gbuffer->unbind();
-        screen.render();
+        screen.render(!window.debug.nohud);
+
+        // Calculate frametime & FPS
+        auto end = SDL_GetPerformanceCounter();
+        float secondsElapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
+        start = end;
 
         // Render HUD
-        text.render("BebraCraft pre-alpha-1", projectionFont, 10.0, float(window.mode.h) - float(std::max(text.width, text.height)) - 5.0);
+        if (!window.debug.nohud) {
+            static std::function topOffset = [&](uint lineFromTop) {
+                return float(window.mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
+            };
+            text.render("Frametime: " + std::to_string(secondsElapsed * 1000.0f) + "ms", projectionFont, 10.0, topOffset(0));
+            text.render("BebraCraft pre-alpha-2", projectionFont, 10.0, topOffset(1));
+            text.render("Testchunk", projectionFont, 10.0, topOffset(2));
+        }
 
         bebra::utils::glHandleError(glGetError());
         SDL_GL_SwapWindow(window.itself);
     }
 
+    SDL_Quit();
     return 0;
 }

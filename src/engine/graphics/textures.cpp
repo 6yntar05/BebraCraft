@@ -1,6 +1,6 @@
 #include "engine/graphics/textures.h"
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_surface.h>
+#include <SDL_image.h>
 
 class Texture {
   private:

@@ -40,7 +40,7 @@ namespace craft {
         viewLoc       = glGetUniformLocation(program.program, "view");
         projectionLoc = glGetUniformLocation(program.program, "projection");
         worldTimeLoc  = glGetUniformLocation(program.program, "worldTime");
-        modelLoc = glGetUniformLocation(program.program, "model");
+        modelLoc      = glGetUniformLocation(program.program, "model");
     }
 
 }
