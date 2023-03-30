@@ -196,7 +196,7 @@ int main(int argc, char* argv[]) {
                 return float(window.mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
             };
             text.render("Frametime: " + std::to_string(secondsElapsed * 1000.0f) + "ms", projectionFont, 10.0, topOffset(0));
-            text.render("BebraCraft pre-alpha-2", projectionFont, 10.0, topOffset(1));
+            text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(1));
             text.render("Testchunk", projectionFont, 10.0, topOffset(2));
         }
 
