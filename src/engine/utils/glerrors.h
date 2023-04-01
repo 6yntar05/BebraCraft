@@ -1,5 +1,5 @@
 #pragma once
-
+#include <SDL_log.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string>

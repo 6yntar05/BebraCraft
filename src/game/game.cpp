@@ -1,3 +1,4 @@
+#include "SDL_video.h"
 #include "engine/camera.h"
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
@@ -29,8 +30,7 @@ int main(int argc, char* argv[]) {
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL);
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
     bebra::glContextCreate(window);
-
-    SDL_LogDebug(SDL_LogCategory::SDL_LOG_CATEGORY_APPLICATION, "aboba");
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 
     // Creating camera:
     bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
     float worldTime = 0.0, rawTime = 0.0;
+    float maxFrametime = 0.0;
 
     // Load font
     bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
@@ -68,6 +69,7 @@ int main(int argc, char* argv[]) {
 
     Uint64 start = SDL_GetPerformanceCounter();
     while (window.isRunning) { // Render cycle
+        uint chunkCallsCounter = 0;
         // Calculate shadertime
         //worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
@@ -79,10 +81,8 @@ int main(int argc, char* argv[]) {
             screen.updateMode(window.mode.w, window.mode.h);
             glViewport(0, 0, window.mode.w, window.mode.h);
         }
-        if (window.debug.lines)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        // Position calculation // Todo: camera class
+        // Position calculation // Todo: put into a camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
         glm::mat4 view           = glm::lookAt(camera.pos, camera.pos + camera.front, camera.up);
         glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
@@ -100,8 +100,13 @@ int main(int argc, char* argv[]) {
         camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
+        window.debug.nohud = false;
 		screen.gbuffer->bind();
         skybox.render(viewIdenpedent, projection, rawTime);
+
+        if (window.debug.lines)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
+
         //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: rewrite this shit
         { // Chunks render
             blockShader.use();
@@ -152,9 +157,10 @@ int main(int argc, char* argv[]) {
                             glDisable(GL_CULL_FACE);
                             glDrawArrays(GL_TRIANGLES, 0, 12);
                             glEnable(GL_CULL_FACE);
-                        } else
+                        } else {
                             glDrawArrays(GL_TRIANGLES, 0, 36);
-                        
+                        }
+                        chunkCallsCounter++;
                     };
                     // TODO: inverse for depth-test optimization
                     //-Y[->>Camera   ]+Y
@@ -187,7 +193,11 @@ int main(int argc, char* argv[]) {
 
         // Calculate frametime & FPS
         auto end = SDL_GetPerformanceCounter();
-        float secondsElapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
+        float Frametime = ((end - start) * 1000.0) / (float)SDL_GetPerformanceFrequency();
+        if (Frametime > maxFrametime)
+            maxFrametime = Frametime;
+        else
+            maxFrametime = ((maxFrametime * 50.0) + Frametime) / 51.0;
         start = end;
 
         // Render HUD
@@ -195,9 +205,15 @@ int main(int argc, char* argv[]) {
             static std::function topOffset = [&](uint lineFromTop) {
                 return float(window.mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
             };
-            text.render("Frametime: " + std::to_string(secondsElapsed * 1000.0f) + "ms", projectionFont, 10.0, topOffset(0));
-            text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(1));
-            text.render("Testchunk", projectionFont, 10.0, topOffset(2));
+
+            text.render("Frametime: " + std::to_string(Frametime) + "ms" +
+                        " / 2%Max: " + std::to_string(maxFrametime) + "ms",
+                        projectionFont, 10.0, topOffset(0));
+
+            text.render("Graphics calls: " + std::to_string(chunkCallsCounter), projectionFont, 10.0, topOffset(1));
+
+            text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
+            text.render("Testchunk", projectionFont, 10.0, topOffset(3));
         }
 
         bebra::utils::glHandleError(glGetError());

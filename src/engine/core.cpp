@@ -44,7 +44,7 @@ SDL_DisplayMode init(const GApi gapi) {
             SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE,   8);
             SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,  24);
             SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0); // 2
+            SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 2);
             break;
         
         case OpenGLES:
@@ -78,7 +78,7 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
 
     // -1 - Adaptive VSYNC,
-    //SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(0);
 
     // Creating window
     this->itself = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -93,9 +93,9 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
-void glContextCreate(const Window& window, const bool nicest) {
+SDL_GLContext glContextCreate(const Window& window, const bool nicest) {
     // Creating context itself
-    SDL_GL_CreateContext(window.itself);
+    SDL_GLContext context = SDL_GL_CreateContext(window.itself);
     glewInit();
 
     // Tuning context
@@ -114,6 +114,8 @@ void glContextCreate(const Window& window, const bool nicest) {
         glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_LINE_SMOOTH);
     }
+
+    return std::move(context);
 }
 
 }  // namespace bebra

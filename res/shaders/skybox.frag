@@ -25,8 +25,6 @@ void main(void) {
         color.w
     );
 
-    normal = vec4(Normal, 1.0);
-
     // G-Buffer filling
     normal = vec4(Normal, color.w);
     position = vec4(glPos.xyz, 0.0);

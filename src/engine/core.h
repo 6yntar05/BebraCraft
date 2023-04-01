@@ -26,10 +26,10 @@ struct Window {
     DebugVars debug;
 
     Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api);
-    ~Window() { SDL_DestroyWindow(itself); }
+    ~Window() { SDL_DestroyWindow(itself);}
 };
 
 SDL_DisplayMode init(const GApi);
-void glContextCreate(const Window& window, const bool nicest = true);
+SDL_GLContext glContextCreate(const Window& window, const bool nicest = true);
 
 }; // namespace bebra

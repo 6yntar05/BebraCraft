@@ -35,31 +35,10 @@ void handleInput(std::list<SDL_Keycode>& keyPressed, bebra::Camera& camera, bebr
                 case SDL_WINDOWEVENT_RESIZED:
                     window.mode.w = event.window.data1;
                     window.mode.h = event.window.data2;
-                    SDL_Log ("Window %d resized to %dx%d",
-                            event.window.windowID, event.window.data1,
-                            event.window.data2);
                     break;
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
                     window.mode.w = event.window.data1;
                     window.mode.h = event.window.data2;
-                    SDL_Log("Window %d size changed to %dx%d",
-                            event.window.windowID, event.window.data1,
-                            event.window.data2);
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    SDL_Log("Window %d gained keyboard focus",
-                            event.window.windowID);
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_LOST:
-                    SDL_Log("Window %d lost keyboard focus",
-                            event.window.windowID);
-                    break;
-                case SDL_WINDOWEVENT_ENTER:
-                    SDL_Log("Mouse entered window %d",
-                            event.window.windowID);
-                    break;
-                case SDL_WINDOWEVENT_LEAVE:
-                    SDL_Log("Mouse left window %d", event.window.windowID);
                     break;
                 case SDL_WINDOWEVENT_CLOSE:
                     SDL_Log("Exiting...");
