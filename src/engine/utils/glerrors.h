@@ -7,9 +7,9 @@
 
 namespace bebra::utils {
 
-inline void glHandleError(const GLenum errorCode) {
+inline std::string glHandleError(const GLenum errorCode) {
     if (!errorCode)
-        return;
+        return {};
 
     std::string error;
     switch (errorCode) {
@@ -21,7 +21,9 @@ inline void glHandleError(const GLenum errorCode) {
         case GL_OUT_OF_MEMORY: error = "OUT_OF_MEMORY"; break;
         case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
     }
-    std::cerr << "GL::ERROR::" << errorCode << " -> " << error << std::endl;
+    error = std::string("GL::ERROR::") + std::to_string(errorCode) + " -> " + error;
+    std::cerr << error << std::endl;
+    return error;
 }
 
 }

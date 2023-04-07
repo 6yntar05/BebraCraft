@@ -1,3 +1,4 @@
+#include <bits/types/struct_sched_param.h>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -31,6 +32,7 @@ namespace graphics {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);  
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE)
             std::cerr << "Error creating FBO\n";
@@ -62,6 +64,11 @@ namespace graphics {
     }
 
 // class ScreenObject
+    void ScreenObject::clear() const {
+        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
     void ScreenObject::render(bool renderHud) const {
         // Shader and VAO
         this->shader.use();
@@ -90,6 +97,11 @@ namespace graphics {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+    }
+
+    void ScreenObject::updateMode(uint width, uint height) {
+        gbuffer->updateMode(width, height);
+        glViewport(0, 0, width, height);
     }
 
     ScreenObject::ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader)

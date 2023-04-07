@@ -1,10 +1,10 @@
 #include <array>
 #include <vector>
-
 #include "game/demoChunkGen.h"
-
 #include "engine/objects/objects.h"
 #include "engine/graphics/textures.h"
+
+const std::string path = "textures/resourcepack/assets/minecraft/textures/block/";
 
 using namespace bebra;
 
@@ -16,115 +16,115 @@ objects::chunk genChunk() {
     // LOAD BLOCKS!
     /// Load textures
     objects::ObjectTexture furnaceTexture {{
-        "textures/blocks/furnace_front_on.png",
-        "textures/blocks/furnace_side.png",
-        "textures/blocks/furnace_side.png",
-        "textures/blocks/furnace_side.png",
-        "textures/blocks/furnace_top.png",
-        "textures/blocks/furnace_top.png"
+        path + "furnace_front_on.png",
+        path + "furnace_side.png",
+        path + "furnace_side.png",
+        path + "furnace_side.png",
+        path + "furnace_top.png",
+        path + "furnace_top.png"
     }};
     
     objects::ObjectTexture stoneTexture {
-        "textures/blocks/stone.png",
+        path + "stone.png",
     };
 
     objects::ObjectTexture dirtTexture {
-        "textures/blocks/dirt.png"
+        path + "dirt.png"
     };
 
     objects::ObjectTexture grassTexture {{
-        "textures/blocks/grass_side.png",
-        "textures/blocks/grass_side.png",
-        "textures/blocks/grass_side.png",
-        "textures/blocks/grass_side.png",
-        "textures/blocks/grass_top.png",
-        "textures/blocks/dirt.png"
+        path + "grass_block_side.png",
+        path + "grass_block_side.png",
+        path + "grass_block_side.png",
+        path + "grass_block_side.png",
+        path + "grass_block_top.png",
+        path + "dirt.png"
     }};
 
     objects::ObjectTexture glass_grayTexture {
-        "textures/blocks/glass_gray.png"
+        path + "gray_stained_glass.png"
     };
     
     objects::ObjectTexture glassTexture {
-        "textures/blocks/glass.png"
+        path + "glass.png"
     };
 
     objects::ObjectTexture leaves_oakTexture {
-        "textures/blocks/leaves_oak.png"
+        path + "oak_leaves.png"
     };
 
     objects::ObjectTexture tallgrassTexture {
-        "textures/blocks/tallgrass.png", 4
+        path + "grass.png", 4
     };
 
     objects::ObjectTexture stonebrickTexture {
-        "textures/blocks/stonebrick.png"
+        path + "stonebrick.png"
     };
 
     objects::ObjectTexture planks_big_oakTexture {
-        "textures/blocks/planks_big_oak.png"
+        path + "dark_oak_planks.png"
     };
 
     objects::ObjectTexture big_oakTexture {{
-        "textures/blocks/log_big_oak.png",
-        "textures/blocks/log_big_oak.png",
-        "textures/blocks/log_big_oak.png",
-        "textures/blocks/log_big_oak.png",
-        "textures/blocks/log_big_oak_top.png",
-        "textures/blocks/log_big_oak_top.png"
+        path + "dark_oak_log.png",
+        path + "dark_oak_log.png",
+        path + "dark_oak_log.png",
+        path + "dark_oak_log.png",
+        path + "dark_oak_log_top.png",
+        path + "dark_oak_log_top.png"
     }};
 
     objects::ObjectTexture planks_birchTexture {
-        "textures/blocks/planks_birch.png"
+        path + "birch_planks.png"
     };
 
     objects::ObjectTexture oakTexture {{
-        "textures/blocks/log_oak.png",
-        "textures/blocks/log_oak.png",
-        "textures/blocks/log_oak.png",
-        "textures/blocks/log_oak.png",
-        "textures/blocks/log_oak_top.png",
-        "textures/blocks/log_oak_top.png"
+        path + "oak_log.png",
+        path + "oak_log.png",
+        path + "oak_log.png",
+        path + "oak_log.png",
+        path + "oak_log_top.png",
+        path + "oak_log_top.png"
     }};
 
     objects::ObjectTexture jukeboxTexture {{
-        "textures/blocks/jukebox_side.png",
-        "textures/blocks/jukebox_side.png",
-        "textures/blocks/jukebox_side.png",
-        "textures/blocks/jukebox_side.png",
-        "textures/blocks/jukebox_top.png",
-        "textures/blocks/jukebox_side.png"
+        path + "jukebox_side.png",
+        path + "jukebox_side.png",
+        path + "jukebox_side.png",
+        path + "jukebox_side.png",
+        path + "jukebox_top.png",
+        path + "jukebox_side.png"
     }};
 
     objects::ObjectTexture glowstoneTexture {
-        "textures/blocks/glowstone.png"
+        path + "glowstone.png"
     };
 
     objects::ObjectTexture gravelTexture {
-        "textures/blocks/gravel.png"
+        path + "gravel.png"
     };
 
     objects::ObjectTexture crafting_tableTexture {{
-        "textures/blocks/crafting_table_front.png",
-        "textures/blocks/crafting_table_side.png",
-        "textures/blocks/crafting_table_side.png",
-        "textures/blocks/crafting_table_side.png",
-        "textures/blocks/crafting_table_top.png",
-        "textures/blocks/planks_birch.png"
+        path + "crafting_table_front.png",
+        path + "crafting_table_side.png",
+        path + "crafting_table_side.png",
+        path + "crafting_table_side.png",
+        path + "crafting_table_top.png",
+        path + "birch_planks.png"
     }};
 
     objects::ObjectTexture quartz_block_chiseledTexture {
-        "textures/blocks/quartz_block_chiseled.png"
+        path + "chiseled_quartz_block_top.png"
     };
 
     objects::ObjectTexture waterTexture {
-        "textures/blocks/water.png"
+        path + "water_still.png"
     };
 
-    objects::ObjectTexture iron_oreTexture { "textures/blocks/iron_ore.png" };
-    objects::ObjectTexture gold_oreTexture { "textures/blocks/gold_ore.png" };
-    objects::ObjectTexture diamond_oreTexture { "textures/blocks/diamond_ore.png" };
-    objects::ObjectTexture coal_oreTexture { "textures/blocks/coal_ore.png" };
+    objects::ObjectTexture iron_oreTexture { path + "iron_ore.png" };
+    objects::ObjectTexture gold_oreTexture { path + "gold_ore.png" };
+    objects::ObjectTexture diamond_oreTexture { path + "diamond_ore.png" };
+    objects::ObjectTexture coal_oreTexture { path + "coal_ore.png" };
 
     /// Create blocks object
     objects::Block* furnaceBlock1 = new objects::Block { furnaceTexture, -90.0f };
