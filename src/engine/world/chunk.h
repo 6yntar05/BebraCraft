@@ -15,7 +15,7 @@ using chunk = std::vector<chunkLayer>;
 class Chunk {
   private:
     // Raw data:
-    chunk rawChunk;             // Maybe pointer or function to worldmap
+    const chunk* const rawChunk;            // Source data
 
     // Loading params:
     static constexpr uint quantHeight = 16; // split chunk by height and gen mesh for every piece
@@ -31,12 +31,29 @@ class Chunk {
     Mesh meshSolid;             // Be drawn first
     Mesh meshTransparent;       // ... second
     Mesh meshSemitransparent;   // ... third
-    int x;
-    int y;
+    const int x;
+    const int y;
 
     // Service
-    Chunk() {}
-    void meshGen() {}
+    void meshGen() { // simple for now
+		for (uint iLayer = 0; iLayer < rawChunk->size(); iLayer++) {
+			auto& layer = rawChunk->at(iLayer);
+			for (uint iRow = 0; iRow < layer.size(); iRow++) {
+				auto& row = layer.at(iRow);
+				for (uint iObj = 0; iObj < row.size(); iObj++) {
+					auto& obj = row.at(iObj);
+					if (obj->id == bebra::objects::ObjIdent::eblock)
+						meshSolid.appendObject(obj); // TODO: change object VBOs
+
+				}
+			}
+		}
+    }
+
+    Chunk(const chunk* const rawChunk, const int x, const int y)
+	: rawChunk(rawChunk), x(x), y(y) {
+        meshGen();
+    }
 };
 
 } // namespace bebra::objects

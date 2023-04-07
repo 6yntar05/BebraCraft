@@ -44,7 +44,11 @@ int main(int argc, char* argv[]) {
         (uint)window.mode.w, (uint)window.mode.h, screenShader
     };
 
-    // Objects // TODO: texture manager
+    // Loading font
+    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
+    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
+
+    // Objects
         // Creating skybox
     craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // FIXME GL::ERROR::1281 -> INVALID_VALUE
         // Loading shaders
@@ -56,26 +60,27 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
 
-    // Loading font
-    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
-    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
-
     // Loading chunks
     auto chunk = craft::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
 
     // Mesh test...
     bebra::objects::Mesh testmesh;
-    testmesh.move({10.0, 10.0, 10.0});
-    bebra::objects::Mesh testmesh2;
-    testmesh += testmesh2;
+    for (int x = 0; x < 16; x++) {
+        for (int y = 0; y < 16; y++) {
+            testmesh.move({0.0, 0.0, 16.0});
+            bebra::objects::Mesh testmesh2;
+            testmesh += testmesh2;
+        }
+        testmesh.move({16.0, 0.0, -16*16.0});
+    }
 
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
     float worldTime = 0.0, rawTime = 0.0;
     float maxFrametime = 0.0;
+    auto start = SDL_GetPerformanceCounter();
 
-    Uint64 start = SDL_GetPerformanceCounter();
     while (window.isRunning) { // Render cycle
         uint chunkCallsCounter = 0;
         // Calculate shadertime

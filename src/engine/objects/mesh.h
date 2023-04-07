@@ -1,4 +1,5 @@
 #pragma once
+#include "engine/objects/base.h"
 #include <new>
 #include <vector>
 #include <GL/glew.h>
@@ -126,11 +127,15 @@ class Mesh {
 		setupMesh(); //
 	}
 
-    void operator+= (Mesh another) {
+    void operator+=(Mesh another) {
 		vertices.insert(vertices.end(), another.vertices.begin(), another.vertices.end());
 		indices.insert(indices.end(), another.indices.begin(), another.indices.end());
 		textures.insert(textures.end(), another.textures.begin(), another.textures.end());
 		setupMesh(); //
+	}
+
+	void appendObject(bebra::objects::Object* obj) {
+		// TODO change objects
 	}
 };
 
