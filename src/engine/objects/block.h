@@ -6,51 +6,51 @@ namespace bebra::objects {
 
 class Block : public Object {
     public:
-    static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
-       -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front
-        0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
-       -0.5f,  0.5f, -0.5f,   0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+    static constexpr std::array<Vertex,36> vertices = {{
+		{{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}}, // Front
+		{{0.5f,  0.5f, -0.5f},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
+		{{0.5f, -0.5f, -0.5f},   {0.0f,  0.0f, -1.0f},   {1.0f, 0.0f}},
+		{{0.5f,  0.5f, -0.5f},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
+		{{-0.5f, -0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}},
+		{{-0.5f,  0.5f, -0.5f},  { 0.0f,  0.0f, -1.0f},   {0.0f, 1.0f}},
+		
+		{{-0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},   {0.0f, 0.0f}}, // Back
+		{{0.5f, -0.5f,  0.5f},   {0.0f,  0.0f,  1.0f},   {1.0f, 0.0f}},
+		{{0.5f,  0.5f,  0.5f},   {0.0f,  0.0f,  1.0f},   {1.0f, 1.0f}},
+		{{0.5f,  0.5f,  0.5f},   {0.0f,  0.0f,  1.0f},   {1.0f, 1.0f}},
+		{{-0.5f,  0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},   {0.0f, 1.0f}},
+		{{-0.5f, -0.5f,  0.5f},  { 0.0f,  0.0f,  1.0f},   {0.0f, 0.0f}},
 
-       -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back
-        0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
-       -0.5f,  0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
-       -0.5f, -0.5f,  0.5f,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
+		{{0.5f,  0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},   {0.0f, 1.0f}}, // Left
+		{{0.5f, -0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},   {1.0f, 0.0f}},
+		{{0.5f,  0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},   {1.0f, 1.0f}},
+		{{0.5f, -0.5f, -0.5f},  {-1.0f,  0.0f,  0.0f},   {1.0f, 0.0f}},
+		{{0.5f,  0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},   {0.0f, 1.0f}},
+		{{0.5f, -0.5f,  0.5f},  {-1.0f,  0.0f,  0.0f},   {0.0f, 0.0f}},
 
-        0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 1.0f, // Left
-        0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+		{{-0.5f,  0.5f,  0.5f},   {1.0f,  0.0f,  0.0f},   {0.0f, 1.0f}}, // Right
+		{{-0.5f,  0.5f, -0.5f},   {1.0f,  0.0f,  0.0f},   {1.0f, 1.0f}},
+		{{-0.5f, -0.5f, -0.5f},   {1.0f,  0.0f,  0.0f},   {1.0f, 0.0f}},
+		{{-0.5f, -0.5f, -0.5f},   {1.0f,  0.0f,  0.0f},   {1.0f, 0.0f}},
+		{{-0.5f, -0.5f,  0.5f},   {1.0f,  0.0f,  0.0f},   {0.0f, 0.0f}},
+		{{-0.5f,  0.5f,  0.5f},   {1.0f,  0.0f,  0.0f},   {0.0f, 1.0f}},
 
-       -0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 1.0f, // Right
-       -0.5f,  0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
-       -0.5f, -0.5f, -0.5f,   1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
-       -0.5f, -0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
-       -0.5f,  0.5f,  0.5f,   1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+		{{-0.5f,  0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},   {0.0f, 1.0f}}, // Up
+		{{0.5f,  0.5f,  0.5f},   {0.0f, -1.0f,  0.0f},   {1.0f, 0.0f}},
+		{{0.5f,  0.5f, -0.5f},   {0.0f, -1.0f,  0.0f},   {1.0f, 1.0f}},
+		{{0.5f,  0.5f,  0.5f},   {0.0f, -1.0f,  0.0f},   {1.0f, 0.0f}},
+		{{-0.5f,  0.5f, -0.5f},  { 0.0f, -1.0f,  0.0f},   {0.0f, 1.0f}},
+		{{-0.5f,  0.5f,  0.5f},  { 0.0f, -1.0f,  0.0f},   {0.0f, 0.0f}},
 
-       -0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f, // Up
-        0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
-       -0.5f,  0.5f, -0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
-       -0.5f,  0.5f,  0.5f,   0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
+		{{-0.5f, -0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  { 0.0f, 1.0f}}, // Down
+		{{0.5f, -0.5f, -0.5f},   {0.0f,  1.0f,  0.0f},   {1.0f, 1.0f}},
+		{{0.5f, -0.5f,  0.5f},   {0.0f,  1.0f,  0.0f},   {1.0f, 0.0f}},
+		{{0.5f, -0.5f,  0.5f},   {0.0f,  1.0f,  0.0f},   {1.0f, 0.0f}},
+		{{-0.5f, -0.5f,  0.5f},  { 0.0f,  1.0f,  0.0f},  { 0.0f, 0.0f}},
+		{{-0.5f, -0.5f, -0.5f},  { 0.0f,  1.0f,  0.0f},  { 0.0f, 1.0f}}
+	}};
 
-       -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f, // Down
-        0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
-       -0.5f, -0.5f,  0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
-       -0.5f, -0.5f, -0.5f,   0.0f,  1.0f,  0.0f,   0.0f, 1.0f,
-    };
-
-    static constexpr GLuint indices[] = {
+    static constexpr std::array<GLuint,6> indices = {
         0, 1, 3, // First Poly
         1, 2, 3  // Second Poly
     };
@@ -64,10 +64,10 @@ class Block : public Object {
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(bebra::objects::Block::verticies), bebra::objects::Block::verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, Block::verticies.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(bebra::objects::Block::indices), bebra::objects::Block::indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, Block::indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
         // Position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);

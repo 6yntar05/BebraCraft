@@ -11,26 +11,21 @@ class Plant : public Block {
     static constexpr float psize = 0.5f / M_SQRT2;
     static constexpr float dsize = psize;
 
-    static constexpr float verticies[] = { //Coords(3), Normal(3), TexturesPos(2)
-       -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f, // Front halfinverted z
-        psize,  dsize, psize,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
-        psize, -0.5f,  psize,   0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
-        psize,  dsize, psize,   0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
-       -psize, -0.5f, -psize,   0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
-       -psize,  dsize,-psize,   0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+    static constexpr std::array<Vertex,12> vertices = {{
+       {{-psize, -0.5f, -psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}}, // Front halfinverted z
+       {{ psize,  dsize, psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
+       {{ psize, -0.5f,  psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 0.0f}},
+       {{ psize,  dsize, psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
+       {{-psize, -0.5f, -psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}},
+       {{-psize,  dsize,-psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 1.0f}},
         
-       -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f, // Back halfinverted z
-        psize, -0.5f, -psize,   0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
-        psize,  dsize,-psize,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
-        psize,  dsize,-psize,   0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
-       -psize,  dsize, psize,   0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
-       -psize, -0.5f,  psize,   0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
-    };
-
-    static constexpr GLuint indices[] = {
-        0, 1, 3, // First Poly
-        1, 2, 3  // Second Poly
-    };
+       {{-psize, -0.5f,  psize},   {0.0f,  0.0f,  1.0f},   {0.0f, 0.0f}}, // Back halfinverted z
+       {{ psize, -0.5f, -psize},   {0.0f,  0.0f,  1.0f},   {1.0f, 0.0f}},
+       {{ psize,  dsize,-psize},   {0.0f,  0.0f,  1.0f},   {1.0f, 1.0f}},
+       {{ psize,  dsize,-psize},   {0.0f,  0.0f,  1.0f},   {1.0f, 1.0f}},
+       {{-psize,  dsize, psize},   {0.0f,  0.0f,  1.0f},   {0.0f, 1.0f}},
+       {{-psize, -0.5f,  psize},   {0.0f,  0.0f,  1.0f},   {0.0f, 0.0f}},
+    }};
 
     // Render
     static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
@@ -41,10 +36,10 @@ class Plant : public Block {
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(bebra::objects::Plant::verticies), bebra::objects::Plant::verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verticies.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(bebra::objects::Plant::indices), bebra::objects::Plant::indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, Block::indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
         // Position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -14,6 +15,12 @@
 #include <engine/graphics/textures.h>
 
 namespace bebra::objects {
+
+struct Vertex {
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+};
 
 enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...
     ebase,
@@ -44,8 +51,8 @@ struct ObjectTexture {
 class Object {
     public:
     // Structure and textures
-    static constexpr float verticies[] = {{}};
-    static constexpr GLuint indices[] = {{}};
+    static constexpr std::array<Vertex,36> verticies = {};
+    static constexpr std::array<GLuint,6> indices = {};
     ObjectTexture texture;
 
     // Position
