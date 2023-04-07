@@ -9,13 +9,13 @@ namespace craft {
     class BlockShaderApi  {
       private:
         bebra::graphics::ShaderProgram program;
-	    GLint viewLoc;
+	      GLint viewLoc;
         GLint projectionLoc;
         GLint worldTimeLoc;
         GLint modelLoc;
 
       public:
-	    void view(const glm::mat4 view);
+	      void view(const glm::mat4 view);
         void projection(const glm::mat4 projection);
         void worldTime(const double time);
         void model(const glm::mat4 model);
@@ -34,6 +34,12 @@ namespace craft {
         void view(const glm::mat4 view);
         void projection(const glm::mat4 projection);
         void worldTime(const double time);
+
+        void setData(const glm::mat4& view, const glm::mat4& projection, const double time) {
+            this->view(view);
+            this->projection(projection);
+            this->worldTime(time);
+        } // TODO: use this
 
         SkyboxShaderApi(const bebra::graphics::ShaderProgram shaderProgram);
     };

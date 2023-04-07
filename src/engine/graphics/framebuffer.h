@@ -58,10 +58,9 @@ namespace graphics {
         // Service
         bebra::graphics::GBuffer* gbuffer;
         
+        void clear() const;
         void render(bool renderHud = true) const;
-        void updateMode(uint width, uint height) {
-            gbuffer->updateMode(width, height);
-        }
+        void updateMode(uint width, uint height);
 
         ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader);
         ~ScreenObject();

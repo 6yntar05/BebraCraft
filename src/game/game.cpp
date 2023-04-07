@@ -7,6 +7,8 @@
 #include "engine/utils/glerrors.h"
 #include "engine/utils/font.h"
 
+#include "engine/objects/mesh.h"
+
 #include "game/demoChunkGen.h"
 #include "game/control.h"
 #include "game/shaders.h"
@@ -26,27 +28,27 @@
 #include <SDL_log.h>
 
 int main(int argc, char* argv[]) {
-    // Init & Creating window
+    // Initialization & Creating window
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL);
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
     bebra::glContextCreate(window);
     SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 
-    // Creating camera:
+    // Creating camera in postision:
     bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
     camera.speed = 0.05;
 
-    // Create screen object and G-Buffer
-    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"}; // GL::ERROR::1281 -> INVALID_VALUE
+    // Creating screen object and G-Buffer
+    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
     bebra::graphics::ScreenObject screen {
         (uint)window.mode.w, (uint)window.mode.h, screenShader
     };
 
     // Objects // TODO: texture manager
         // Creating skybox
-    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // GL::ERROR::1281 -> INVALID_VALUE
+    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // FIXME GL::ERROR::1281 -> INVALID_VALUE
         // Loading shaders
-    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"}; // GL::ERROR::1281 -> INVALID_VALUE
+    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
     craft::BlockShaderApi blockShaderSet {blockShader};
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
@@ -54,18 +56,24 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
 
-    // Load chunks
+    // Loading font
+    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
+    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
+
+    // Loading chunks
     auto chunk = craft::genChunk();
     int chunkSize = static_cast<int>(chunk.size());
+
+    // Mesh test...
+    bebra::objects::Mesh testmesh;
+    testmesh.move({10.0, 10.0, 10.0});
+    bebra::objects::Mesh testmesh2;
+    testmesh += testmesh2;
 
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
     float worldTime = 0.0, rawTime = 0.0;
     float maxFrametime = 0.0;
-
-    // Load font
-    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
-    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
 
     Uint64 start = SDL_GetPerformanceCounter();
     while (window.isRunning) { // Render cycle
@@ -77,10 +85,9 @@ int main(int argc, char* argv[]) {
         // Handling input and window events
         bool isModeChanged = false;
         handleInput(keyPressed, camera, window, isModeChanged);
-        if (isModeChanged) {
+
+        if (isModeChanged)
             screen.updateMode(window.mode.w, window.mode.h);
-            glViewport(0, 0, window.mode.w, window.mode.h);
-        }
 
         // Position calculation // Todo: put into a camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -100,14 +107,15 @@ int main(int argc, char* argv[]) {
         camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
-        window.debug.nohud = false;
 		screen.gbuffer->bind();
+        screen.clear();
         skybox.render(viewIdenpedent, projection, rawTime);
 
         if (window.debug.lines)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
 
-        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // TODO: rewrite this shit
+        // TODO: chunks loader -> mesh
+        //for (int x = 0; x < 16; x++) for (int y = 0; y < 16; y++) // CALLS OVERHEAD
         { // Chunks render
             blockShader.use();
             blockShaderSet.model(model);
@@ -147,7 +155,7 @@ int main(int argc, char* argv[]) {
                             default: { glBindVertexArray(blockVAO); break; }
                         }
 
-                        // TODO: texture sets manager, non-cringe alpha blending, instance manager, multithreading
+                        // TODO: texture sets manager
                         GLint textureSlot = GL_TEXTURE31;
                         GLint textureSlotIndex = 31; // < Max texture slots
                         glActiveTexture(textureSlot + textureSlotIndex);
@@ -158,9 +166,13 @@ int main(int argc, char* argv[]) {
                             glDrawArrays(GL_TRIANGLES, 0, 12);
                             glEnable(GL_CULL_FACE);
                         } else {
-                            glDrawArrays(GL_TRIANGLES, 0, 36);
+                            //glDrawArrays(GL_TRIANGLES, 0, 36);
                         }
                         chunkCallsCounter++;
+
+                        // Mesh test:
+                        testmesh.render();
+
                     };
                     // TODO: inverse for depth-test optimization
                     //-Y[->>Camera   ]+Y
@@ -209,9 +221,7 @@ int main(int argc, char* argv[]) {
             text.render("Frametime: " + std::to_string(Frametime) + "ms" +
                         " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                         projectionFont, 10.0, topOffset(0));
-
             text.render("Graphics calls: " + std::to_string(chunkCallsCounter), projectionFont, 10.0, topOffset(1));
-
             text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
             text.render("Testchunk", projectionFont, 10.0, topOffset(3));
         }

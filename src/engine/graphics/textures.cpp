@@ -1,62 +1,36 @@
 #include "engine/graphics/textures.h"
-#include <SDL_surface.h>
-#include <SDL_image.h>
 
-class Texture {
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
+class Texture { // todo: not texture
   private:
-    SDL_Surface* const surface;
-    unsigned char** pixels;
-    const bool isFlipped;
-    unsigned char* buffer; bool isBufferAllocated = false;  // For texture flipping
+    unsigned char* image;
 
   public:
-    uint width;
-    uint height;
+    int width;
+    int height;
     int mode;
 
-    unsigned char* getData(const bool flipped = false) {
-        if (flipped ^ isFlipped) {
-            uint channels = ((mode==GL_RGBA)?4:3);  // Color channels
-
-            if (isBufferAllocated)  // Allocation check
-                delete[] buffer;
-            this->buffer = new unsigned char[width*height*channels];
-            this->isBufferAllocated = true;
-            
-            for (uint h = 0; h < height; h++)
-                for (uint w = 0; w < width; w++)
-                    for (uint c = 0; c < channels; c++)
-                        buffer [        // to:
-                            h*(width*channels) +        // Vertical
-                            w*(channels) +              // Horisontal
-                            c                           // Channel
-                        ] = (*pixels) [ // from:
-                            (height-h-1)*(width*channels) + // Vertical (flipped)
-                            w*(channels) +              // Horisontal
-                            c                           // Channel
-                        ];
-
-            return buffer;
-        }
-        return *pixels;
+    unsigned char* getData() {
+        return image;
     }
 
-    Texture(const std::string path, const bool flipped = false)
-    : surface(IMG_Load(path.c_str())), isFlipped(flipped) {
-        this->pixels = new unsigned char* (static_cast<unsigned char*>(surface->pixels));
-        this->width = surface->w;
-        this->height = surface->h;
-        if (surface->format->BytesPerPixel == 4)
+    Texture(const std::string path, const bool flip = true) {
+        if (flip)
+            stbi_set_flip_vertically_on_load(true);
+        // Mode
+        int channels;
+        this->image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+        if (channels >= 4)
             mode = GL_RGBA;
         else
             mode = GL_RGB;
+            // GL_RED
     }
 
     ~Texture() {
-        delete this->pixels;
-        if (isBufferAllocated)
-            delete[] buffer;
-        SDL_FreeSurface(surface);
+        stbi_image_free(image);
     }
 };
 
@@ -151,7 +125,7 @@ void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes) 
     glBindTexture(GL_TEXTURE_CUBE_MAP, *texture);
 
     for (unsigned int i = 0; i < pathes.size(); i++) {
-        Texture image {pathes.at(i)};
+        Texture image {pathes.at(i), false};
         glTexImage2D(
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0,
             image.mode, image.width, image.height,

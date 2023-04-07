@@ -48,7 +48,7 @@ SDL_DisplayMode init(const GApi gapi) {
             break;
         
         case OpenGLES:
-            // Setting OpenGLES version
+            // Setting OpenGL ES version
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
