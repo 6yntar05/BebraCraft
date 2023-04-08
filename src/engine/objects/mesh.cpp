@@ -2,12 +2,12 @@
 
 namespace bebra::objects {
 // class Mesh:
-void Mesh::bindBuffers() {
+void Mesh::bindBuffers() const{
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 }
-void Mesh::unbindBuffers() {
+void Mesh::unbindBuffers() const {
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
