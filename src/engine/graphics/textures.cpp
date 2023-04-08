@@ -1,7 +1,7 @@
 #include "engine/graphics/textures.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 class Texture { // todo: not texture
   private:

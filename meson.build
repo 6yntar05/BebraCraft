@@ -1,7 +1,11 @@
 project('BebraCraft', 'cpp')
 src_dir = 'src'
 
-compiller_args = ['-I/usr/include/freetype2', '-I/usr/include/SDL2', '-Wall', '-Wextra', '-Wpedantic', '-Wno-unused-parameter', '-fdiagnostics-color=always']
+compiller_args = ['-I/usr/include/freetype2', '-I/usr/include/SDL2',
+    '-Wall', '-Wextra', '-Wpedantic',
+    '-Wno-unused-parameter', '-Wno-missing-field-initializers',
+    '-fdiagnostics-color=always']
+
 linker_args = ['-lGL', '-lGLEW', '-lSDL2', '-lSDL2_image', '-lSDL2_ttf', '-lfreetype']
 
 if get_option('buildtype') == 'debug'
@@ -26,6 +30,8 @@ executable(
     include_directories: [
         src_dir,
         'res',
+        'libs',
+        'libs/tinygltf'
     ],
 
     link_args: linker_args,

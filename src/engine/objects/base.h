@@ -51,8 +51,8 @@ struct ObjectTexture {
 class Object {
     public:
     // Structure and textures
-    static constexpr std::array<Vertex,36> vertices = {};
-    static constexpr std::array<GLuint,6> indices = {};
+    static constexpr std::array<Vertex,24> vertices = {};
+    static constexpr std::array<GLuint,36> indices = {};
     ObjectTexture texture;
 
     // Position

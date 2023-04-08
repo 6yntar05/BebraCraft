@@ -4,6 +4,7 @@
 #include "engine/graphics/framebuffer.h"
 #include "engine/objects/block.h"
 #include "engine/objects/objects.h"
+#include "engine/objects/model.h"
 #include "engine/utils/glerrors.h"
 #include "engine/utils/font.h"
 
@@ -57,8 +58,44 @@ int main(int argc, char* argv[]) {
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
     bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
-    bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
     bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
+    bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
+
+    // Test models:
+    /*
+    bebra::objects::Model senko {"./senko.gltf"}; // :з
+    std::cout << "Images: " << senko.model.images.size() << '\n';
+    tinygltf::Image texture = senko.model.images.at(0);
+    std::cout << 
+        "\nScenes: " << senko.model.scenes.at(0).nodes.at(0) <<
+        "\nNodes: " << senko.model.nodes.size() <<
+        "\nMeshes: " << senko.model.meshes.size() << '\n';
+    for (tinygltf::Node& node : senko.model.nodes) {
+        if (node.mesh == -1) continue;
+        std::cout << node.name << '\n';
+        for (tinygltf::Primitive& primitive : senko.model.meshes.at(node.mesh).primitives) {
+            for (auto& i : primitive.attributes) {
+                std::cout << '\t' << i.first << '|' << i.second << '\n';
+                tinygltf::Accessor accessor = senko.model.accessors.at(i.second);
+                tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
+
+                const float* data = reinterpret_cast<const float*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
+                for (size_t k = 0; k < accessor.count; k++) {
+                    if (accessor.type == 3) {
+                        std::cout << "(" << data[k * 3 + 0] << ", "// x
+                                            << data[k * 3 + 1] << ", " // y
+                                            << data[k * 3 + 2] << ")" // z
+                                            << "\n";
+                    } else {
+                        std::cout << "(" << data[k * 2 + 0] << ", "// x
+                                        << data[k * 2 + 1] << ")" // y
+                                        << "\n";
+                    }
+                }
+            }
+        }
+    }*/
+    //exit(-1);
 
     // Loading chunks
     auto chunk = craft::genChunk();
@@ -115,6 +152,8 @@ int main(int argc, char* argv[]) {
             blockShaderSet.worldTime(rawTime);
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
+            //testCoolChunk.meshSolid.render();
+
             for (int iLayer = 0; iLayer < 15; iLayer++) {
                 bebra::objects::chunkLayer& layer = chunk.at(iLayer);
                 for (int iRow = 0; iRow < 16; iRow++) {
@@ -148,20 +187,21 @@ int main(int argc, char* argv[]) {
                         glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                         if (block->id == bebra::objects::eplant) {
                             glDisable(GL_CULL_FACE);
-                            glDrawArrays(GL_TRIANGLES, 0, 12);
+                            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
                             glEnable(GL_CULL_FACE);
                         } else {
-                            glDrawArrays(GL_TRIANGLES, 0, 36);
+                            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                         }
                         chunkCallsCounter++;
 
                         // Mesh test:
-                        testCoolChunk.meshSolid.render();
+                        //testCoolChunk.meshSolid.render();
 
                     }
                 }
             }
         }
+        // TODO: game::objectsIds
 
         {// Render from G-Buffer
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
