@@ -2,6 +2,7 @@
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
+#include "engine/objects/block.h"
 #include "engine/objects/objects.h"
 #include "engine/utils/glerrors.h"
 #include "engine/utils/font.h"
@@ -61,18 +62,7 @@ int main(int argc, char* argv[]) {
 
     // Loading chunks
     auto chunk = craft::genChunk();
-    int chunkSize = static_cast<int>(chunk.size());
-
-    // Mesh test...
-    bebra::objects::Mesh testmesh;
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 16; y++) {
-            testmesh.move({0.0, 0.0, 16.0});
-            bebra::objects::Mesh testmesh2;
-            testmesh += testmesh2;
-        }
-        testmesh.move({16.0, 0.0, -16*16.0});
-    }
+    bebra::world::Chunk testCoolChunk {&chunk, 0, 0};
 
     // Runtime vars
     std::list<SDL_Keycode> keyPressed;
@@ -125,7 +115,7 @@ int main(int argc, char* argv[]) {
             blockShaderSet.worldTime(rawTime);
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
-            for (int iLayer = 0; iLayer < chunkSize ; iLayer++) {
+            for (int iLayer = 0; iLayer < 15; iLayer++) {
                 bebra::objects::chunkLayer& layer = chunk.at(iLayer);
                 for (int iRow = 0; iRow < 16; iRow++) {
                     bebra::objects::chunkRow& row = layer.at(iRow);
@@ -166,7 +156,7 @@ int main(int argc, char* argv[]) {
                         chunkCallsCounter++;
 
                         // Mesh test:
-                        testmesh.render();
+                        testCoolChunk.meshSolid.render();
 
                     }
                 }

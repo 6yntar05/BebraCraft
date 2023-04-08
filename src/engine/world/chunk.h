@@ -7,15 +7,16 @@
 #include "engine/objects/mesh.h"
 
 namespace bebra::objects {
-
 using chunkRow = std::array<bebra::objects::Object*, 16>;
 using chunkLayer = std::array<chunkRow, 16>;
 using chunk = std::vector<chunkLayer>;
+} // namespace bebra::objects
 
+namespace bebra::world {
 class Chunk {
   private:
     // Raw data:
-    const chunk* const rawChunk;            // Source data
+    const objects::chunk* const rawChunk;            // Source data
 
     // Loading params:
     static constexpr uint quantHeight = 16; // split chunk by height and gen mesh for every piece
@@ -28,9 +29,9 @@ class Chunk {
 
     // Chunk:
     // struct ? {
-    Mesh meshSolid;             // Be drawn first
-    Mesh meshTransparent;       // ... second
-    Mesh meshSemitransparent;   // ... third
+    objects::Mesh meshSolid;             // Be drawn first
+    objects::Mesh meshTransparent;       // ... second
+    objects::Mesh meshSemitransparent;   // ... third
     const int x;
     const int y;
 
@@ -42,15 +43,16 @@ class Chunk {
 				auto& row = layer.at(iRow);
 				for (uint iObj = 0; iObj < row.size(); iObj++) {
 					auto& obj = row.at(iObj);
+
 					if (obj->id == bebra::objects::ObjIdent::eblock)
-						meshSolid.appendObject(obj); // TODO: change object VBOs
+						meshSolid.append(*obj, {iObj, iLayer, iRow});
 
 				}
 			}
 		}
     }
 
-    Chunk(const chunk* const rawChunk, const int x, const int y)
+    Chunk(const objects::chunk* const rawChunk, const int x, const int y)
 	: rawChunk(rawChunk), x(x), y(y) {
         meshGen();
     }
