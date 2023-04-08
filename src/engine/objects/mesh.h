@@ -38,9 +38,10 @@ public:
 	}
 
 	void render() const {
-		this->bindBuffers();
-		glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // TODO: textures
-		this->unbindBuffers();
+		glBindVertexArray(VAO);
+		//glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // TODO: textures
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 	}
 
 	void move(const glm::vec3& vec) {
@@ -57,12 +58,24 @@ public:
 		this->updateMesh();
 	}
 
-	void append(const bebra::objects::Object obj, const glm::vec3& move = {0,0,0}) { // todo: move (static constexpr is a problem)
+	void append(const bebra::objects::Object obj, const glm::vec3& move = {0,0,0}) { // todo: move (static constexpr is a problem) // TODO REWRITE THIS SHIT
 		std::array<Vertex, 36> tmpVerts;
 		switch (obj.id) {
-			case eblock: tmpVerts = Block::vertices; break;
-			case efluid: tmpVerts = Fluid::vertices; break;
-			case eglass: tmpVerts = Glass::vertices; break;
+			case eblock: {
+				for (size_t i = 0; i < tmpVerts.size(); i++)
+					tmpVerts.at(i) = ((i < Block::vertices.size()) ? Block::vertices.at(i) : Block::vertices.at(0)); // temporary
+				break;
+			}
+			case efluid: {
+				for (size_t i = 0; i < tmpVerts.size(); i++)
+					tmpVerts.at(i) = ((i < Fluid::vertices.size()) ? Fluid::vertices.at(i) : Fluid::vertices.at(0)); // temporary
+				break;
+			}
+			case eglass: {
+				for (size_t i = 0; i < tmpVerts.size(); i++)
+					tmpVerts.at(i) = ((i < Glass::vertices.size()) ? Glass::vertices.at(i) : Glass::vertices.at(0)); // temporary
+				break;
+			}
 			case eplant: {
 				for (size_t i = 0; i < tmpVerts.size(); i++)
 					tmpVerts.at(i) = ((i < Plant::vertices.size()) ? Plant::vertices.at(i) : Plant::vertices.at(0)); // temporary
@@ -74,7 +87,7 @@ public:
 			i.Position += move;
 		}
 		this->vertices.insert(vertices.end(), tmpVerts.begin(), tmpVerts.end());
-		this->indices.insert(indices.end(), obj.indices.begin(), obj.indices.end()); // ?
+		this->indices.insert(indices.end(), Block::indices.begin(), Block::indices.end());
 		//this->textures <- obj.texture.textureArray
 		this->updateMesh();
 	}

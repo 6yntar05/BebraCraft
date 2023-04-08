@@ -26,7 +26,7 @@ const float sideShading = 0.2;
 const float downShading = 0.3;
 
 void main(void) {
-    color = texture(textureArray, vec3(TexCoord, (vertexID%36)/6)); // Use VAO texture indexes
+    color = texture(textureArray, vec3(TexCoord, (vertexID%36)/4)); // TODO: UV textures
     
     if (color.w < 0.001) discard; // Dirty 'hack'
 
