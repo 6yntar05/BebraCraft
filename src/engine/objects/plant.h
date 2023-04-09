@@ -11,7 +11,7 @@ class Plant : public Block {
     static constexpr float psize = 0.5f / M_SQRT2;
     static constexpr float dsize = psize;
 
-    static constexpr std::array<Vertex,8> vertices = {{
+    static constexpr std::array<Vertex,24> vertices = {{
        {{-psize, -0.5f, -psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}}, // Front halfinverted z
        {{ psize,  dsize, psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
        {{ psize, -0.5f,  psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 0.0f}},

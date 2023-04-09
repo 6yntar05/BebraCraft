@@ -62,7 +62,6 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
     // Test models:
-    /*
     bebra::objects::Model senko {"./senko.gltf"}; // :з
     std::cout << "Images: " << senko.model.images.size() << '\n';
     tinygltf::Image texture = senko.model.images.at(0);
@@ -94,7 +93,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-    }*/
+    }
     //exit(-1);
 
     // Loading chunks
@@ -109,16 +108,17 @@ int main(int argc, char* argv[]) {
 
     while (window.isRunning) { // Render cycle
         uint chunkCallsCounter = 0;
+
+        { // Handling input and window events
+            bool isModeChanged = false;
+            handleInput(keyPressed, camera, window, isModeChanged);
+            if (isModeChanged)
+                screen.updateMode(window.mode.w, window.mode.h);
+        }
+
         // Calculate shadertime
         //worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
-
-        // Handling input and window events
-        bool isModeChanged = false;
-        handleInput(keyPressed, camera, window, isModeChanged);
-
-        if (isModeChanged)
-            screen.updateMode(window.mode.w, window.mode.h);
 
         // Position calculation // Todo: put into a camera class
         glm::mat4 model          = glm::rotate(glm::mat4(1.0f), 1.0f * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -140,11 +140,12 @@ int main(int argc, char* argv[]) {
         // Offscreen rendering in G-Buffer
 		screen.gbuffer->bind();
         screen.clear();
+
         skybox.render(viewIdenpedent, projection, rawTime);
-        if (window.debug.lines)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
 
         { // Chunks render
+            if (window.debug.lines)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             blockShader.use();
             blockShaderSet.model(model);
             blockShaderSet.view(view);
@@ -152,7 +153,7 @@ int main(int argc, char* argv[]) {
             blockShaderSet.worldTime(rawTime);
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
-            //testCoolChunk.meshSolid.render();
+            testCoolChunk.meshSolid.render();
 
             for (int iLayer = 0; iLayer < 15; iLayer++) {
                 bebra::objects::chunkLayer& layer = chunk.at(iLayer);
@@ -200,6 +201,7 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
+            testCoolChunk.meshSolid.render();
         }
         // TODO: game::objectsIds
 
