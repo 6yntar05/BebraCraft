@@ -69,58 +69,52 @@ int main(int argc, char* argv[]) {
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
     
-    /*
     bebra::objects::Mesh senkoMesh;
     for (tinygltf::Node& node : senko.model.nodes) {
         if (node.mesh == -1) continue;
+        std::cout << '\t' << node.name << '\n';
 
         for (tinygltf::Primitive& primitive : senko.model.meshes.at(node.mesh).primitives) {
+            // Vertex data
             for (auto& i : primitive.attributes) {
-                // i.first - value type // todo :(
-                bebra::objects::Vertex vertex;
-
+                std::cout << i.second << '\n';
                 tinygltf::Accessor accessor = senko.model.accessors.at(i.second);
                 tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
-
                 const float* data = reinterpret_cast<const float*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
+
                 for (size_t k = 0; k < accessor.count; k++) {
-                    if (accessor.type == 3)
-                        if (i.first.substr(0,6) == "NORMAL")
-                            vertex.Normal = {
-                                data[k * 3 + 0],
-                                data[k * 3 + 1],
-                                data[k * 3 + 2]
-                            };
-                        else if(i.first.substr(0,8) == "POSITION")
-                            vertex.Position = {
-                                data[k * 3 + 0],
-                                data[k * 3 + 1],
-                                data[k * 3 + 2]
-                            };
-                        else throw std::bad_typeid();
+                    if ((accessor.type == 3) && (!i.first.compare("POSITION")))
+                        std::cerr << "POSITION: " <<
+                            data[k * 3 + 0] << " : " <<
+                            data[k * 3 + 1] << " : " <<
+                            data[k * 3 + 2] << '\n';
+
+                    else if((accessor.type == 3) && (!i.first.compare("NORMAL")))
+                        std::cerr << "NORMAL: " <<
+                            data[k * 3 + 0] << " : " <<
+                            data[k * 3 + 1] << " : " <<
+                            data[k * 3 + 2] << '\n';
                         
-                    else if(i.first.substr(0,8) == "TEXCOORD")
-                        vertex.TexCoords = {
-                            data[k * 2 + 0],
-                            data[k * 2 + 1]
-                        };
+                    else if((accessor.type == 2) && (!i.first.compare("TEXCOORD_0")))
+                        std::cerr << "TEXCOORD_0: " <<
+                            data[k * 2 + 0] << " : " <<
+                            data[k * 2 + 1] << '\n';
+                        // 3D texcoords for texture arrays
                     
                     else throw std::bad_typeid();
                 }
-                senkoMesh.vertices.push_back(vertex);
+            }
+            // Inidices
+            tinygltf::Accessor accessor = senko.model.accessors.at(primitive.indices);
+            tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
+            const short* idata = reinterpret_cast<const short*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
+            std::cout << "indices:("<<accessor.count<<") " << primitive.indices << '\n';
+            for (size_t i = 0; i < accessor.count; i++) {
+                std::cout << '\t' << idata[i] << '\n';
             }
         }
     }
-    
-
-    // todo: Gen indices (0,1,2 - 0,2,3)
-    // 6 indices for every 4 vertex
-    for (size_t i = 0; i < senkoMesh.vertices.size(); i++) {
-        senkoMesh.indices.push_back(i);
-        senkoMesh.textures.push_back({senkoTex, -1});
-    }
-    senkoMesh.updateMesh();
-    */
+    //exit(0);
 
     // Loading chunks
     auto chunk = craft::genChunk();
