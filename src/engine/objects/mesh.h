@@ -13,7 +13,7 @@ namespace bebra::objects {
 
 struct TextureView {
 	GLuint texture;
-	bool isArray = false;
+	int arrayIndex = -1; // if -1 - isn't array
 };
 
 class Mesh {
@@ -28,7 +28,7 @@ private:
 public:
     // Mesh data
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<GLuint> indices;
     std::vector<TextureView> textures;
 
     // Service
@@ -58,37 +58,43 @@ public:
 		this->updateMesh();
 	}
 
-	void append(const bebra::objects::Object obj, const glm::vec3& move = {0,0,0}) { // todo: move (static constexpr is a problem) // TODO REWRITE THIS SHIT
-		std::array<Vertex, 36> tmpVerts;
+	void append(const bebra::objects::Object obj, const glm::vec3& move = {0,0,0}) {
+		auto appendVertices = Object::vertices;
+		auto appendIndices = Object::indices;
+
 		switch (obj.id) {
 			case eblock: {
-				for (size_t i = 0; i < tmpVerts.size(); i++)
-					tmpVerts.at(i) = ((i < Block::vertices.size()) ? Block::vertices.at(i) : Block::vertices.at(0)); // temporary
+				appendVertices = Block::vertices;
+				appendIndices  = Block::indices;
 				break;
 			}
 			case efluid: {
-				for (size_t i = 0; i < tmpVerts.size(); i++)
-					tmpVerts.at(i) = ((i < Fluid::vertices.size()) ? Fluid::vertices.at(i) : Fluid::vertices.at(0)); // temporary
+				appendVertices = Fluid::vertices;
+				appendIndices  = Fluid::indices;
 				break;
 			}
 			case eglass: {
-				for (size_t i = 0; i < tmpVerts.size(); i++)
-					tmpVerts.at(i) = ((i < Glass::vertices.size()) ? Glass::vertices.at(i) : Glass::vertices.at(0)); // temporary
+				appendVertices = Glass::vertices;
+				appendIndices  = Glass::indices;
 				break;
 			}
 			case eplant: {
-				for (size_t i = 0; i < tmpVerts.size(); i++)
-					tmpVerts.at(i) = ((i < Plant::vertices.size()) ? Plant::vertices.at(i) : Plant::vertices.at(0)); // temporary
+				appendVertices = Plant::vertices;
+				appendIndices  = Plant::indices;
 				break;
 			}
 			default: break;
 		}
-		for (auto& i : tmpVerts) {
-			i.Position += move;
+
+		for (Vertex vertex : appendVertices) {
+			vertex.Position += move;
+			this->vertices.push_back(vertex);
 		}
-		this->vertices.insert(vertices.end(), tmpVerts.begin(), tmpVerts.end());
-		this->indices.insert(indices.end(), Block::indices.begin(), Block::indices.end());
-		//this->textures <- obj.texture.textureArray
+		for (const GLuint i : appendIndices) {
+			this->indices.push_back(i);
+			this->textures.push_back({}); // TODO
+		}
+
 		this->updateMesh();
 	}
 };
