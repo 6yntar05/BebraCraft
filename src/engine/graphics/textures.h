@@ -20,6 +20,7 @@ namespace graphics {
     );
 
     void loadTexture(GLuint* const texture, const std::string path);
+    void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels);
 
     void loadTextureArray(GLuint* const texture, std::vector<std::string> pathes);
     GLuint loadTextureArray(std::vector<std::string> pathes);

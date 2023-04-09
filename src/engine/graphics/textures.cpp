@@ -86,6 +86,26 @@ void loadTexture(GLuint* const texture, const std::string path) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels) {
+    // Bind
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D, *texture);
+    // Texture params
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    // Reading texture & creating mipmaps
+    glTexImage2D(GL_TEXTURE_2D, 0, (channels==4)?GL_RGBA16:GL_RGB, width, height, 0, (channels==4)?GL_RGBA:GL_RGB, GL_UNSIGNED_BYTE, data.data());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    // Unding
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 void loadTextureArray(GLuint* const texture, const std::vector<std::string> pathes) { // ISSUES (OPENGLES)
     //loadTexture(texture, pathes.at(0));
     //return;

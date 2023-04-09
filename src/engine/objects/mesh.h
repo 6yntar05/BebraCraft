@@ -23,7 +23,6 @@ private:
 	void bindBuffers() const;
 	void unbindBuffers() const;
     void setupMesh();
-	void updateMesh();
 
 public:
     // Mesh data
@@ -36,6 +35,8 @@ public:
 		// Fill the buffers
 		setupMesh();
 	}
+
+	void updateMesh();
 
 	void render() const {
 		glBindVertexArray(VAO);

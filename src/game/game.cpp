@@ -2,6 +2,7 @@
 #include "engine/core.h"
 #include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
+#include "engine/objects/base.h"
 #include "engine/objects/block.h"
 #include "engine/objects/objects.h"
 #include "engine/objects/model.h"
@@ -15,8 +16,12 @@
 #include "game/shaders.h"
 #include "game/skybox.h"
 
+#include <cctype>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <system_error>
+#include <typeinfo>
 #include <vector>
 #include <functional>
 #include <map>
@@ -63,38 +68,59 @@ int main(int argc, char* argv[]) {
 
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
-    std::cout << "Images: " << senko.model.images.size() << '\n';
-    tinygltf::Image texture = senko.model.images.at(0);
-    std::cout << 
-        "\nScenes: " << senko.model.scenes.at(0).nodes.at(0) <<
-        "\nNodes: " << senko.model.nodes.size() <<
-        "\nMeshes: " << senko.model.meshes.size() << '\n';
+    
+    /*
+    bebra::objects::Mesh senkoMesh;
     for (tinygltf::Node& node : senko.model.nodes) {
         if (node.mesh == -1) continue;
-        std::cout << node.name << '\n';
+
         for (tinygltf::Primitive& primitive : senko.model.meshes.at(node.mesh).primitives) {
             for (auto& i : primitive.attributes) {
-                std::cout << '\t' << i.first << '|' << i.second << '\n';
+                // i.first - value type // todo :(
+                bebra::objects::Vertex vertex;
+
                 tinygltf::Accessor accessor = senko.model.accessors.at(i.second);
                 tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
 
                 const float* data = reinterpret_cast<const float*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
                 for (size_t k = 0; k < accessor.count; k++) {
-                    if (accessor.type == 3) {
-                        std::cout << "(" << data[k * 3 + 0] << ", "// x
-                                            << data[k * 3 + 1] << ", " // y
-                                            << data[k * 3 + 2] << ")" // z
-                                            << "\n";
-                    } else {
-                        std::cout << "(" << data[k * 2 + 0] << ", "// x
-                                        << data[k * 2 + 1] << ")" // y
-                                        << "\n";
-                    }
+                    if (accessor.type == 3)
+                        if (i.first.substr(0,6) == "NORMAL")
+                            vertex.Normal = {
+                                data[k * 3 + 0],
+                                data[k * 3 + 1],
+                                data[k * 3 + 2]
+                            };
+                        else if(i.first.substr(0,8) == "POSITION")
+                            vertex.Position = {
+                                data[k * 3 + 0],
+                                data[k * 3 + 1],
+                                data[k * 3 + 2]
+                            };
+                        else throw std::bad_typeid();
+                        
+                    else if(i.first.substr(0,8) == "TEXCOORD")
+                        vertex.TexCoords = {
+                            data[k * 2 + 0],
+                            data[k * 2 + 1]
+                        };
+                    
+                    else throw std::bad_typeid();
                 }
+                senkoMesh.vertices.push_back(vertex);
             }
         }
     }
-    //exit(-1);
+    
+
+    // todo: Gen indices (0,1,2 - 0,2,3)
+    // 6 indices for every 4 vertex
+    for (size_t i = 0; i < senkoMesh.vertices.size(); i++) {
+        senkoMesh.indices.push_back(i);
+        senkoMesh.textures.push_back({senkoTex, -1});
+    }
+    senkoMesh.updateMesh();
+    */
 
     // Loading chunks
     auto chunk = craft::genChunk();
@@ -197,11 +223,13 @@ int main(int argc, char* argv[]) {
 
                         // Mesh test:
                         //testCoolChunk.meshSolid.render();
-
+                        //senkoMesh.render();
+                        senko.render();
                     }
                 }
             }
-            testCoolChunk.meshSolid.render();
+            //testCoolChunk.meshSolid.render();
+            //senkoMesh.render();
         }
         // TODO: game::objectsIds
 
