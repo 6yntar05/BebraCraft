@@ -25,6 +25,7 @@ private:
     void setupMesh();
 
 public:
+	std::string internalName;
     // Mesh data
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;

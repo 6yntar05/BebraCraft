@@ -190,11 +190,14 @@ int main(int argc, char* argv[]) {
             glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
             glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
             for (auto& mesh : senko.meshes) { // TODO: move to mesh.render()
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
-                model *= mesh.transform;
-                entityShaderSet.model(model);
-                mesh.render();
+                //if (!mesh.internalName.compare("rightarm")) {
+                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
+                    //model = glm::translate(model, {camera.pos.x + 0.3, camera.pos.y - 1.5f, camera.pos.z}); // before rotating!
+                    model *= mesh.transform;
+                    entityShaderSet.model(model);
+                    mesh.render();
+                //}
             }
         }
         // TODO: game::objectsIds
