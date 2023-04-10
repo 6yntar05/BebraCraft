@@ -191,6 +191,7 @@ int main(int argc, char* argv[]) {
             glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
             for (auto& mesh : senko.meshes) { // TODO: move to mesh.render()
                 glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
                 model *= mesh.transform;
                 entityShaderSet.model(model);
                 mesh.render();
@@ -228,7 +229,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        //bebra::utils::glHandleError(glGetError());
+        bebra::utils::glHandleError(glGetError());
         SDL_GL_SwapWindow(window.itself);
     }
 
