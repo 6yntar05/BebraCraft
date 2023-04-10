@@ -119,9 +119,10 @@ public:
 
         bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
         //bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str()); // for binary glTF(.glb)
-        if (!ret) 
+        if (!ret) {
             printf("Failed to parse glTF\n");
-
+            return;
+        }
         if (!warn.empty())
             printf("Warn: %s\n", warn.c_str());
 
