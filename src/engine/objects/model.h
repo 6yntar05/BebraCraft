@@ -30,6 +30,7 @@ private:
         if (node.mesh != -1) {
             // Process the meshes of the current node
             bebra::objects::Mesh mesh;
+            mesh.internalName = node.name;
 
             // Buffers
             for (const tinygltf::Primitive& primitive : model.meshes.at(node.mesh).primitives) {
