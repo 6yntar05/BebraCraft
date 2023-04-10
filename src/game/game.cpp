@@ -67,88 +67,10 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
     // Test models:
-    std::vector<bebra::objects::Mesh> senkoMeshes;
-
     bebra::objects::Model senko {"./senko.gltf"}; // :з
-    for (tinygltf::Node& node : senko.model.nodes) {
-        if (node.mesh == -1) continue; // Parent empty node
-        // std::cout << '\t' << node.name << '\n';
-
-        bebra::objects::Mesh senkoMesh;
-
-        for (tinygltf::Primitive& primitive : senko.model.meshes.at(node.mesh).primitives) {
-            std::vector<bebra::objects::Vertex> vertexes;
-            
-            // Vertex data
-            for (auto& i : primitive.attributes) {
-                std::cout << "Buffer index: " << i.second << '\n';
-
-                tinygltf::Accessor accessor = senko.model.accessors.at(i.second);
-                tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
-                const float* data = reinterpret_cast<const float*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
-
-                std::cout << "Accessors count: " << accessor.count << '\n';
-                if (vertexes.size() < accessor.count)
-                    vertexes.resize(accessor.count);
-                
-                for (size_t k = 0; k < accessor.count; k++) {
-                    if ((accessor.type == 3) && (!i.first.compare("POSITION"))) {
-                        std::cerr << "POSITION: " <<
-                            data[k * 3 + 0] << " : " <<
-                            data[k * 3 + 1] << " : " <<
-                            data[k * 3 + 2] << '\n';
-
-                        vertexes.at(k).Position = {
-                            data[k * 3 + 0], 
-                            data[k * 3 + 1], 
-                            data[k * 3 + 2]
-                        };
-
-                    } else if((accessor.type == 3) && (!i.first.compare("NORMAL"))) {
-                        std::cerr << "NORMAL: " <<
-                            data[k * 3 + 0] << " : " <<
-                            data[k * 3 + 1] << " : " <<
-                            data[k * 3 + 2] << '\n';
-                        
-                        vertexes.at(k).Normal = {
-                            data[k * 3 + 0], 
-                            data[k * 3 + 1], 
-                            data[k * 3 + 2]
-                        };
-                        
-                    } else if((accessor.type == 2) && (!i.first.compare("TEXCOORD_0"))) {
-                        std::cerr << "TEXCOORD_0: " <<
-                            data[k * 2 + 0] << " : " <<
-                            data[k * 2 + 1] << '\n';
-                        // 3D texcoords for texture arrays
-
-                        vertexes.at(k).TexCoords = {
-                            data[k * 2 + 0], 
-                            data[k * 2 + 1], 
-                        };
-                    
-                    } else throw std::bad_typeid();
-                }
-            }
-            senkoMesh.vertices = vertexes;
-
-            // Inidices
-            tinygltf::Accessor accessor = senko.model.accessors.at(primitive.indices);
-            tinygltf::BufferView& bufferView = senko.model.bufferViews[accessor.bufferView];
-            const short* idata = reinterpret_cast<const short*>(&senko.model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
-            std::cout << "indices:("<<accessor.count<<") " << primitive.indices << '\n';
-            for (size_t i = 0; i < accessor.count; i++) {
-                std::cout << '\t' << idata[i] << '\n';
-                ;;
-                senkoMesh.indices.push_back(idata[i]);
-                ;;
-            }
-        }
-        senkoMesh.updateMesh();
-        senkoMeshes.push_back(senkoMesh);
-    }
-    //exit(0);
-
+    bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
+    craft::BlockShaderApi entityShaderSet {entityShader}; // compatible
+    
     // Loading chunks
     auto chunk = craft::genChunk();
     bebra::world::Chunk testCoolChunk {&chunk, 0, 0};
@@ -221,6 +143,7 @@ int main(int argc, char* argv[]) {
                         // Block space transformation
                         glm::mat4 model = glm::mat4(1.0f);
                         model = glm::translate(model, { iBlock, iLayer, iRow });
+
                         //if (block->rotate != 0.0)
                         //    model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
                         blockShaderSet.model(model);
@@ -256,7 +179,20 @@ int main(int argc, char* argv[]) {
                 }
             }
             //testCoolChunk.meshSolid.render();
-            for (auto& mesh : senkoMeshes) {
+
+            entityShader.use();
+            entityShaderSet.model(model);
+            entityShaderSet.view(view);
+            entityShaderSet.projection(projection);
+            entityShaderSet.worldTime(rawTime);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
+            glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
+            for (auto& mesh : senko.meshes) { // TODO: move to mesh.render()
+                glm::mat4 model = glm::mat4(1.0f);
+                model *= mesh.transform;
+                entityShaderSet.model(model);
                 mesh.render();
             }
         }
@@ -292,7 +228,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        bebra::utils::glHandleError(glGetError());
+        //bebra::utils::glHandleError(glGetError());
         SDL_GL_SwapWindow(window.itself);
     }
 

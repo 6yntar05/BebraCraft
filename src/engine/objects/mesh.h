@@ -30,6 +30,9 @@ public:
     std::vector<GLuint> indices;
     std::vector<TextureView> textures;
 
+	// Space-transform data
+	glm::mat4 transform = glm::mat4(1.0f);
+
     // Service
     Mesh() { // TODO
 		// Fill the buffers
