@@ -3,38 +3,28 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-class Texture { // todo: not texture
-  private:
-    unsigned char* image;
-
-  public:
-    int width;
-    int height;
-    int mode;
-
-    unsigned char* getData() {
-        return image;
-    }
-
-    Texture(const std::string path, const bool flip = true) {
-        if (flip)
-            stbi_set_flip_vertically_on_load(true);
-        // Mode
-        int channels;
-        this->image = stbi_load(path.c_str(), &width, &height, &channels, 0);
-        if (channels >= 4)
-            mode = GL_RGBA;
-        else
-            mode = GL_RGB;
-            // GL_RED
-    }
-
-    ~Texture() {
-        stbi_image_free(image);
-    }
-};
-
 namespace bebra::graphics {
+
+unsigned char* Texture::getData() {
+    return image;
+}
+
+Texture::Texture(const std::string path, const bool flip) {
+    if (flip)
+        stbi_set_flip_vertically_on_load(true);
+    // Mode
+    int channels;
+    this->image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (channels >= 4)
+        mode = GL_RGBA;
+    else
+        mode = GL_RGB;
+        // GL_RED
+}
+
+Texture::~Texture() {
+    stbi_image_free(image);
+}
 
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
     GLuint texture;
@@ -127,6 +117,29 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::string> path
     for (uint i = 0; i < pathes.size(); i++) {
         Texture image {pathes.at(i).c_str(), true};
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, image.width, image.height, 1, image.mode, GL_UNSIGNED_BYTE, image.getData());
+    }
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    // Unding
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+}
+
+void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels) {
+    // Bind
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
+    // Texture params
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    // Reading texture & creating mipmaps
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 5, GL_RGBA16, width, height, data.size());
+        // Create array
+    for (uint i = 0; i < data.size(); i++) {
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, (channels==4)?GL_RGBA:GL_RGB, GL_UNSIGNED_BYTE, data.at(i).data());
     }
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     // Unding

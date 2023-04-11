@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     camera.speed = 0.05;
 
     // Creating screen object and G-Buffer
-    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
+    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"};
     bebra::graphics::ScreenObject screen {
         (uint)window.mode.w, (uint)window.mode.h, screenShader
     };
@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
 
     // Objects
         // Creating skybox
-    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} }; // FIXME GL::ERROR::1281 -> INVALID_VALUE
+    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
-    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
+    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
     craft::BlockShaderApi blockShaderSet {blockShader};
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
-    bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"}; // FIXME GL::ERROR::1281 -> INVALID_VALUE
+    bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
     craft::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
     // Loading chunks
@@ -173,8 +173,6 @@ int main(int argc, char* argv[]) {
 
                         // Mesh test:
                         //testCoolChunk.meshSolid.render();
-                        //senkoMesh.render();
-                        //senko.render();
                     }
                 }
             }

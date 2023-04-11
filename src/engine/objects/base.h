@@ -46,6 +46,10 @@ struct ObjectTexture {
             pathes.push_back(path);
         this->textureArray = graphics::loadTextureArray(pathes);
     }
+    ObjectTexture(std::vector<std::vector<unsigned char>> data, uint width, uint height, uint mode)
+        : arraySize(data.size()) {
+        graphics::loadTextureArray(&(this->textureArray), data, width, height, mode);
+    }
 };
 
 class Object {

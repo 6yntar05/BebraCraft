@@ -1,4 +1,5 @@
 #include "engine/graphics/shaders.h"
+#include "engine/utils/glerrors.h"
 
 #include <iostream>
 #include <fstream>
@@ -9,10 +10,9 @@ namespace graphics {
 
 // class shader
     Shader::Shader(const ShaderType type, const std::string path) 
-    : type(path.size() == 0 ? type : enone)
-    {
-        if (type == enone) return;
-        if (path.size() == 0) return;
+    : type(path.size() ? type : enone) {
+        //if (path.size() == 0) this->type = Shader::enone;
+        if (this->type == enone) return;
         // Reading shader
         const GLchar* shaderCode;
         std::ifstream file;
@@ -59,10 +59,12 @@ namespace graphics {
     }
 
 // class ShaderProgram
-    ShaderProgram::ShaderProgram(Shader vertex, Shader geometry, Shader fragment)
-    : program( glCreateProgram() ) {
+    ShaderProgram::ShaderProgram(const Shader vertex, const Shader geometry, const Shader fragment)
+    : program(glCreateProgram()) {
         // Shader program
         glAttachShader(program, vertex.blob);
+        if (geometry.type != Shader::enone)
+            glAttachShader(program, geometry.blob);
         glAttachShader(program, fragment.blob);
         glLinkProgram(program);
         // Print linking errors if any
