@@ -34,19 +34,14 @@ objects::chunk genChunk() {
         path + "dirt.png"
     };
 
-    //bebra::graphics::Texture testTex {"grass_block_side.png"};
-    //bebra::utils::colorize(testTex.getData(), testTex.width, testTex.height, testTex.mode, {0.1, 1.0, 0.1});
-    //
-    //objects::ObjectTexture grassTexture {
-    //    {testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData()}, 0,0,0
-    //};
-
+    bebra::graphics::Texture grassC {path + "grass_block_top.png"};
+    bebra::utils::colorize(grassC, {0.4, 1.0, 0.4});
     objects::ObjectTexture grassTexture {{
         path + "grass_block_side.png",
         path + "grass_block_side.png",
         path + "grass_block_side.png",
         path + "grass_block_side.png",
-        path + "grass_block_top.png",
+        grassC,
         path + "dirt.png"
     }};
 
@@ -58,12 +53,16 @@ objects::chunk genChunk() {
         path + "glass.png"
     };
 
+    bebra::graphics::Texture leavesC {path + "oak_leaves.png"};
+    bebra::utils::colorize(leavesC, {0.3, 1.0, 0.3});
     objects::ObjectTexture leaves_oakTexture {
-        path + "oak_leaves.png"
+        {leavesC, leavesC, leavesC, leavesC, leavesC, leavesC}
     };
 
+    bebra::graphics::Texture tgrassC {path + "grass.png"};
+    bebra::utils::colorize(tgrassC, {0.3, 1.0, 0.3}, {0.3, 0.3, 0.3});
     objects::ObjectTexture tallgrassTexture {
-        path + "grass.png", 4
+        {tgrassC, tgrassC, tgrassC, tgrassC}
     };
 
     objects::ObjectTexture stonebrickTexture {
@@ -126,8 +125,10 @@ objects::chunk genChunk() {
         path + "chiseled_quartz_block_top.png"
     };
 
+    bebra::graphics::Texture testTex {path + "water_still.png"};
+    bebra::utils::colorize(testTex, {0.2, 0.2, 0.9});
     objects::ObjectTexture waterTexture {
-        path + "water_still.png"
+        {testTex, testTex, testTex, testTex, testTex, testTex}
     };
 
     objects::ObjectTexture iron_oreTexture { path + "iron_ore.png" };

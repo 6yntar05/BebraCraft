@@ -23,7 +23,7 @@ Texture::Texture(const std::string path, const bool flip) {
 }
 
 Texture::~Texture() {
-    stbi_image_free(image);
+    //stbi_image_free(image);
 }
 
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
@@ -94,6 +94,33 @@ void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, u
     // Unding
     glBindTexture(GL_TEXTURE_2D, 0);
 
+}
+
+void loadTextureArray(GLuint* const texture, std::vector<Texture> textures) {
+    // Bind
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
+    // Texture params
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    // Reading texture & creating mipmaps
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, textures.at(0).width, textures.at(0).height, textures.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    for (uint i = 0; i < textures.size(); i++) {
+        glTexSubImage3D(
+            GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
+            textures.at(i).width, textures.at(i).height, 1,
+            textures.at(i).mode, GL_UNSIGNED_BYTE,
+            textures.at(i).getData()
+        );
+    }
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    // Unbinding
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
 void loadTextureArray(GLuint* const texture, const std::vector<std::string> pathes) {
