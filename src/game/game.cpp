@@ -33,6 +33,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL_log.h>
 
+// TODO: novideo framebuffer problem
+
 int main(int argc, char* argv[]) {
     // Initialization & Creating window
 #ifdef __ANDROID__
@@ -149,6 +151,9 @@ int main(int argc, char* argv[]) {
                                 ((who == bebra::objects::esemitransparent) && (block->id == bebra::objects::efluid))
                             )) continue;
 
+                            if (who == bebra::objects::esemitransparent)
+                                glDepthMask(GL_FALSE);
+
                             // Pick right buffers for current object
                             switch(block->id) {
                                 case bebra::objects::eplant: { glBindVertexArray(plantVAO); break; }
@@ -178,6 +183,9 @@ int main(int argc, char* argv[]) {
                                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                             }
                             chunkCallsCounter++;
+
+                            if (who == bebra::objects::esemitransparent)
+                                glDepthMask(GL_TRUE);
                         }
                     }
                 }
@@ -185,9 +193,6 @@ int main(int argc, char* argv[]) {
 
             chunkPass(bebra::objects::esolid);
             chunkPass(bebra::objects::etransparent);
-            
-            //testCoolChunk.meshSolid.render();
-
             { // Test draw entity
                 entityShader.use();
                 entityShaderSet.model(model);
@@ -208,8 +213,10 @@ int main(int argc, char* argv[]) {
                     //}
                 }
             }
+            chunkPass(bebra::objects::esemitransparent);
 
-            chunkPass(bebra::objects::esemitransparent); // TODO
+            // Mesh test:
+            //testCoolChunk.meshSolid.render();
 
         }
         // TODO: game::objectsIds

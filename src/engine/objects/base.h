@@ -36,20 +36,20 @@ struct ObjectTexture {
     uint arraySize;
     
     ObjectTexture() : arraySize(0) {}
-    ObjectTexture(std::vector<std::string> pathes)
+    ObjectTexture(std::vector<graphics::Texture> textures)
+        : arraySize(textures.size()) {
+        graphics::loadTextureArray(&textureArray, textures);
+    }
+    /*ObjectTexture(std::vector<std::string> pathes)
         : arraySize(pathes.size()) {
         this->textureArray = graphics::loadTextureArray(pathes);
-    }
+    }*/
     ObjectTexture(std::string path, uint count = 6)
         : arraySize(count) {
         std::vector<std::string> pathes;
         for (uint i = 0; i < count; i++)
             pathes.push_back(path);
         this->textureArray = graphics::loadTextureArray(pathes);
-    }
-    ObjectTexture(std::vector<std::vector<unsigned char>> data, uint width, uint height, uint mode)
-        : arraySize(data.size()) {
-        graphics::loadTextureArray(&(this->textureArray), data, width, height, mode);
     }
 };
 

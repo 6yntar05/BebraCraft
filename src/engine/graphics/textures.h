@@ -11,10 +11,9 @@
 namespace bebra::graphics {
 
 class Texture { // todo: not texture
-private:
+public:
     unsigned char* image;
 
-public:
     int width;
     int height;
     int mode;
@@ -37,8 +36,9 @@ void loadTexture(GLuint* const texture, const std::string path);
 void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels);
 GLuint loadTexture(const std::string path);
 
-void loadTextureArray(GLuint* const texture, std::vector<std::string> pathes);
-void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels);
+void loadTextureArray(GLuint* const texture, std::vector<Texture> textures);
+//void loadTextureArray(GLuint* const texture, std::vector<std::string> pathes);
+//void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels);
 GLuint loadTextureArray(std::vector<std::string> pathes);
 
 void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes);
