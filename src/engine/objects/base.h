@@ -24,10 +24,11 @@ struct Vertex {
 
 enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...
     ebase,
-    eblock,
-    eglass,
-    eplant,
-    efluid
+    esolid,
+    etransparent,
+    esemitransparent,
+    efluid,
+    eplant
 };
 
 struct ObjectTexture {
@@ -53,7 +54,8 @@ struct ObjectTexture {
 };
 
 class Object {
-    public:
+public:
+    const std::string name;
     // Structure and textures
     static constexpr std::array<Vertex,24> vertices = {};
     static constexpr std::array<GLuint,36> indices = {};

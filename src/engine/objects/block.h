@@ -77,7 +77,7 @@ class Block : public Object {
     }
 
     // Service
-    static constexpr ObjIdent id = ObjIdent::eblock;
+    static constexpr ObjIdent id = ObjIdent::esolid;
     Block() : Object(id) {};
     Block(ObjIdent id) : Object(id) {};
     Block(ObjectTexture texture, float rotate = 0.0)
