@@ -12,19 +12,19 @@ uniform samplerCube skybox;
 uniform float worldTime;
 
 // Out
-out vec4 color;
-out vec4 normal;
-out vec4 position;
+layout(location = 0) out vec4 COL0; // color
+layout(location = 1) out vec4 COL1; // normal
+layout(location = 2) out vec4 COL2; // position
 
 void main(void) {
-    color = texture(skybox, TexCoords);
+    COL0 = texture(skybox, TexCoords);
 
-    color = vec4(
-        color.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
-        color.w
+    COL0 = vec4(
+        COL0.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
+        COL0.w
     );
 
     // G-Buffer filling
-    normal = vec4(Normal, color.w);
-    position = vec4(glPos.xyz, 0.0);
+    COL1 = vec4(Normal, COL0.w); // normal
+    COL2 = vec4(glPos.xyz, 0.0);  // position
 }

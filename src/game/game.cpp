@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
         camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer // TODO: fix for opengles
-		screen.gbuffer->bind();
+		//screen.gbuffer->bind();
         screen.clear();
         skybox.render(viewIdenpedent, projection, rawTime);
         if (window.debug.lines)
@@ -223,9 +223,9 @@ int main(int argc, char* argv[]) {
 
         {// Render from G-Buffer
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            screen.gbuffer->unbind();
-            screen.clear();
-            screen.render(!window.debug.nohud);
+            //screen.gbuffer->unbind();
+            //screen.clear();
+            //screen.render(!window.debug.nohud);
         }
 
         { // Calculate frametime & FPS
