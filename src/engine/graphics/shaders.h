@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <string>
+#include <iostream>
 
 namespace bebra {
 namespace graphics {
@@ -21,9 +22,9 @@ namespace graphics {
         const ShaderType type;
 
         // Service
-        Shader() : type(enone) {}
+        Shader() : type(enone) { std::cout << "Call\n";}
         Shader(const ShaderType type, const std::string path);
-        ~Shader() { glDeleteShader(blob); }
+        ~Shader() {glDeleteShader(blob);}
     };
 
     class ShaderProgram {

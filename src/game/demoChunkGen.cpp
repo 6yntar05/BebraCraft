@@ -3,6 +3,7 @@
 #include "game/demoChunkGen.h"
 #include "engine/objects/objects.h"
 #include "engine/graphics/textures.h"
+#include <engine/utils/textures.h>
 
 const std::string path = "textures/resourcepack/assets/minecraft/textures/block/";
 
@@ -31,6 +32,13 @@ objects::chunk genChunk() {
     objects::ObjectTexture dirtTexture {
         path + "dirt.png"
     };
+
+    //bebra::graphics::Texture testTex {"grass_block_side.png"};
+    //bebra::utils::colorize(testTex.getData(), testTex.width, testTex.height, testTex.mode, {0.1, 1.0, 0.1});
+    //
+    //objects::ObjectTexture grassTexture {
+    //    {testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData(), testTex.getData()}, 0,0,0
+    //};
 
     objects::ObjectTexture grassTexture {{
         path + "grass_block_side.png",

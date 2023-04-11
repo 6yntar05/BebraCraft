@@ -50,7 +50,6 @@ private:
                     for (size_t k = 0; k < accessor.count; k++) {
                         if ((accessor.type == 3) && (!i.first.compare("POSITION"))) {
                             //std::cerr << "POSITION: " << data[k * 3 + 0] << " : " << data[k * 3 + 1] << " : " << data[k * 3 + 2] << '\n';
-
                             vertexes.at(k).Position = {
                                 data[k * 3 + 0], 
                                 data[k * 3 + 1], 
@@ -58,8 +57,7 @@ private:
                             };
 
                         } else if((accessor.type == 3) && (!i.first.compare("NORMAL"))) {
-                            //std::cerr << "NORMAL: " << data[k * 3 + 0] << " : " << data[k * 3 + 1] << " : " << data[k * 3 + 2] << '\n';
-                            
+                            //std::cerr << "NORMAL: " << data[k * 3 + 0] << " : " << data[k * 3 + 1] << " : " << data[k * 3 + 2] << '\n';  
                             vertexes.at(k).Normal = {
                                 data[k * 3 + 0], 
                                 data[k * 3 + 1], 
@@ -69,7 +67,6 @@ private:
                         } else if((accessor.type == 2) && (!i.first.compare("TEXCOORD_0"))) {
                             //std::cerr << "TEXCOORD_0: " << data[k * 2 + 0] << " : " << data[k * 2 + 1] << '\n';
                             // 3D texcoords for texture arrays
-
                             vertexes.at(k).TexCoords = {
                                 data[k * 2 + 0], 
                                 data[k * 2 + 1], 

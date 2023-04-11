@@ -14,14 +14,14 @@ using chunk = std::vector<chunkLayer>;
 
 namespace bebra::world {
 class Chunk {
-  private:
+private:
     // Raw data:
     const objects::chunk* const rawChunk;            // Source data
 
     // Loading params:
     static constexpr uint quantHeight = 16; // split chunk by height and gen mesh for every piece
 
-  public:
+public:
     // Chunk contants:
     static constexpr uint lenght  = 16;
     static constexpr uint widht   = 16;
@@ -44,9 +44,14 @@ class Chunk {
 				for (uint iObj = 0; iObj < row.size(); iObj++) {
 					auto& obj = row.at(iObj);
 
-					if (obj->id == bebra::objects::ObjIdent::eblock)
-						meshSolid.append(*obj, {iObj, iLayer, iRow});
-
+					switch (obj->id) {
+						case objects::eplant:
+							meshTransparent.append(*obj, {iObj, iLayer, iRow}); break;
+						case objects::eglass:
+							meshSemitransparent.append(*obj, {iObj, iLayer, iRow}); break;
+						default:
+							meshSolid.append(*obj, {iObj, iLayer, iRow}); break;
+					}
 				}
 			}
 		}
