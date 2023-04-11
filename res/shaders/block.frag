@@ -1,13 +1,12 @@
-#version 330 core
-
-#extension GL_ARB_explicit_attrib_location : require
+#version 300 es
+precision mediump float;
 
 // VBO & Textures
 in vec3 Position;
 in vec3 Normal;
 in vec2 TexCoord;
 flat in int vertexID;
-uniform sampler2DArray textureArray;
+uniform mediump sampler2DArray textureArray;
 
 // Vertex input
 in vec4 glPos;
@@ -53,7 +52,7 @@ void main(void) {
             );
 
     color = vec4(
-            color.xyz * (-(atan(3.3 - (worldTime*10)) / 2.85) + 0.5),
+            color.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
             /* (1.0 - (
                 pow(0.95 - globalLight, 3)
             )),*/

@@ -1,9 +1,8 @@
-#version 330 core
-
-#extension GL_ARB_explicit_attrib_location : require
+#version 300 es
+precision mediump float;
 
 layout (location = 0) in vec3 aPos;
-layout (location = 0) in vec3 aNormal;
+layout (location = 1) in vec3 aNormal;
 
 uniform mat4 projection;
 uniform mat4 view;

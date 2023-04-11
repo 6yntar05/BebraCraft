@@ -1,6 +1,5 @@
-#version 330 core
-
-#extension GL_ARB_explicit_attrib_location : require
+#version 300 es
+precision mediump float;
 
 // VBO & Textures
 in vec3 Position;
@@ -19,45 +18,10 @@ out vec4 color;
 out vec4 normal;
 out vec4 position;
 
-// Constants
-const float camShadEase = 5.0;
-const float sideShading = 0.2;
-const float downShading = 0.3;
-
 void main(void) {
-    color = texture2D(texture, TexCoord); // TODO: UV textures
+    color = texture2D(texture, TexCoord);
     
     if (color.w < 0.001) discard; // Dirty 'hack'
-
-    // Camera shadow
-    if (color.w > 0.9)
-        color.xyz -= vec3(
-            ( 1.0 - gl_FragCoord.z )
-            /*--------------------*/ /
-                   camShadEase
-        );
-    
-    // Simple shading
-    color = vec4(
-            color.xyz * (
-                1.0 - ( max( abs(Normal.x), abs(Normal.z) ) * sideShading )
-            ),
-            color.w
-        );
-
-    if (Normal.y > 0.0)
-        color = vec4(
-                color.xyz * (1.0 - downShading),
-                color.w
-            );
-
-    color = vec4(
-            color.xyz * (-(atan(3.3 - (worldTime*10)) / 2.85) + 0.5),
-            /* (1.0 - (
-                pow(0.95 - globalLight, 3)
-            )),*/
-            color.w
-        );
     
     // G-Buffer filling
     normal = vec4(Normal, color.w);

@@ -35,8 +35,9 @@
 
 int main(int argc, char* argv[]) {
     // Initialization & Creating window
-    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL);
+    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGLES); // TODO: OpenGLES
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     bebra::glContextCreate(window);
     SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 
@@ -113,7 +114,7 @@ int main(int argc, char* argv[]) {
         camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer
-		screen.gbuffer->bind();
+		//screen.gbuffer->bind();
         screen.clear();
 
         skybox.render(viewIdenpedent, projection, rawTime);
@@ -127,8 +128,6 @@ int main(int argc, char* argv[]) {
             blockShaderSet.projection(projection);
             blockShaderSet.worldTime(rawTime);
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
-
-            testCoolChunk.meshSolid.render();
 
             for (int iLayer = 0; iLayer < 15; iLayer++) {
                 bebra::objects::chunkLayer& layer = chunk.at(iLayer);
@@ -202,8 +201,8 @@ int main(int argc, char* argv[]) {
 
         {// Render from G-Buffer
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            screen.gbuffer->unbind();
-            screen.render(!window.debug.nohud);
+            //screen.gbuffer->unbind();
+            //screen.render(!window.debug.nohud);
         }
 
         { // Calculate frametime & FPS

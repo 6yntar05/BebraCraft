@@ -1,6 +1,5 @@
-#version 330 core 
-
-#extension GL_ARB_explicit_attrib_location : require
+#version 300 es
+precision mediump float;
 
 // Vertex input
 in vec3 TexCoords;
@@ -21,7 +20,7 @@ void main(void) {
     color = texture(skybox, TexCoords);
 
     color = vec4(
-        color.xyz * (-(atan(3.3 - (worldTime*10)) / 2.85) + 0.5),
+        color.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
         color.w
     );
 

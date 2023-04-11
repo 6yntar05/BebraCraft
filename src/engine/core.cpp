@@ -51,7 +51,7 @@ SDL_DisplayMode init(const GApi gapi) {
             // Setting OpenGL ES version
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
             // Setting SDL buffers
             SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
@@ -96,7 +96,12 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
 SDL_GLContext glContextCreate(const Window& window, const bool nicest) {
     // Creating context itself
     SDL_GLContext context = SDL_GL_CreateContext(window.itself);
+    if (!context)
+        std::cerr << "Failed to create OpenGL ES context: " << SDL_GetError() << std::endl;
     glewInit();
+
+    if (SDL_GL_MakeCurrent(window.itself, context) < 0)
+        std::cerr << "Failed to make OpenGL ES context current: " << SDL_GetError() << std::endl;
 
     // Tuning context
     glViewport(0, 0, window.mode.w, window.mode.h);
