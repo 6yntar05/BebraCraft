@@ -15,9 +15,9 @@ in vec4 glPos;
 uniform float worldTime;
 
 // G-Buffer
-out vec4 color;
-out vec4 normal;
-out vec4 position;
+layout(location = 0) out vec4 COL0; // color
+layout(location = 1) out vec4 COL1; // normal
+layout(location = 2) out vec4 COL2; // position
 
 // Constants
 const float camShadEase = 5.0;
@@ -25,42 +25,42 @@ const float sideShading = 0.2;
 const float downShading = 0.3;
 
 void main(void) {
-    color = texture(textureArray, vec3(TexCoord, (vertexID%36)/4)); // TODO: UV textures
+    COL0 = texture(textureArray, vec3(TexCoord, (vertexID%36)/4)); // TODO: UV textures
     
-    if (color.w < 0.001) discard; // Dirty 'hack'
+    if (COL0.w < 0.001) discard; // Dirty 'hack'
 
     // Camera shadow
-    if (color.w > 0.9)
-        color.xyz -= vec3(
+    if (COL0.w > 0.9)
+        COL0.xyz -= vec3(
             ( 1.0 - gl_FragCoord.z )
             /*--------------------*/ /
                    camShadEase
         );
     
     // Simple shading
-    color = vec4(
-            color.xyz * (
+    COL0 = vec4(
+            COL0.xyz * (
                 1.0 - ( max( abs(Normal.x), abs(Normal.z) ) * sideShading )
             ),
-            color.w
+            COL0.w
         );
 
     if (Normal.y > 0.0)
-        color = vec4(
-                color.xyz * (1.0 - downShading),
-                color.w
+        COL0 = vec4(
+                COL0.xyz * (1.0 - downShading),
+                COL0.w
             );
 
-    color = vec4(
-            color.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
+    COL0 = vec4(
+            COL0.xyz * (-(atan(3.3 - (worldTime*10.0)) / 2.85) + 0.5),
             /* (1.0 - (
                 pow(0.95 - globalLight, 3)
             )),*/
-            color.w
+            COL0.w
         );
     
     // G-Buffer filling
-    normal = vec4(Normal, color.w);
-    position = vec4(glPos.xyz, gl_FragCoord.w);
+    COL1 = vec4(Normal, COL0.w); // Normal
+    COL2 = vec4(glPos.xyz, gl_FragCoord.w); // Position
     
 }

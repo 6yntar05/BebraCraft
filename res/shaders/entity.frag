@@ -14,17 +14,17 @@ in vec4 glPos;
 uniform float worldTime;
 
 // G-Buffer
-out vec4 color;
-out vec4 normal;
-out vec4 position;
+layout(location = 0) out vec4 COL0; // color
+layout(location = 1) out vec4 COL1; // normal
+layout(location = 2) out vec4 COL2; // position
 
 void main(void) {
-    color = texture2D(texture, TexCoord);
+    COL0 = texture2D(texture, TexCoord);
     
-    if (color.w < 0.001) discard; // Dirty 'hack'
+    if (COL0.w < 0.001) discard; // Dirty 'hack'
     
     // G-Buffer filling
-    normal = vec4(Normal, color.w);
-    position = vec4(glPos.xyz, gl_FragCoord.w);
+    COL1 = vec4(Normal, COL0.w);
+    COL2 = vec4(glPos.xyz, gl_FragCoord.w);
     
 }
