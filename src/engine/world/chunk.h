@@ -44,14 +44,13 @@ public:
 				for (uint iObj = 0; iObj < row.size(); iObj++) {
 					auto& obj = row.at(iObj);
 
-					switch (obj->id) {
-						case objects::eplant:
-							meshTransparent.append(*obj, {iObj, iLayer, iRow}); break;
-						case objects::eglass:
-							meshSemitransparent.append(*obj, {iObj, iLayer, iRow}); break;
-						default:
-							meshSolid.append(*obj, {iObj, iLayer, iRow}); break;
-					}
+					if (obj->id == objects::esolid)
+						meshSolid.append(*obj, {iObj, iLayer, iRow});
+					if (obj->id == objects::etransparent || obj->id == objects::eplant)
+						meshTransparent.append(*obj, {iObj, iLayer, iRow});
+					if (obj->id == objects::esemitransparent || obj->id == objects::efluid)
+						meshSemitransparent.append(*obj, {iObj, iLayer, iRow});
+                    
 				}
 			}
 		}

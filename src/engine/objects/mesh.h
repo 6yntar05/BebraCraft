@@ -2,7 +2,6 @@
 #include "engine/objects/base.h"
 #include "engine/objects/block.h"
 #include "engine/objects/fluid.h"
-#include "engine/objects/glass.h"
 #include "engine/objects/plant.h"
 #include <new>
 #include <vector>
@@ -12,7 +11,7 @@
 namespace bebra::objects {
 
 struct TextureView {
-	GLuint texture;
+	GLuint texture;	     // Single texture or array
 	int arrayIndex = -1; // if -1 - isn't array
 };
 
@@ -44,7 +43,6 @@ public:
 
 	void render() const {
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, vertices.size()); // TODO: textures
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
@@ -63,24 +61,14 @@ public:
 		this->updateMesh();
 	}
 
-	void append(const bebra::objects::Object obj, const glm::vec3& move = {0,0,0}) {
+	void append(const bebra::objects::Object obj, const glm::vec3 move = {0,0,0}) { // WTF
 		auto appendVertices = Object::vertices;
-		auto appendIndices = Object::indices;
+		auto appendIndices  = Object::indices;
 
 		switch (obj.id) {
-			case eblock: {
-				appendVertices = Block::vertices;
-				appendIndices  = Block::indices;
-				break;
-			}
 			case efluid: {
 				appendVertices = Fluid::vertices;
 				appendIndices  = Fluid::indices;
-				break;
-			}
-			case eglass: {
-				appendVertices = Glass::vertices;
-				appendIndices  = Glass::indices;
 				break;
 			}
 			case eplant: {
@@ -88,16 +76,21 @@ public:
 				appendIndices  = Plant::indices;
 				break;
 			}
-			default: break;
+			default: {
+				appendVertices = Block::vertices;
+				appendIndices  = Block::indices;
+				break;
+			};
 		}
 
 		for (Vertex vertex : appendVertices) {
-			vertex.Position += move;
-			this->vertices.push_back(vertex);
+			this->vertices.push_back({vertex.Position + move, vertex.Normal, vertex.TexCoords});
 		}
+		size_t appendOffset = this->vertices.size();
+
 		for (const GLuint i : appendIndices) {
-			this->indices.push_back(i);
-			this->textures.push_back({}); // TODO
+			this->indices.push_back(appendOffset + i); // WTF // .insert
+			//this->textures.push_back({}); // TODO
 		}
 
 		this->updateMesh();

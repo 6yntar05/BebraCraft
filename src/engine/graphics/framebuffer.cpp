@@ -45,14 +45,10 @@ namespace graphics {
 
     void GBuffer::bind() {
         glBindFramebuffer(GL_FRAMEBUFFER, this->descriptor);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.356, 0.6, 0.98, 1.0f);
     }
 
     void GBuffer::unbind() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     GBuffer::GBuffer(const uint width, const uint height) { this->init(width, height); }

@@ -35,7 +35,11 @@
 
 int main(int argc, char* argv[]) {
     // Initialization & Creating window
-    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGLES); // TODO: OpenGLES
+#ifdef __ANDROID__
+    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGLES); // Only GLES or Vulkan(not implemented(And unlikely to be :З))
+#else
+    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL); // TODO: OpenGLES
+#endif
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
     //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
     bebra::glContextCreate(window);
@@ -113,96 +117,108 @@ int main(int argc, char* argv[]) {
             direction.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
         camera.front = glm::normalize(direction);
 
-        // Offscreen rendering in G-Buffer
-		//screen.gbuffer->bind();
+        // Offscreen rendering in G-Buffer // TODO: fix for opengles
+		screen.gbuffer->bind();
         screen.clear();
-
         skybox.render(viewIdenpedent, projection, rawTime);
+        if (window.debug.lines)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        { // Chunks render
-            if (window.debug.lines)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            blockShader.use();
-            blockShaderSet.model(model);
-            blockShaderSet.view(view);
-            blockShaderSet.projection(projection);
-            blockShaderSet.worldTime(rawTime);
+        { // Chunks rendering
             static auto cameraBlocksPos = glm::value_ptr(camera.pos);
 
-            for (int iLayer = 0; iLayer < 15; iLayer++) {
-                bebra::objects::chunkLayer& layer = chunk.at(iLayer);
-                for (int iRow = 0; iRow < 16; iRow++) {
-                    bebra::objects::chunkRow& row = layer.at(iRow);
-                     for (int iBlock = 0; iBlock < 16; iBlock++) {
-                        const bebra::objects::Object* block = row.at(iBlock);
-                        
-                        // Check for visible
-                        if (!block->texture.arraySize) continue;
+            static std::function chunkPass = [&](bebra::objects::ObjIdent who) {
+                blockShader.use();
+                blockShaderSet.model(model);
+                blockShaderSet.view(view);
+                blockShaderSet.projection(projection);
+                blockShaderSet.worldTime(rawTime);
+                for (int iLayer = 0; iLayer < 15; iLayer++) {
+                    bebra::objects::chunkLayer& layer = chunk.at(iLayer);
+                    for (int iRow = 0; iRow < 16; iRow++) {
+                        bebra::objects::chunkRow& row = layer.at(iRow);
+                        for (int iBlock = 0; iBlock < 16; iBlock++) {
+                            const bebra::objects::Object* block = row.at(iBlock);
+                            
+                            // Check for air
+                            if (!block->texture.arraySize || block->id == bebra::objects::ebase) continue;
 
-                        // Block space transformation
-                        glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, { iBlock, iLayer, iRow });
+                            //
+                            if(!((who == block->id) ||
+                                ((who == bebra::objects::etransparent) && (block->id == bebra::objects::eplant)) ||
+                                ((who == bebra::objects::esemitransparent) && (block->id == bebra::objects::efluid))
+                            )) continue;
 
-                        //if (block->rotate != 0.0)
-                        //    model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
-                        blockShaderSet.model(model);
+                            // Pick right buffers for current object
+                            switch(block->id) {
+                                case bebra::objects::eplant: { glBindVertexArray(plantVAO); break; }
+                                case bebra::objects::efluid: { glBindVertexArray(fluidVAO); break; }
+                                default: { glBindVertexArray(blockVAO); break; }
+                            }
 
-                        // Pick right buffers for current object
-                        switch(block->id) {
-                            case bebra::objects::eblock: { glBindVertexArray(blockVAO); break; }
-                            case bebra::objects::eplant: { glBindVertexArray(plantVAO); break; }
-                            case bebra::objects::efluid: { glBindVertexArray(fluidVAO); break; }
-                            default: { glBindVertexArray(blockVAO); break; }
+                            // Block space transformation
+                            glm::mat4 model = glm::mat4(1.0f);
+                            model = glm::translate(model, { iBlock, iLayer, iRow });
+
+                            //if (block->rotate != 0.0)
+                            //    model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
+                            blockShaderSet.model(model);
+
+                            // TODO: texture sets manager
+                            GLint textureSlot = GL_TEXTURE31;
+                            GLint textureSlotIndex = 31; // < Max texture slots
+                            glActiveTexture(textureSlot + textureSlotIndex);
+                            glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
+                            glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
+                            if (block->id == bebra::objects::eplant) {
+                                glDisable(GL_CULL_FACE);
+                                glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+                                glEnable(GL_CULL_FACE);
+                            } else {
+                                glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+                            }
+                            chunkCallsCounter++;
                         }
-
-                        // TODO: texture sets manager
-                        GLint textureSlot = GL_TEXTURE31;
-                        GLint textureSlotIndex = 31; // < Max texture slots
-                        glActiveTexture(textureSlot + textureSlotIndex);
-                        glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
-                        glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
-                        if (block->id == bebra::objects::eplant) {
-                            glDisable(GL_CULL_FACE);
-                            glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-                            glEnable(GL_CULL_FACE);
-                        } else {
-                            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-                        }
-                        chunkCallsCounter++;
-
-                        // Mesh test:
-                        //testCoolChunk.meshSolid.render();
                     }
                 }
-            }
+            };
+
+            chunkPass(bebra::objects::esolid);
+            chunkPass(bebra::objects::etransparent);
+            
             //testCoolChunk.meshSolid.render();
 
-            entityShader.use();
-            entityShaderSet.model(model);
-            entityShaderSet.view(view);
-            entityShaderSet.projection(projection);
-            entityShaderSet.worldTime(rawTime);
-
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
-            glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
-            for (auto& mesh : senko.meshes) { // TODO: move to mesh.render()
-                //if (!mesh.internalName.compare("rightarm")) {
-                    glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
-                    //model = glm::translate(model, {camera.pos.x + 0.3, camera.pos.y - 1.5f, camera.pos.z}); // before rotating!
-                    model *= mesh.transform;
-                    entityShaderSet.model(model);
-                    mesh.render();
-                //}
+            { // Test draw entity
+                entityShader.use();
+                entityShaderSet.model(model);
+                entityShaderSet.view(view);
+                entityShaderSet.projection(projection);
+                entityShaderSet.worldTime(rawTime);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
+                glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
+                for (auto& mesh : senko.meshes) {
+                    //if (!mesh.internalName.compare("rightarm")) {
+                        glm::mat4 model = glm::mat4(1.0f);
+                        model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
+                        //model = glm::translate(model, {camera.pos.x + 0.3, camera.pos.y - 1.5f, camera.pos.z}); // before rotating!
+                        model *= mesh.transform;
+                        entityShaderSet.model(model);
+                        mesh.render();
+                    //}
+                }
             }
+
+            chunkPass(bebra::objects::esemitransparent); // TODO
+
         }
         // TODO: game::objectsIds
 
         {// Render from G-Buffer
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            //screen.gbuffer->unbind();
-            //screen.render(!window.debug.nohud);
+            screen.gbuffer->unbind();
+            screen.clear();
+            screen.render(!window.debug.nohud);
         }
 
         { // Calculate frametime & FPS

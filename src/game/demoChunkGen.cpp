@@ -1,5 +1,6 @@
 #include <array>
 #include <vector>
+#include "engine/objects/base.h"
 #include "game/demoChunkGen.h"
 #include "engine/objects/objects.h"
 #include "engine/graphics/textures.h"
@@ -135,29 +136,32 @@ objects::chunk genChunk() {
     objects::ObjectTexture coal_oreTexture { path + "coal_ore.png" };
 
     /// Create blocks object
-    objects::Block* furnaceBlock1 = new objects::Block { furnaceTexture, -90.0f };
-    objects::Block* furnaceBlock2 = new objects::Block { furnaceTexture, 180.0f };
-    objects::Block* stoneBlock = new objects::Block { stoneTexture };
-    objects::Block* dirtBlock = new objects::Block { dirtTexture };
-    objects::Block* grassBlock = new objects::Block { grassTexture };
-    objects::Block* oakBlock = new objects::Block { oakTexture };
-    objects::Block* planks_birchBlock = new objects::Block { planks_birchTexture };
-    objects::Block* big_oakBlock = new objects::Block { big_oakTexture };
-    objects::Block* planks_big_oakBlock = new objects::Block { planks_big_oakTexture };
-    objects::Block* leaves_oakBlock = new objects::Block { leaves_oakTexture };
-    objects::Glass* glass_grayBlock = new objects::Glass { glass_grayTexture };
-    objects::Block* jukeboxBlock = new objects::Block { jukeboxTexture };
-    objects::Glass* glassBlock = new objects::Glass { glassTexture };
-    objects::Block* glowstoneBlock = new objects::Block { glowstoneTexture };
-    objects::Block* gravelBlock = new objects::Block { gravelTexture };
-    objects::Block* crafting_tableBlock = new objects::Block { crafting_tableTexture };
-    objects::Plant* tallgrassBlock = new objects::Plant { tallgrassTexture };
-    objects::Fluid* waterBlock = new objects::Fluid { waterTexture };
-    objects::Block* quartz_block_chiseledBlock = new objects::Block { quartz_block_chiseledTexture };
-    objects::Block* iron_oreBlock = new objects::Block { iron_oreTexture };
-    objects::Block* diamond_oreBlock = new objects::Block { diamond_oreTexture };
-    objects::Block* coal_oreBlock = new objects::Block { coal_oreTexture };
-    objects::Block* gold_oreBlock = new objects::Block { gold_oreTexture };
+    objects::Object* furnaceBlock1 = new objects::Block { furnaceTexture, -90.0f };
+    objects::Object* furnaceBlock2 = new objects::Block { furnaceTexture, 180.0f };
+    objects::Object* stoneBlock = new objects::Block { stoneTexture };
+    objects::Object* dirtBlock = new objects::Block { dirtTexture };
+    objects::Object* grassBlock = new objects::Block { grassTexture };
+    objects::Object* oakBlock = new objects::Block { oakTexture };
+    objects::Object* planks_birchBlock = new objects::Block { planks_birchTexture };
+    objects::Object* big_oakBlock = new objects::Block { big_oakTexture };
+    objects::Object* planks_big_oakBlock = new objects::Block { planks_big_oakTexture };
+    objects::Object* leaves_oakBlock = new objects::Block { leaves_oakTexture };
+        leaves_oakBlock->id = bebra::objects::etransparent;
+    objects::Object* glass_grayBlock = new objects::Block { glass_grayTexture };
+        glass_grayBlock->id = bebra::objects::esemitransparent;
+    objects::Object* jukeboxBlock = new objects::Block { jukeboxTexture };
+    objects::Object* glassBlock = new objects::Block { glassTexture };
+        glassBlock->id = bebra::objects::etransparent;
+    objects::Object* glowstoneBlock = new objects::Block { glowstoneTexture };
+    objects::Object* gravelBlock = new objects::Block { gravelTexture };
+    objects::Object* crafting_tableBlock = new objects::Block { crafting_tableTexture };
+    objects::Object* tallgrassBlock = new objects::Plant { tallgrassTexture };
+    objects::Object* waterBlock = new objects::Fluid { waterTexture };
+    objects::Object* quartz_block_chiseledBlock = new objects::Block { quartz_block_chiseledTexture };
+    objects::Object* iron_oreBlock = new objects::Block { iron_oreTexture };
+    objects::Object* diamond_oreBlock = new objects::Block { diamond_oreTexture };
+    objects::Object* coal_oreBlock = new objects::Block { coal_oreTexture };
+    objects::Object* gold_oreBlock = new objects::Block { gold_oreTexture };
 
     static const std::array<objects::Object*, 24> b {
         new objects::Object {}, stoneBlock, grassBlock, dirtBlock, leaves_oakBlock, oakBlock, planks_birchBlock, big_oakBlock, planks_big_oakBlock, glassBlock,
