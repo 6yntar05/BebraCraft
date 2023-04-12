@@ -13,7 +13,6 @@
 
 #include "game/demoChunkGen.h"
 #include "game/control.h"
-#include "game/shaders.h"
 #include "game/skybox.h"
 
 #include <cctype>
@@ -66,7 +65,7 @@ int main(int argc, char* argv[]) {
     craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
     bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
-    craft::BlockShaderApi blockShaderSet {blockShader};
+    bebra::graphics::BlockShaderApi blockShaderSet {blockShader};
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
     bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
@@ -76,7 +75,7 @@ int main(int argc, char* argv[]) {
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
-    craft::BlockShaderApi entityShaderSet {entityShader}; // compatible
+    bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
     // Loading chunks
     auto chunk = craft::genChunk();
@@ -192,27 +191,15 @@ int main(int argc, char* argv[]) {
             };
 
             chunkPass(bebra::objects::esolid);
-            chunkPass(bebra::objects::etransparent);
-            { // Test draw entity
-                entityShader.use();
-                entityShaderSet.model(model);
-                entityShaderSet.view(view);
-                entityShaderSet.projection(projection);
-                entityShaderSet.worldTime(rawTime);
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
-                glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
-                for (auto& mesh : senko.meshes) {
-                    //if (!mesh.internalName.compare("rightarm")) {
-                        glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
-                        //model = glm::translate(model, {camera.pos.x + 0.3, camera.pos.y - 1.5f, camera.pos.z}); // before rotating!
-                        model *= mesh.transform;
-                        entityShaderSet.model(model);
-                        mesh.render();
-                    //}
-                }
-            }
+            chunkPass(bebra::objects::etransparent); // Mipmaps turns transparent textures to semitranspaent on some fragments
+
+            entityShaderSet.program.use();
+            entityShaderSet.model(model);
+            entityShaderSet.view(view);
+            entityShaderSet.projection(projection);
+            entityShaderSet.worldTime(rawTime);
+            senko.render({10, 6.5, 4}, entityShaderSet);
+            
             chunkPass(bebra::objects::esemitransparent);
 
             // Mesh test:

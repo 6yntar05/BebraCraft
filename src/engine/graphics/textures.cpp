@@ -1,20 +1,13 @@
 #include "engine/graphics/textures.h"
+#include <cstddef>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 namespace bebra::graphics {
 
-unsigned char* Texture::getData() {
-    return image;
-}
-
-Texture::Texture(const std::string path, const bool flip) {
-    if (flip)
-        stbi_set_flip_vertically_on_load(true);
-    // Mode
-    int channels;
-    this->image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+Texture::Texture(const std::vector<unsigned char> raw, int width, int height, int channels)
+: image(raw), width(width), height(height), channels(channels){
     if (channels >= 4)
         mode = GL_RGBA;
     else
@@ -22,8 +15,21 @@ Texture::Texture(const std::string path, const bool flip) {
         // GL_RED
 }
 
-Texture::~Texture() {
-    //stbi_image_free(image);
+Texture::Texture(const std::string path, const bool flip) {
+    if (flip)
+        stbi_set_flip_vertically_on_load(true);
+    unsigned char* stb_image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (!stb_image) return;
+    this->image.resize(width * height * channels);
+    for(size_t i = 0; i < this->image.size(); i++)
+        this->image[i] = stb_image[i];
+    stbi_image_free(stb_image);
+
+    if (channels >= 4)
+        mode = GL_RGBA;
+    else
+        mode = GL_RGB;
+        // GL_RED
 }
 
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
@@ -56,7 +62,7 @@ GLuint createMultisampleTexture(const GLint internalformat, const uint width, co
     return texture;
 }
 
-void loadTexture(GLuint* const texture, const std::string path) {
+void loadTexture(GLuint* const texture, Texture raw) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
@@ -69,8 +75,7 @@ void loadTexture(GLuint* const texture, const std::string path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
     // Reading texture & creating mipmaps
-    Texture image {path.c_str(), true};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.getData());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw.width, raw.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, raw.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
     // Unding
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -93,7 +98,12 @@ void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, u
     glGenerateMipmap(GL_TEXTURE_2D);
     // Unding
     glBindTexture(GL_TEXTURE_2D, 0);
+}
 
+GLuint loadTexture(Texture raw) {
+    GLuint texture;
+    loadTexture(&texture, raw);
+    return texture;
 }
 
 void loadTextureArray(GLuint* const texture, std::vector<Texture> textures) {

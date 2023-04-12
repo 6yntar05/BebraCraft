@@ -1,26 +1,33 @@
 #pragma once
-
-#include <string>
-#include <vector>
-
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stb_image.h>
 
+#include <string>
+#include <vector>
+
 namespace bebra::graphics {
 
 class Texture { // todo: not texture
-public:
-    unsigned char* image;
+private:
+    std::vector<unsigned char> image;
 
+public:
+    // data
     int width;
     int height;
     int mode;
+    int channels;
+    uint uvCount = 1;
 
-    unsigned char* getData();
+    // service
+    unsigned char* getData() { return image.data(); }
+    void append(Texture another);   // Creating UV
+    void operator+(Texture another) { this->append(another); }
+
+    Texture(const std::vector<unsigned char> raw, int width, int height, int channels = 4);
     Texture(const std::string path, const bool flip = true);
-    ~Texture();
 };
 
 GLuint createTexture(
@@ -32,13 +39,11 @@ GLuint createMultisampleTexture(
     const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
 );
 
-void loadTexture(GLuint* const texture, const std::string path);
+void loadTexture(GLuint* const texture, Texture raw);
 void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels);
-GLuint loadTexture(const std::string path);
+GLuint loadTexture(Texture raw);
 
 void loadTextureArray(GLuint* const texture, std::vector<Texture> textures);
-//void loadTextureArray(GLuint* const texture, std::vector<std::string> pathes);
-//void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels);
 GLuint loadTextureArray(std::vector<std::string> pathes);
 
 void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes);

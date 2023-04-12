@@ -1,4 +1,5 @@
 #pragma once
+#include "engine/graphics/textures.h"
 #include "engine/objects/base.h"
 #include "engine/objects/block.h"
 #include "engine/objects/fluid.h"
@@ -24,17 +25,18 @@ private:
     void setupMesh();
 
 public:
-	std::string internalName;
+	std::string name;
     // Mesh data
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
-    std::vector<TextureView> textures;
+    TextureView texture;
 
 	// Space-transform data // TODO: split data
 	glm::mat4 transform = glm::mat4(1.0f);
 
     // Service
-    Mesh() { // TODO
+	Mesh() : Mesh("Unnamed") {}
+    Mesh(const std::string name) : name(name) {
 		// Fill the buffers
 		setupMesh();
 	}
@@ -57,7 +59,7 @@ public:
 		another.move(move);
 		vertices.insert(vertices.end(), another.vertices.begin(), another.vertices.end());
 		indices.insert(indices.end(), another.indices.begin(), another.indices.end());
-		textures.insert(textures.end(), another.textures.begin(), another.textures.end());
+		//textures.insert(textures.end(), another.textures.begin(), another.textures.end());
 		this->updateMesh();
 	}
 
@@ -94,6 +96,10 @@ public:
 		}
 
 		this->updateMesh();
+	}
+
+	void setTexture(graphics::Texture raw) {
+		this->texture.texture = graphics::loadTexture({raw});
 	}
 };
 

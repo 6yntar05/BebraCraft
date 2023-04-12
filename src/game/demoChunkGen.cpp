@@ -35,7 +35,7 @@ objects::chunk genChunk() {
     };
 
     bebra::graphics::Texture grassC {path + "grass_block_top.png"};
-    bebra::utils::colorize(grassC, {0.4, 1.0, 0.4});
+    bebra::utils::colorize(grassC, {0.4, 1.0, 0.4}, {0.05, 0.09, 0.05});
     objects::ObjectTexture grassTexture {{
         path + "grass_block_side.png",
         path + "grass_block_side.png",
@@ -60,7 +60,7 @@ objects::chunk genChunk() {
     };
 
     bebra::graphics::Texture tgrassC {path + "grass.png"};
-    bebra::utils::colorize(tgrassC, {0.3, 1.0, 0.3}, {0.3, 0.3, 0.3});
+    bebra::utils::colorize(tgrassC, {0.3, 1.0, 0.3}, {0.2, 0.2, 0.2});
     objects::ObjectTexture tallgrassTexture {
         {tgrassC, tgrassC, tgrassC, tgrassC}
     };
@@ -126,7 +126,7 @@ objects::chunk genChunk() {
     };
 
     bebra::graphics::Texture testTex {path + "water_still.png"};
-    bebra::utils::colorize(testTex, {0.2, 0.2, 0.9});
+    bebra::utils::colorize(testTex, {0.35, 0.4, 1.0});
     objects::ObjectTexture waterTexture {
         {testTex, testTex, testTex, testTex, testTex, testTex}
     };
