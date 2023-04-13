@@ -1,7 +1,7 @@
 #include <array>
 #include <vector>
 #include "engine/objects/base.h"
-#include "game/demoChunkGen.h"
+#include "game/world/demoChunkGen.h"
 #include "engine/objects/objects.h"
 #include "engine/graphics/textures.h"
 #include <engine/utils/textures.h>

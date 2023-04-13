@@ -1,4 +1,6 @@
 #pragma once
+#include <engine/graphics/textures.h>
+
 #include <array>
 #include <string>
 #include <vector>
@@ -7,12 +9,9 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <engine/graphics/textures.h>
 
 namespace bebra::objects {
 
@@ -20,6 +19,7 @@ struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
+    //int TexIndex = 0;
 };
 
 enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...

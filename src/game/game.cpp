@@ -1,28 +1,24 @@
-#include "engine/camera.h"
 #include "engine/core.h"
-#include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
-#include "engine/objects/base.h"
-#include "engine/objects/block.h"
+#include "engine/graphics/shaders.h"
 #include "engine/objects/objects.h"
 #include "engine/objects/model.h"
+#include "engine/objects/base.h"
 #include "engine/utils/glerrors.h"
 #include "engine/utils/font.h"
+#include "engine/camera.h"
 
-#include "engine/objects/mesh.h"
-
-#include "game/demoChunkGen.h"
+#include "game/world/demoChunkGen.h"
 #include "game/control.h"
 #include "game/skybox.h"
 
-#include <cctype>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-#include <typeinfo>
-#include <vector>
 #include <functional>
+#include <stdexcept>
+#include <typeinfo>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cctype>
 #include <map>
 
 #include <GL/glew.h>
@@ -32,8 +28,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL_log.h>
 
-// TODO: novideo framebuffer problem
-
 int main(int argc, char* argv[]) {
     // Initialization & Creating window
 #ifdef __ANDROID__
@@ -42,9 +36,7 @@ int main(int argc, char* argv[]) {
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL); // TODO: OpenGLES
 #endif
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-    bebra::glContextCreate(window);
-    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
+    bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug);
 
     // Creating camera in postision:
     bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
