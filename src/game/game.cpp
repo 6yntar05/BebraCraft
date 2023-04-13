@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
     auto start = SDL_GetPerformanceCounter();
 
     while (window.isRunning) { // Render cycle
-        uint chunkCallsCounter = 0;
+        uint callsCounter = 0;
 
         { // Handling input and window events
             bool isModeChanged = false;
@@ -126,9 +126,7 @@ int main(int argc, char* argv[]) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         { // Chunks rendering
-            static auto cameraBlocksPos = glm::value_ptr(camera.pos);
-
-            static std::function chunkPass = [&](bebra::objects::ObjIdent who) {
+            static std::function chunkPass = [&](bebra::objects::ObjIdent who, int chunkX, int chunkY) {
                 blockShader.use();
                 blockShaderSet.model(model);
                 blockShaderSet.view(view);
@@ -162,7 +160,7 @@ int main(int argc, char* argv[]) {
 
                             // Block space transformation
                             glm::mat4 model = glm::mat4(1.0f);
-                            model = glm::translate(model, { iBlock, iLayer, iRow });
+                            model = glm::translate(model, { iBlock + chunkX*16, iLayer, iRow + chunkY*16});
 
                             //if (block->rotate != 0.0)
                             //    model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
@@ -181,7 +179,7 @@ int main(int argc, char* argv[]) {
                             } else {
                                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                             }
-                            chunkCallsCounter++;
+                            callsCounter++;
 
                             if (who == bebra::objects::esemitransparent)
                                 glDepthMask(GL_TRUE);
@@ -189,21 +187,24 @@ int main(int argc, char* argv[]) {
                     }
                 }
             };
-
-            chunkPass(bebra::objects::esolid);
-            chunkPass(bebra::objects::etransparent); // Mipmaps turns transparent textures to semitranspaent on some fragments
-
-            entityShaderSet.program.use();
-            entityShaderSet.model(model);
-            entityShaderSet.view(view);
-            entityShaderSet.projection(projection);
-            entityShaderSet.worldTime(rawTime);
-            senko.render({10, 6.5, 4}, entityShaderSet);
             
-            chunkPass(bebra::objects::esemitransparent);
+            int x = 0, y = 0;
+            //for (int x = 0; x < 8; x++) for (int y = 0; y < 8; y++) // TODO: reduce draw calls
+            {
+                chunkPass(bebra::objects::esolid, x, y);
+                chunkPass(bebra::objects::etransparent, x, y); // Mipmaps turns transparent textures to semitranspaent on some fragments
 
-            // Mesh test:
-            //testCoolChunk.meshSolid.render();
+                entityShaderSet.program.use();
+                entityShaderSet.model(model);
+                entityShaderSet.view(view);
+                entityShaderSet.projection(projection);
+                entityShaderSet.worldTime(rawTime);
+                senko.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                
+                chunkPass(bebra::objects::esemitransparent, x, y);
+                // Mesh test:
+                //testCoolChunk.meshSolid.render();
+            }
 
         }
         // TODO: game::objectsIds
@@ -233,7 +234,7 @@ int main(int argc, char* argv[]) {
                 text.render("Frametime: " + std::to_string(Frametime) + "ms" +
                             " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                             projectionFont, 10.0, topOffset(0));
-                text.render("Graphics calls: " + std::to_string(chunkCallsCounter), projectionFont, 10.0, topOffset(1));
+                text.render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
                 text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
                 text.render("Testchunk", projectionFont, 10.0, topOffset(3));
             }

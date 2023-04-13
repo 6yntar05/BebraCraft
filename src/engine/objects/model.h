@@ -30,7 +30,7 @@ private:
         transform *= newTransform;
     }
 
-    void processNodeRecursive(const tinygltf::Node& node, glm::mat4 parentTransform) {
+    void processNodeRecursive(const tinygltf::Node& node, glm::mat4 parentTransform) { // TODO: reduce complexity
         // Combine transformation matrix of the current node with its parent's transformation matrix
         nodeTransformation(node, parentTransform);
 
@@ -47,8 +47,7 @@ private:
                     if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
                         const tinygltf::Texture& texture = model.textures.at(material.pbrMetallicRoughness.baseColorTexture.index);
                         const tinygltf::Image& image = model.images.at(texture.source);
-                        graphics::Texture tex {image.image, image.width, image.height, image.component};
-                        mesh.setTexture(tex);
+                        mesh.setTexture({image.image, image.width, image.height, image.component});
                     }
                 }
 
@@ -118,7 +117,6 @@ private:
 public:
     tinygltf::Model model;
     std::vector<Mesh> meshes;
-    GLuint _TMP_tex;
 
     Model(const std::string& path) {
         tinygltf::TinyGLTF loader;
@@ -137,9 +135,6 @@ public:
             printf("Err: %s\n", err.c_str());
         
         this->readModel();
-
-        tinygltf::Image tex = this->model.images.at(0);
-        bebra::graphics::loadTexture(&_TMP_tex, tex.image, tex.width, tex.height, tex.component);
     }
 
     void render(glm::vec3 pos, graphics::BlockShaderApi& shader) const {

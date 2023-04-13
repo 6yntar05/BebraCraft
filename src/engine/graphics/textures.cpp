@@ -6,14 +6,44 @@
 
 namespace bebra::graphics {
 
-Texture::Texture(const std::vector<unsigned char> raw, int width, int height, int channels)
-: image(raw), width(width), height(height), channels(channels){
-    if (channels >= 4)
-        mode = GL_RGBA;
-    else
-        mode = GL_RGB;
-        // GL_RED
+void Texture::findGLMode() {
+    if (this->channels >= 4)
+        this->mode = GL_RGBA;
+    else this->mode = GL_RGB;
+    // GL_RED
 }
+
+void Texture::append(Texture another) { // Append to UV texture
+    assert(height == another.height);
+    assert(channels == another.channels);
+
+    std::vector<unsigned char> newimage;
+    size_t imageLineSize    = width * channels;
+    size_t anotherLineSize  = another.width * another.channels;
+
+    newimage.reserve(image.size() + another.image.size());
+    for (int y = 0; y < this->height; y++) { // each UV line
+        // Copy old texture line
+        newimage.insert(
+            newimage.end(),
+            image.begin() + (imageLineSize * y),
+            image.begin() + (imageLineSize *(y+1))
+        );
+        // Copy new texture line
+        newimage.insert(
+            newimage.end(),
+            another.image.begin() + (anotherLineSize * y),
+            another.image.begin() + (anotherLineSize *(y+1))
+        );
+    }
+
+    this->image    = std::move(newimage);
+    this->width   += another.width;
+    this->uvCount += another.uvCount;
+}
+
+Texture::Texture(const std::vector<unsigned char> raw, int width, int height, int channels)
+: image(raw), width(width), height(height), channels(channels) { findGLMode(); }
 
 Texture::Texture(const std::string path, const bool flip) {
     if (flip)
@@ -25,11 +55,7 @@ Texture::Texture(const std::string path, const bool flip) {
         this->image[i] = stb_image[i];
     stbi_image_free(stb_image);
 
-    if (channels >= 4)
-        mode = GL_RGBA;
-    else
-        mode = GL_RGB;
-        // GL_RED
+    findGLMode();
 }
 
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {

@@ -12,6 +12,7 @@ namespace bebra::graphics {
 class Texture { // todo: not texture
 private:
     std::vector<unsigned char> image;
+    void findGLMode();
 
 public:
     // data

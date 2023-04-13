@@ -32,19 +32,16 @@ enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...
 };
 
 struct ObjectTexture {
+    std::vector<graphics::Texture> textures;
     GLuint textureArray;
     uint arraySize;
     
     ObjectTexture() : arraySize(0) {}
     ObjectTexture(std::vector<graphics::Texture> textures)
-        : arraySize(textures.size()) {
+        : textures(textures), arraySize(textures.size()) {
         graphics::loadTextureArray(&textureArray, textures);
     }
-    /*ObjectTexture(std::vector<std::string> pathes)
-        : arraySize(pathes.size()) {
-        this->textureArray = graphics::loadTextureArray(pathes);
-    }*/
-    ObjectTexture(std::string path, uint count = 6)
+    ObjectTexture(std::string path, uint count = 6) // TODO
         : arraySize(count) {
         std::vector<std::string> pathes;
         for (uint i = 0; i < count; i++)
