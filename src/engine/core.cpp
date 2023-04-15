@@ -11,7 +11,6 @@
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
 #include <SDL_render.h>
-#include <SDL_image.h>
 
 namespace bebra {
 

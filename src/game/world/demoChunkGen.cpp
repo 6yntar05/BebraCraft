@@ -65,10 +65,6 @@ objects::chunk genChunk() {
         {tgrassC, tgrassC, tgrassC, tgrassC}
     };
 
-    objects::ObjectTexture stonebrickTexture {
-        path + "stonebrick.png"
-    };
-
     objects::ObjectTexture planks_big_oakTexture {
         path + "dark_oak_planks.png"
     };

@@ -39,14 +39,22 @@ struct ObjectTexture {
     ObjectTexture() : arraySize(0) {}
     ObjectTexture(std::vector<graphics::Texture> textures)
         : textures(textures), arraySize(textures.size()) {
-        graphics::loadTextureArray(&textureArray, textures);
+        //graphics::loadTextureArray(&textureArray, textures);
+        auto texture = textures.at(0);
+        for (size_t i = 1; i < textures.size(); i++)
+            texture.append(textures[i]);
+        graphics::loadTexture(&textureArray, texture);
     }
     ObjectTexture(std::string path, uint count = 6) // TODO
         : arraySize(count) {
-        std::vector<std::string> pathes;
-        for (uint i = 0; i < count; i++)
-            pathes.push_back(path);
-        this->textureArray = graphics::loadTextureArray(pathes);
+        //std::vector<std::string> pathes;
+        //for (uint i = 0; i < count; i++)
+        //    pathes.push_back(path);
+        //this->textureArray = graphics::loadTextureArray(pathes);
+        graphics::Texture texture {path};
+        for (size_t i = 1; i < count; i++)
+            texture.append(graphics::Texture(path));
+        graphics::loadTexture(&textureArray, texture);
     }
 };
 

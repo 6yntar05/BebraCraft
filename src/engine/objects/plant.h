@@ -12,15 +12,15 @@ class Plant : public Block {
     static constexpr float dsize = psize;
 
     static constexpr std::array<Vertex,24> vertices = {{
-       {{-psize, -0.5f, -psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 0.0f}}, // Front halfinverted z
-       {{ psize,  dsize, psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 1.0f}},
-       {{ psize, -0.5f,  psize},   {0.0f,  0.0f, -1.0f},   {1.0f, 0.0f}},
-       {{-psize,  dsize,-psize},   {0.0f,  0.0f, -1.0f},   {0.0f, 1.0f}},
+       {{-psize, -0.5f, -psize},   {0.0f,  0.0f, -1.0f},   {(0.0f+0.0f)/6.0f, 0.0f}}, // Front halfinverted z
+       {{ psize,  dsize, psize},   {0.0f,  0.0f, -1.0f},   {(1.0f+0.0f)/6.0f, 1.0f}},
+       {{ psize, -0.5f,  psize},   {0.0f,  0.0f, -1.0f},   {(1.0f+0.0f)/6.0f, 0.0f}},
+       {{-psize,  dsize,-psize},   {0.0f,  0.0f, -1.0f},   {(0.0f+0.0f)/6.0f, 1.0f}},
         
-       {{-psize, -0.5f,  psize},   {0.0f,  0.0f,  1.0f},   {0.0f, 0.0f}}, // Back halfinverted z
-       {{ psize, -0.5f, -psize},   {0.0f,  0.0f,  1.0f},   {1.0f, 0.0f}},
-       {{ psize,  dsize,-psize},   {0.0f,  0.0f,  1.0f},   {1.0f, 1.0f}},
-       {{-psize,  dsize, psize},   {0.0f,  0.0f,  1.0f},   {0.0f, 1.0f}},
+       {{-psize, -0.5f,  psize},   {0.0f,  0.0f,  1.0f},   {(0.0f+0.0f)/6.0f, 0.0f}}, // Back halfinverted z
+       {{ psize, -0.5f, -psize},   {0.0f,  0.0f,  1.0f},   {(1.0f+0.0f)/6.0f, 0.0f}},
+       {{ psize,  dsize,-psize},   {0.0f,  0.0f,  1.0f},   {(1.0f+0.0f)/6.0f, 1.0f}},
+       {{-psize,  dsize, psize},   {0.0f,  0.0f,  1.0f},   {(0.0f+0.0f)/6.0f, 1.0f}},
     }};
 
     // Render

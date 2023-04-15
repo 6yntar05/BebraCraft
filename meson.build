@@ -6,7 +6,7 @@ compiller_args = ['-I/usr/include/freetype2', '-I/usr/include/SDL2',
     '-Wno-unused-parameter', '-Wno-missing-field-initializers',
     '-fdiagnostics-color=always']
 
-linker_args = ['-lGL', '-lGLEW', '-lSDL2', '-lSDL2_image', '-lSDL2_ttf', '-lfreetype']
+linker_args = ['-lGL', '-lGLEW', '-lSDL2', '-lSDL2_ttf', '-lfreetype']
 
 if get_option('buildtype') == 'debug'
     compiller_args += ['-fsanitize=address', '-O0', '-g']

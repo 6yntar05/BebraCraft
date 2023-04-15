@@ -8,10 +8,9 @@
 namespace bebra {
 
 enum GApi {
+    None,
     OpenGL,
-    OpenGLES, // TODO
-    Vulkan, // TODO
-    None
+    OpenGLES // TODO
 };
 
 enum ContextFlags {
@@ -35,7 +34,7 @@ struct Window {
     bool isRunning;
 
     Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api);
-    //~Window() { SDL_DestroyWindow(itself); }
+    ~Window() { SDL_DestroyWindow(itself); }
 };
 
 SDL_DisplayMode init(const GApi);

@@ -30,6 +30,19 @@ private:
         transform *= newTransform;
     }
 
+    template<typename T>
+    void readIndices(const tinygltf::Model& model, const tinygltf::Primitive& primitive, std::vector<GLuint>& indices) {
+        tinygltf::Accessor accessor = model.accessors.at(primitive.indices);
+        const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+        const T* idata = reinterpret_cast<const T*>(&model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
+
+        //std::cerr << "indices:("<<accessor.count<<") " << primitive.indices << '\n';
+        for (size_t i = 0; i < accessor.count; i++) {
+            //std::cerr << '\t' << idata[i] << '\n';
+            indices.push_back(idata[i]);
+        }
+    }
+
     void processNodeRecursive(const tinygltf::Node& node, glm::mat4 parentTransform) { // TODO: reduce complexity
         // Combine transformation matrix of the current node with its parent's transformation matrix
         nodeTransformation(node, parentTransform);
@@ -37,6 +50,7 @@ private:
         if (node.mesh != -1) {
             // Process the meshes of the current node
             bebra::objects::Mesh mesh {node.name};
+            //std::cerr << "NAME: " << node.name << '\n';
 
             // Buffers
             for (const tinygltf::Primitive& primitive : model.meshes.at(node.mesh).primitives) {
@@ -54,13 +68,13 @@ private:
                 // Vertex data
                 std::vector<bebra::objects::Vertex> vertices;
                 for (auto& i : primitive.attributes) {
-                    //std::cout << "Buffer index: " << i.second << '\n';
+                    //std::cerr << "Buffer index: " << i.second << '\n';
 
                     tinygltf::Accessor accessor = model.accessors.at(i.second);
                     const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
                     const float* data = reinterpret_cast<const float*>(&model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
 
-                    //std::cout << "Accessors count: " << accessor.count << '\n';
+                    //std::cerr << "Accessors count: " << accessor.count << '\n';
                     if (vertices.size() < accessor.count)
                         vertices.resize(accessor.count);
                     
@@ -81,19 +95,29 @@ private:
                             //std::cerr << "TEXCOORD_0: " << data[k * 2 + 0] << " : " << data[k * 2 + 1] << '\n';
                             vertices.at(k).TexCoords = { data[k * 2 + 0], data[k * 2 + 1] };
                         
-                        } else throw std::bad_typeid();
+                        };
                     }
                 }
                 mesh.vertices = vertices;
 
                 // Inidices
-                tinygltf::Accessor accessor = model.accessors.at(primitive.indices);
-                const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
-                const short* idata = reinterpret_cast<const short*>(&model.buffers.at(0).data[bufferView.byteOffset + accessor.byteOffset]);
-                //std::cout << "indices:("<<accessor.count<<") " << primitive.indices << '\n';
-                for (size_t i = 0; i < accessor.count; i++) {
-                    //std::cout << '\t' << idata[i] << '\n';
-                    mesh.indices.push_back(idata[i]);
+                switch(model.accessors.at(primitive.indices).componentType) {
+                    case TINYGLTF_COMPONENT_TYPE_BYTE:
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+                        readIndices<uint8_t>(model, primitive, mesh.indices);
+                        break;
+                    case TINYGLTF_COMPONENT_TYPE_SHORT:
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+                        readIndices<uint16_t>(model, primitive, mesh.indices);
+                        break;
+                    case TINYGLTF_COMPONENT_TYPE_INT:
+                    case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+                        readIndices<uint32_t>(model, primitive, mesh.indices);
+                        break;
+                    default:
+                        std::cerr << "Unknown index component type! Trying uint\n";
+                        readIndices<uint32_t>(model, primitive, mesh.indices);
+                        break;
                 }
             }
 
@@ -122,8 +146,12 @@ public:
         tinygltf::TinyGLTF loader;
         std::string err, warn;
 
-        bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
-        //bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str()); // for binary glTF(.glb)
+        bool ret;
+        if (!path.substr(path.size()-4, path.size()).compare(".glb"))
+            ret = loader.LoadBinaryFromFile(&model, &err, &warn, path.c_str());
+        else
+            ret = loader.LoadASCIIFromFile(&model, &err, &warn, path.c_str());
+
         if (!ret) {
             printf("Failed to parse glTF\n");
             return;

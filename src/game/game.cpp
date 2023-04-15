@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
 
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
+    //bebra::objects::Model senko {"./de_dust2.glb"};
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
     bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
@@ -162,8 +163,10 @@ int main(int argc, char* argv[]) {
                             GLint textureSlot = GL_TEXTURE31;
                             GLint textureSlotIndex = 31; // < Max texture slots
                             glActiveTexture(textureSlot + textureSlotIndex);
-                            glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
+                            //glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
+                            glBindTexture(GL_TEXTURE_2D, block->texture.textureArray);
+                            //glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
+                            glUniform1i(glGetUniformLocation(blockShader.program, "textureUV"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                             if (block->id == bebra::objects::eplant) {
                                 glDisable(GL_CULL_FACE);
                                 glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
