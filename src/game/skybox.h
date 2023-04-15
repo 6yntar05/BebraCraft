@@ -2,14 +2,12 @@
 #include "engine/graphics/cubemaps.h"
 #include "engine/graphics/shaders.h"
 
-#include "game/shaders.h"
-
 namespace craft {
 
 class skybox { // TODO
 private:
     bebra::graphics::ShaderProgram shader;
-    craft::SkyboxShaderApi shaderApi;
+    bebra::graphics::SkyboxShaderApi shaderApi;
     GLuint VBO;
     GLuint VAO;
     GLuint texture;

@@ -6,7 +6,8 @@ in vec3 Position;
 in vec3 Normal;
 in vec2 TexCoord;
 flat in int vertexID;
-uniform mediump sampler2DArray textureArray;
+//uniform mediump sampler2DArray textureArray;
+uniform mediump sampler2D textureUV;
 
 // Vertex input
 in vec4 glPos;
@@ -25,7 +26,8 @@ const float sideShading = 0.2;
 const float downShading = 0.3;
 
 void main(void) {
-    COL0 = texture(textureArray, vec3(TexCoord, (vertexID%36)/4)); // TODO: UV textures
+    //COL0 = texture(textureArray, vec3(TexCoord, (vertexID%36)/4)); // TODO: UV textures
+    COL0 = texture(textureUV, TexCoord); // TODO: UV textures
     
     if (COL0.w < 0.001) discard; // Dirty 'hack'
 

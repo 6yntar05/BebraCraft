@@ -1,29 +1,61 @@
 #include "engine/graphics/textures.h"
+#include <cstddef>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 namespace bebra::graphics {
 
-unsigned char* Texture::getData() {
-    return image;
+void Texture::findGLMode() {
+    if (this->channels >= 4)
+        this->mode = GL_RGBA;
+    else this->mode = GL_RGB;
+    // GL_RED
 }
+
+void Texture::append(Texture another) { // Append to UV texture
+    assert(height == another.height);
+    assert(channels == another.channels);
+
+    std::vector<unsigned char> newimage;
+    size_t imageLineSize    = width * channels;
+    size_t anotherLineSize  = another.width * another.channels;
+
+    newimage.reserve(image.size() + another.image.size());
+    for (int y = 0; y < this->height; y++) { // each UV line
+        // Copy old texture line
+        newimage.insert(
+            newimage.end(),
+            image.begin() + (imageLineSize * y),
+            image.begin() + (imageLineSize *(y+1))
+        );
+        // Copy new texture line
+        newimage.insert(
+            newimage.end(),
+            another.image.begin() + (anotherLineSize * y),
+            another.image.begin() + (anotherLineSize *(y+1))
+        );
+    }
+
+    this->image    = std::move(newimage);
+    this->width   += another.width;
+    this->uvCount += another.uvCount;
+}
+
+Texture::Texture(const std::vector<unsigned char> raw, int width, int height, int channels)
+: image(raw), width(width), height(height), channels(channels) { findGLMode(); }
 
 Texture::Texture(const std::string path, const bool flip) {
     if (flip)
         stbi_set_flip_vertically_on_load(true);
-    // Mode
-    int channels;
-    this->image = stbi_load(path.c_str(), &width, &height, &channels, 0);
-    if (channels >= 4)
-        mode = GL_RGBA;
-    else
-        mode = GL_RGB;
-        // GL_RED
-}
+    unsigned char* stb_image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (!stb_image) return;
+    this->image.resize(width * height * channels);
+    for(size_t i = 0; i < this->image.size(); i++)
+        this->image[i] = stb_image[i];
+    stbi_image_free(stb_image);
 
-Texture::~Texture() {
-    //stbi_image_free(image);
+    findGLMode();
 }
 
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
@@ -56,21 +88,20 @@ GLuint createMultisampleTexture(const GLint internalformat, const uint width, co
     return texture;
 }
 
-void loadTexture(GLuint* const texture, const std::string path) {
+void loadTexture(GLuint* const texture, Texture raw) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
     // Reading texture & creating mipmaps
-    Texture image {path.c_str(), true};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.getData());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw.width, raw.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, raw.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
     // Unding
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -81,8 +112,8 @@ void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, u
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -93,7 +124,12 @@ void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, u
     glGenerateMipmap(GL_TEXTURE_2D);
     // Unding
     glBindTexture(GL_TEXTURE_2D, 0);
+}
 
+GLuint loadTexture(Texture raw) {
+    GLuint texture;
+    loadTexture(&texture, raw);
+    return texture;
 }
 
 void loadTextureArray(GLuint* const texture, std::vector<Texture> textures) {

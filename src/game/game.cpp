@@ -1,29 +1,24 @@
-#include "engine/camera.h"
 #include "engine/core.h"
-#include "engine/graphics/shaders.h"
 #include "engine/graphics/framebuffer.h"
-#include "engine/objects/base.h"
-#include "engine/objects/block.h"
+#include "engine/graphics/shaders.h"
 #include "engine/objects/objects.h"
 #include "engine/objects/model.h"
+#include "engine/objects/base.h"
 #include "engine/utils/glerrors.h"
 #include "engine/utils/font.h"
+#include "engine/camera.h"
 
-#include "engine/objects/mesh.h"
-
-#include "game/demoChunkGen.h"
+#include "game/world/demoChunkGen.h"
 #include "game/control.h"
-#include "game/shaders.h"
 #include "game/skybox.h"
 
-#include <cctype>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-#include <typeinfo>
-#include <vector>
 #include <functional>
+#include <stdexcept>
+#include <typeinfo>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cctype>
 #include <map>
 
 #include <GL/glew.h>
@@ -33,8 +28,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL_log.h>
 
-// TODO: novideo framebuffer problem
-
 int main(int argc, char* argv[]) {
     // Initialization & Creating window
 #ifdef __ANDROID__
@@ -43,9 +36,7 @@ int main(int argc, char* argv[]) {
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL); // TODO: OpenGLES
 #endif
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-    bebra::glContextCreate(window);
-    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
+    bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug);
 
     // Creating camera in postision:
     bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
@@ -66,7 +57,7 @@ int main(int argc, char* argv[]) {
     craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
         // Loading shaders
     bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
-    craft::BlockShaderApi blockShaderSet {blockShader};
+    bebra::graphics::BlockShaderApi blockShaderSet {blockShader};
         // Buffers
     GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
     bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
@@ -75,8 +66,9 @@ int main(int argc, char* argv[]) {
 
     // Test models:
     bebra::objects::Model senko {"./senko.gltf"}; // :з
+    //bebra::objects::Model senko {"./de_dust2.glb"};
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
-    craft::BlockShaderApi entityShaderSet {entityShader}; // compatible
+    bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
     // Loading chunks
     auto chunk = craft::genChunk();
@@ -89,7 +81,7 @@ int main(int argc, char* argv[]) {
     auto start = SDL_GetPerformanceCounter();
 
     while (window.isRunning) { // Render cycle
-        uint chunkCallsCounter = 0;
+        uint callsCounter = 0;
 
         { // Handling input and window events
             bool isModeChanged = false;
@@ -127,9 +119,7 @@ int main(int argc, char* argv[]) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         { // Chunks rendering
-            static auto cameraBlocksPos = glm::value_ptr(camera.pos);
-
-            static std::function chunkPass = [&](bebra::objects::ObjIdent who) {
+            static std::function chunkPass = [&](bebra::objects::ObjIdent who, int chunkX, int chunkY) {
                 blockShader.use();
                 blockShaderSet.model(model);
                 blockShaderSet.view(view);
@@ -163,7 +153,7 @@ int main(int argc, char* argv[]) {
 
                             // Block space transformation
                             glm::mat4 model = glm::mat4(1.0f);
-                            model = glm::translate(model, { iBlock, iLayer, iRow });
+                            model = glm::translate(model, { iBlock + chunkX*16, iLayer, iRow + chunkY*16});
 
                             //if (block->rotate != 0.0)
                             //    model = glm::rotate(model, glm::radians(block->rotate), { 0.0, 1.0, 0.0 });
@@ -173,8 +163,10 @@ int main(int argc, char* argv[]) {
                             GLint textureSlot = GL_TEXTURE31;
                             GLint textureSlotIndex = 31; // < Max texture slots
                             glActiveTexture(textureSlot + textureSlotIndex);
-                            glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
-                            glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
+                            //glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
+                            glBindTexture(GL_TEXTURE_2D, block->texture.textureArray);
+                            //glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
+                            glUniform1i(glGetUniformLocation(blockShader.program, "textureUV"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                             if (block->id == bebra::objects::eplant) {
                                 glDisable(GL_CULL_FACE);
                                 glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
@@ -182,7 +174,7 @@ int main(int argc, char* argv[]) {
                             } else {
                                 glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                             }
-                            chunkCallsCounter++;
+                            callsCounter++;
 
                             if (who == bebra::objects::esemitransparent)
                                 glDepthMask(GL_TRUE);
@@ -190,33 +182,24 @@ int main(int argc, char* argv[]) {
                     }
                 }
             };
+            
+            int x = 0, y = 0;
+            //for (int x = 0; x < 8; x++) for (int y = 0; y < 8; y++) // TODO: reduce draw calls
+            {
+                chunkPass(bebra::objects::esolid, x, y);
+                chunkPass(bebra::objects::etransparent, x, y); // Mipmaps turns transparent textures to semitranspaent on some fragments
 
-            chunkPass(bebra::objects::esolid);
-            chunkPass(bebra::objects::etransparent);
-            { // Test draw entity
-                entityShader.use();
+                entityShaderSet.program.use();
                 entityShaderSet.model(model);
                 entityShaderSet.view(view);
                 entityShaderSet.projection(projection);
                 entityShaderSet.worldTime(rawTime);
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, senko._TMP_tex);
-                glUniform1i(glGetUniformLocation(entityShader.program, "texture"), 0);
-                for (auto& mesh : senko.meshes) {
-                    //if (!mesh.internalName.compare("rightarm")) {
-                        glm::mat4 model = glm::mat4(1.0f);
-                        model = glm::translate(model, { 10, 6.5, 4}); // before rotating!
-                        //model = glm::translate(model, {camera.pos.x + 0.3, camera.pos.y - 1.5f, camera.pos.z}); // before rotating!
-                        model *= mesh.transform;
-                        entityShaderSet.model(model);
-                        mesh.render();
-                    //}
-                }
+                senko.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                
+                chunkPass(bebra::objects::esemitransparent, x, y);
+                // Mesh test:
+                //testCoolChunk.meshSolid.render();
             }
-            chunkPass(bebra::objects::esemitransparent);
-
-            // Mesh test:
-            //testCoolChunk.meshSolid.render();
 
         }
         // TODO: game::objectsIds
@@ -246,7 +229,7 @@ int main(int argc, char* argv[]) {
                 text.render("Frametime: " + std::to_string(Frametime) + "ms" +
                             " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                             projectionFont, 10.0, topOffset(0));
-                text.render("Graphics calls: " + std::to_string(chunkCallsCounter), projectionFont, 10.0, topOffset(1));
+                text.render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
                 text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
                 text.render("Testchunk", projectionFont, 10.0, topOffset(3));
             }

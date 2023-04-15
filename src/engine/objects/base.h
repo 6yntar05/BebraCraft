@@ -1,4 +1,6 @@
 #pragma once
+#include <engine/graphics/textures.h>
+
 #include <array>
 #include <string>
 #include <vector>
@@ -7,12 +9,9 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <engine/graphics/textures.h>
 
 namespace bebra::objects {
 
@@ -20,6 +19,7 @@ struct Vertex {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
+    //int TexIndex = 0;
 };
 
 enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...
@@ -32,24 +32,29 @@ enum ObjIdent { // todo: transparent and semitransparent instead glass, fluid...
 };
 
 struct ObjectTexture {
+    std::vector<graphics::Texture> textures;
     GLuint textureArray;
     uint arraySize;
     
     ObjectTexture() : arraySize(0) {}
     ObjectTexture(std::vector<graphics::Texture> textures)
-        : arraySize(textures.size()) {
-        graphics::loadTextureArray(&textureArray, textures);
+        : textures(textures), arraySize(textures.size()) {
+        //graphics::loadTextureArray(&textureArray, textures);
+        auto texture = textures.at(0);
+        for (size_t i = 1; i < textures.size(); i++)
+            texture.append(textures[i]);
+        graphics::loadTexture(&textureArray, texture);
     }
-    /*ObjectTexture(std::vector<std::string> pathes)
-        : arraySize(pathes.size()) {
-        this->textureArray = graphics::loadTextureArray(pathes);
-    }*/
-    ObjectTexture(std::string path, uint count = 6)
+    ObjectTexture(std::string path, uint count = 6) // TODO
         : arraySize(count) {
-        std::vector<std::string> pathes;
-        for (uint i = 0; i < count; i++)
-            pathes.push_back(path);
-        this->textureArray = graphics::loadTextureArray(pathes);
+        //std::vector<std::string> pathes;
+        //for (uint i = 0; i < count; i++)
+        //    pathes.push_back(path);
+        //this->textureArray = graphics::loadTextureArray(pathes);
+        graphics::Texture texture {path};
+        for (size_t i = 1; i < count; i++)
+            texture.append(graphics::Texture(path));
+        graphics::loadTexture(&textureArray, texture);
     }
 };
 

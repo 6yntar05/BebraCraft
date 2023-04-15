@@ -1,17 +1,16 @@
+#include "engine/core.h"
+#include "engine/utils/glerrors.h"
+
 #include <exception>
 #include <iostream>
 
 #include <GL/glew.h>
-
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_events.h>
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
 #include <SDL_render.h>
-#include <SDL_image.h>
-
-#include "engine/core.h"
 
 namespace bebra {
 
@@ -93,7 +92,7 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     SDL_SetRelativeMouseMode(SDL_TRUE);
 }
 
-SDL_GLContext glContextCreate(const Window& window, const bool nicest) {
+SDL_GLContext glContextCreate(const Window& window, std::bitset<4> flags) {
     // Creating context itself
     SDL_GLContext context = SDL_GL_CreateContext(window.itself);
     if (!context)
@@ -105,19 +104,32 @@ SDL_GLContext glContextCreate(const Window& window, const bool nicest) {
 
     // Tuning context
     glViewport(0, 0, window.mode.w, window.mode.h);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // For fonts rendering
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-    if (nicest) {
-        glEnable(GL_MULTISAMPLE);
+    // Context flags:
+    //window.contextFlags = flags;
+    if ((std::bitset<4>(ContextFlags::Debug) & flags)!=0) {
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
+        // Initialise debug output
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+        glDebugMessageCallback(utils::glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+    if ((std::bitset<4>(ContextFlags::AA) & flags)!=0) {
         glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-        glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         glEnable(GL_LINE_SMOOTH);
+    }
+    if ((std::bitset<4>(ContextFlags::Multisample) & flags)!=0) {
+        glEnable(GL_MULTISAMPLE);
     }
 
     return std::move(context);
