@@ -5,6 +5,7 @@ src_files = files(
     'engine/graphics/shaders.cpp',
     'engine/graphics/textures.cpp',
     'engine/objects/mesh.cpp',
+    'engine/objects/model.cpp',
     'engine/core.cpp',
     'game/control.cpp',
     'game/world/demoChunkGen.cpp'

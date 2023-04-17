@@ -36,11 +36,10 @@ int main(int argc, char* argv[]) {
     SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL); // TODO: OpenGLES
 #endif
     bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
-    bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug);
+    bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug); // TODO: Multisample buffer
 
     // Creating camera in postision:
-    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f) };
-    camera.speed = 0.05;
+    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f), 90 };
 
     // Creating screen object and G-Buffer
     bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"};
@@ -65,8 +64,8 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
     // Test models:
-    bebra::objects::Model senko {"./senko.gltf"}; // :з
-    //bebra::objects::Model senko {"./de_dust2.glb"};
+    bebra::objects::Model gltfModel {"./model.gltf"};
+    //bebra::objects::Model gltfModel {"./model.glb"};
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
     bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
@@ -101,7 +100,7 @@ int main(int argc, char* argv[]) {
         glm::mat4 projection     = glm::perspective(
                                         glm::radians(camera.fov),
                                         float(window.mode.w) / float(window.mode.h),
-                                        0.1f, 300.0f
+                                        0.1f, 3000.0f
                                     ); // 300 - render distance
         glm::mat4 projectionFont = glm::ortho(0.0f, float(window.mode.w), 0.0f, float(window.mode.h));
 
@@ -160,11 +159,11 @@ int main(int argc, char* argv[]) {
                             blockShaderSet.model(model);
 
                             // TODO: texture sets manager
-                            GLint textureSlot = GL_TEXTURE31;
-                            GLint textureSlotIndex = 31; // < Max texture slots
+                            GLint textureSlot = GL_TEXTURE0;
+                            GLint textureSlotIndex = 0; // < Max texture slots
                             glActiveTexture(textureSlot + textureSlotIndex);
-                            //glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
                             glBindTexture(GL_TEXTURE_2D, block->texture.textureArray);
+                            //glBindTexture(GL_TEXTURE_2D_ARRAY, block->texture.textureArray);
                             //glUniform1i(glGetUniformLocation(blockShader.program, "textureArray"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                             glUniform1i(glGetUniformLocation(blockShader.program, "textureUV"), (textureSlot-GL_TEXTURE0)+textureSlotIndex);
                             if (block->id == bebra::objects::eplant) {
@@ -194,7 +193,7 @@ int main(int argc, char* argv[]) {
                 entityShaderSet.view(view);
                 entityShaderSet.projection(projection);
                 entityShaderSet.worldTime(rawTime);
-                senko.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
                 
                 chunkPass(bebra::objects::esemitransparent, x, y);
                 // Mesh test:

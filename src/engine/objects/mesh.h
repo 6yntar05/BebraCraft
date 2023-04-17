@@ -43,7 +43,7 @@ public:
 
 	void updateMesh();
 
-	void render() const {
+	void render() const { // glm::vec3 pos, graphics::BlockShaderApi& shader
 		glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
@@ -54,14 +54,6 @@ public:
 			i.Position += vec;
 		this->updateMesh();
 	}
-
-	//void append(Mesh another, const glm::vec3& move = {0,0,0}) { // todo: no-copy realisation
-	//	another.move(move);
-	//	vertices.insert(vertices.end(), another.vertices.begin(), another.vertices.end());
-	//	indices.insert(indices.end(), another.indices.begin(), another.indices.end());
-	//	//textures.insert(textures.end(), another.textures.begin(), another.textures.end());
-	//	this->updateMesh();
-	//}
 
 	void append(const bebra::objects::Object obj, const glm::vec3 move = {0,0,0}) {
 		auto appendVertices = Object::vertices;

@@ -21,9 +21,9 @@ public:
 	const ShaderType type;
 
 	// Service
-	Shader() : type(enone) { std::cout << "Call\n";}
+	Shader() : type(enone) {}
 	Shader(const ShaderType type, const std::string path);
-	~Shader() {glDeleteShader(blob);}
+	//~Shader() {glDeleteShader(blob);}
 };
 
 class ShaderProgram {

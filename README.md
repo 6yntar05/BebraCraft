@@ -1,5 +1,5 @@
 # BebraCraft
-Students laboratory work. OpenGL C++ Minecraft (not)clone
+Student's laboratory work. OpenGL C++ Minecraft (not)clone
 
 ![BebraCraft Screenshot](/Screenshot.png?raw=true "BebraCraft")
 
