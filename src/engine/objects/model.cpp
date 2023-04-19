@@ -1,4 +1,5 @@
 //#define DEBUG
+#include "engine/graphics/textures.h"
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NOEXCEPTION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -46,23 +47,6 @@ void Model::readIndices(const tinygltf::Model& model, const tinygltf::Primitive&
 bebra::objects::Mesh Model::processMesh(const tinygltf::Mesh& srcmesh, bebra::objects::Mesh& mesh) {
     // Buffers
     for (const tinygltf::Primitive& primitive : srcmesh.primitives) {
-        // FIXME: material assigned to each primitive
-        // but we only consider the last one, because fucked up
-        if (primitive.material > -1) {
-            const tinygltf::Material& material = model.materials.at(primitive.material);
-            if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-                const tinygltf::Texture& texture = model.textures.at(material.pbrMetallicRoughness.baseColorTexture.index);
-                const tinygltf::Image& image = model.images.at(texture.source);
-                mesh.setTexture({image.image, image.width, image.height, image.component});
-            } else {
-                mesh.setTexture({ {
-                        (u_char)250, (u_char)000, (u_char)240, (u_char)230,  (u_char)010, (u_char)010, (u_char)010, (u_char)230,
-                        (u_char)010, (u_char)010, (u_char)010, (u_char)230,  (u_char)250, (u_char)000, (u_char)240, (u_char)230
-                    }, 2, 2, 4
-                });
-            }
-        }
-
         // Vertex data
         std::vector<bebra::objects::Vertex> vertices;
         for (auto& i : primitive.attributes) {
@@ -120,6 +104,34 @@ bebra::objects::Mesh Model::processMesh(const tinygltf::Mesh& srcmesh, bebra::ob
                 std::cerr << "Unknown index component type! Trying uint\n";
                 readIndices<uint32_t>(model, primitive, mesh.indices);
                 break;
+        }
+
+        // Material data
+        if (primitive.material > -1) {
+            const tinygltf::Material& material = model.materials.at(primitive.material);
+            if (material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
+                // If texture...
+                const tinygltf::Texture& texture = model.textures.at(material.pbrMetallicRoughness.baseColorTexture.index);
+                const tinygltf::Image& image = model.images.at(texture.source);
+                mesh.setTexture({image.image, image.width, image.height, image.component});
+                
+            } else {
+                // If base color...
+                std::vector<double> basecolor = material.pbrMetallicRoughness.baseColorFactor;
+                std::vector<unsigned char> color;
+
+                for (auto channel : basecolor) {
+                    double clamped_channel = std::clamp(channel, 0.0, 1.0);
+                    unsigned char value = static_cast<unsigned char>(std::round(clamped_channel * 255.0));
+                    color.push_back(value);
+                }
+
+                // Add missing color components if they are not defined
+                if (color.size() == 3) 
+                    color.push_back(255); // alpha = 255
+
+                mesh.setTexture({color, 1, 1, static_cast<int>(color.size())});
+            }
         }
     }
     return mesh;

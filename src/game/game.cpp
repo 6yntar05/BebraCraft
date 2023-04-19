@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug); // TODO: Multisample buffer
 
     // Creating camera in postision:
-    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f), 90 };
+    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05};
 
     // Creating screen object and G-Buffer
     bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"};
@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
     // Test models:
-    bebra::objects::Model gltfModel {"./model.gltf"};
-    //bebra::objects::Model gltfModel {"./model.glb"};
+    //bebra::objects::Model gltfModel {"./model.gltf"};
+    bebra::objects::Model gltfModel {"./model.glb"};
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
     bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
                                         glm::radians(camera.fov),
                                         float(window.mode.w) / float(window.mode.h),
                                         0.1f, 3000.0f
-                                    ); // 300 - render distance
+                                    ); // 3000 - render distance
         glm::mat4 projectionFont = glm::ortho(0.0f, float(window.mode.w), 0.0f, float(window.mode.h));
 
         glm::vec3 direction;
@@ -193,7 +193,8 @@ int main(int argc, char* argv[]) {
                 entityShaderSet.view(view);
                 entityShaderSet.projection(projection);
                 entityShaderSet.worldTime(rawTime);
-                gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                //gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                gltfModel.render({}, entityShaderSet);
                 
                 chunkPass(bebra::objects::esemitransparent, x, y);
                 // Mesh test:
