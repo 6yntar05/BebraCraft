@@ -31,13 +31,6 @@ public:
     Texture(const std::string path, const bool flip = true);
 };
 
-static Texture placeholder {
-    {
-        (u_char)250, (u_char)000, (u_char)240, (u_char)230,  (u_char)010, (u_char)010, (u_char)010, (u_char)230,
-        (u_char)010, (u_char)010, (u_char)010, (u_char)230,  (u_char)250, (u_char)000, (u_char)240, (u_char)230
-    }, 2, 2, 4
-};
-
 GLuint createTexture(
     const GLint internalformat, const uint width, const uint height,
     const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
