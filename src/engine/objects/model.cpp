@@ -20,9 +20,12 @@ void Model::nodeTransformation(const tinygltf::Node& node, glm::mat4& transform)
             mat.at(i) = node.matrix.at(i);
         newTransform *= glm::make_mat4(mat.data());
     } else {
-        if (!node.translation.empty()) newTransform = glm::translate(newTransform, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
-        if (!node.rotation.empty())    newTransform*= glm::mat4_cast(glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]));
-        if (!node.scale.empty())       newTransform = glm::scale(newTransform, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
+        if (!node.translation.empty())
+            newTransform = glm::translate(newTransform, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
+        if (!node.rotation.empty())
+            newTransform*= glm::mat4_cast(glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]));
+        if (!node.scale.empty())
+            newTransform = glm::scale(newTransform, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
     }
     transform *= newTransform;
 }
@@ -94,9 +97,9 @@ bebra::objects::Mesh Model::processMesh(const tinygltf::Mesh& srcmesh, bebra::ob
 
         // Inidices
         switch(model.accessors.at(primitive.indices).componentType) {
-            case TINYGLTF_COMPONENT_TYPE_BYTE:          readIndices<int8_t> (model, primitive, mesh.indices); break;
-            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: readIndices<uint8_t>(model, primitive, mesh.indices); break;
-            case TINYGLTF_COMPONENT_TYPE_SHORT:         readIndices<int16_t>(model, primitive, mesh.indices); break;
+            case TINYGLTF_COMPONENT_TYPE_BYTE:          readIndices<int8_t>  (model, primitive, mesh.indices); break;
+            case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: readIndices<uint8_t> (model, primitive, mesh.indices); break;
+            case TINYGLTF_COMPONENT_TYPE_SHORT:         readIndices<int16_t> (model, primitive, mesh.indices); break;
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:readIndices<uint16_t>(model, primitive, mesh.indices); break;
             case TINYGLTF_COMPONENT_TYPE_INT:           readIndices<int32_t> (model, primitive, mesh.indices); break;
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:  readIndices<uint32_t>(model, primitive, mesh.indices); break;

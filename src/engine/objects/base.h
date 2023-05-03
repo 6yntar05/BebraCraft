@@ -71,7 +71,6 @@ public:
 
     // Render
     static void loadObject(GLuint& VBO, GLuint& VAO, GLuint& EBO) {
-        std::cerr << "Wtf its base object" << std::endl;
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
         glBindVertexArray(0);

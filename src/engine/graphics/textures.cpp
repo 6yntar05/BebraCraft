@@ -1,4 +1,5 @@
 #include "engine/graphics/textures.h"
+#include <GL/gl.h>
 #include <cstddef>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -6,6 +7,7 @@
 
 namespace bebra::graphics {
 
+// Texture class:
 void Texture::findGLMode() {
     if (this->channels >= 4)
         this->mode = GL_RGBA;
@@ -58,6 +60,42 @@ Texture::Texture(const std::string path, const bool flip) {
     findGLMode();
 }
 
+// Texture loading utils:
+static void glSetTextureParams(GLuint textureType = GL_TEXTURE_2D, const TextureParams params = {}) {
+    GLuint _param;
+
+    // Wrapping:
+    for (GLuint wrapSide : {GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T}) {
+        TextureWrapping wrapType = (wrapSide == GL_TEXTURE_WRAP_S) ? params.sideWrapping : params.topWrapping;
+        switch(wrapType) {
+            case eClamp: _param = GL_CLAMP; break;
+            case eClampToEdge: _param = GL_CLAMP_TO_EDGE; break;
+            case eRepeat: _param = GL_REPEAT; break;
+            case eRepeatMirrored: _param = GL_MIRRORED_REPEAT; break;
+        }
+        glTexParameteri(textureType, wrapSide, _param);
+    }
+
+    // Filtering:
+    glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    for (GLuint wrapSide : {GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER}) {
+        TextureFiltering filteringType = (wrapSide == GL_TEXTURE_MIN_FILTER) ? params.minFilteting : params.magFilteting;
+        switch(filteringType) {
+            case eNearest: _param = GL_NEAREST; break;
+            case eLinear: _param = GL_LINEAR; break;
+            case eNearestMipmapLinear: _param = GL_NEAREST_MIPMAP_LINEAR; break;
+            case eNearestMipmapNearest: _param = GL_NEAREST_MIPMAP_NEAREST; break;
+            case eLinearMipmapLinear: _param = GL_LINEAR_MIPMAP_LINEAR; break;
+            case eLinearMipmapNearest: _param = GL_LINEAR_MIPMAP_NEAREST; break;
+        }
+        glTexParameteri(textureType, wrapSide, _param);
+    }
+    glTexParameteri(textureType, GL_TEXTURE_MAX_ANISOTROPY, params.anisotropyLevel);
+    //glTexParameteri(textureType, GL_TEXTURE_MAX_LEVEL, 4);
+    //glTexParameteri(textureType, GL_TEXTURE_BASE_LEVEL, 0);
+}
+
 GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
     GLuint texture;
     // Bind
@@ -88,18 +126,12 @@ GLuint createMultisampleTexture(const GLint internalformat, const uint width, co
     return texture;
 }
 
-void loadTexture(GLuint* const texture, Texture raw) {
+void loadTexture(GLuint* const texture, Texture raw, TextureParams const params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    glSetTextureParams(GL_TEXTURE_2D, params);
     // Reading texture & creating mipmaps
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw.width, raw.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, raw.getData());
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -107,18 +139,12 @@ void loadTexture(GLuint* const texture, Texture raw) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels) {
+void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    glSetTextureParams(GL_TEXTURE_2D, params);
     // Reading texture & creating mipmaps
     glTexImage2D(GL_TEXTURE_2D, 0, (channels==4)?GL_RGBA:GL_RGB, width, height, 0, (channels==4)?GL_RGBA:GL_RGB, GL_UNSIGNED_BYTE, data.data());
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -126,24 +152,18 @@ void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, u
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLuint loadTexture(Texture raw) {
+GLuint loadTexture(Texture raw, const TextureParams params) {
     GLuint texture;
-    loadTexture(&texture, raw);
+    loadTexture(&texture, raw, params);
     return texture;
 }
 
-void loadTextureArray(GLuint* const texture, std::vector<Texture> textures) {
+void loadTextureArray(GLuint* const texture, std::vector<Texture> textures, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    glSetTextureParams(GL_TEXTURE_2D_ARRAY, params);
     // Reading texture & creating mipmaps
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, textures.at(0).width, textures.at(0).height, textures.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     for (uint i = 0; i < textures.size(); i++) {
@@ -159,18 +179,12 @@ void loadTextureArray(GLuint* const texture, std::vector<Texture> textures) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void loadTextureArray(GLuint* const texture, const std::vector<std::string> pathes) {
+void loadTextureArray(GLuint* const texture, const std::vector<std::string> pathes, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    glSetTextureParams(GL_TEXTURE_2D_ARRAY, params);
     // Reading texture & creating mipmaps
     Texture image {pathes.at(0).c_str(), true};
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, image.width, image.height, pathes.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -183,18 +197,12 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::string> path
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels) {
+void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
     // Texture params
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 16);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 4);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR); // Smoth MIN scaling with mipmap
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Detailed MAG scaling
+    glSetTextureParams(GL_TEXTURE_2D_ARRAY, params);
     // Reading texture & creating mipmaps
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 5, GL_RGBA, width, height, data.size());
         // Create array
@@ -206,14 +214,14 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsig
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-GLuint loadTextureArray(const std::vector<std::string> pathes) {
+GLuint loadTextureArray(const std::vector<std::string> pathes, const TextureParams params) {
     // Wrapper
     GLuint texture;
-    loadTextureArray(&texture, pathes);
+    loadTextureArray(&texture, pathes, params);
     return texture;
 }
 
-void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes) {
+void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes, const TextureParams params) {
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, *texture);
 
@@ -226,20 +234,16 @@ void loadCubemapTexture(GLuint* const texture, std::vector<std::string> pathes) 
         );
     }
 
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    glSetTextureParams(GL_TEXTURE_CUBE_MAP, params);
 
     glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-GLuint loadCubemapTexture(const std::vector<std::string> pathes) {
+GLuint loadCubemapTexture(const std::vector<std::string> pathes, const TextureParams params) {
     // Wrapper
     GLuint texture;
-    loadCubemapTexture(&texture, pathes);
+    loadCubemapTexture(&texture, pathes, params);
     return texture;
 }
 

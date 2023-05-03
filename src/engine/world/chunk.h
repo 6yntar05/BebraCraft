@@ -16,7 +16,7 @@ namespace bebra::world {
 class Chunk {
 private:
     // Raw data:
-    const objects::chunk* const rawChunk;            // Source data
+    const objects::chunk* const rawChunk;   // Source data
 
     // Loading params:
     static constexpr uint quantHeight = 16; // split chunk by height and gen mesh for every piece
@@ -32,6 +32,7 @@ public:
     objects::Mesh meshSolid;             // Be drawn first
     objects::Mesh meshTransparent;       // ... second
     objects::Mesh meshSemitransparent;   // ... third
+    // Coordinates in world
     const int x;
     const int y;
 
