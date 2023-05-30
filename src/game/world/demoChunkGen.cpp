@@ -1,15 +1,13 @@
 #include <array>
 #include <vector>
 #include "engine/objects/base.h"
-#include "game/world/demoChunkGen.h"
 #include "engine/objects/objects.h"
 #include "engine/graphics/textures.h"
-#include <engine/utils/textures.h>
-
-const std::string path = "textures/resourcepack/assets/minecraft/textures/block/";
+#include "engine/utils/textures.h"
+#include "game/world/demoChunkGen.h"
+#include "game/graphics/texatlas.h"
 
 using namespace bebra;
-
 namespace craft {
 
 objects::chunk genChunk() {

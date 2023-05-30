@@ -9,8 +9,8 @@
 #include "engine/camera.h"
 
 #include "game/world/demoChunkGen.h"
+#include "game/world/skybox.h"
 #include "game/control.h"
-#include "game/skybox.h"
 
 #include <functional>
 #include <stdexcept>
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
     bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
     // Test models:
-    bebra::objects::Model gltfModel {"./model.gltf"};
+    bebra::objects::Model gltfModel {"./model.glb"};
     bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
     bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
     
@@ -192,12 +192,12 @@ int main(int argc, char* argv[]) {
                 entityShaderSet.view(view);
                 entityShaderSet.projection(projection);
                 entityShaderSet.worldTime(rawTime);
-                gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
-                //gltfModel.render({}, entityShaderSet);
+                //gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
+                gltfModel.render({}, entityShaderSet);
                 
                 chunkPass(bebra::objects::esemitransparent, x, y);
                 // Mesh test:
-                testCoolChunk.meshSolid.render();
+                //testCoolChunk.meshSolid.render();
             }
 
         }

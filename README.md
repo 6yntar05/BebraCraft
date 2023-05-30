@@ -5,10 +5,13 @@ Student's laboratory work. OpenGL C++ Minecraft (not)clone
 
 ## Installation
 ### Archlinux
-- `sudo pacman -S cmake gcc sdl2 sdl2_image glew glm freetype2`
+- `sudo pacman -S cmake gcc sdl2 sdl2_image sdl2_ttf glew glm freetype2`
 ### Debian/Ubuntu
 - `sudo apt update # && sudo apt upgrade`
 - `sudo apt install build-essential cmake extra-cmake-modules libopengl-dev libglx-dev libglu1-mesa-dev libglm-dev libglew-dev glew-utils libsdl2-dev libfreetype-dev`
+### FreeBSD
+- `sudo pkg install cmake gcc sdl2 sdl2_image sdl2_ttf glew glm freetype2`
+- `# NOTE: FreeBSD stores headers/libs in /usr/local dir; Just use meson build`
 ### RaspberryPi
 - Look at 'raspberrypi' branch (TODO: OpenGL ES)
 

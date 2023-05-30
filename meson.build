@@ -1,7 +1,7 @@
 project('BebraCraft', 'cpp')
 src_dir = 'src'
 
-compiller_args = ['-I/usr/include/freetype2', '-I/usr/include/SDL2',
+compiller_args = ['-I/usr/include/freetype2', '-I/usr/include/SDL2', '-I/usr/local/include/freetype2', '-I/usr/local/include/SDL2',
     '-Wall', '-Wextra', '-Wpedantic',
     '-Wno-unused-parameter', '-Wno-missing-field-initializers',
     '-fdiagnostics-color=always']

@@ -1,4 +1,4 @@
-#include "game/shaders.h"
+#include "game/graphics/shaders.h"
 #include <glm/gtc/type_ptr.hpp>
 
 namespace craft {

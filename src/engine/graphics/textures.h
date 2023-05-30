@@ -10,34 +10,16 @@
 namespace bebra::graphics {
 
 // Texture params:
-enum TextureFormat {
-    eRGBA,
-    eRGB,
-    eR
-};
-
-enum TextureFiltering {
-    eNearest,
-    eLinear,
-    eNearestMipmapLinear,
-    eNearestMipmapNearest,
-    eLinearMipmapLinear,
-    eLinearMipmapNearest
-};
-
-enum TextureWrapping {
-    eClamp,
-    eClampToEdge,
-    eRepeat,
-    eRepeatMirrored
-};
+enum TextureFormat { eRGBA, eRGB, eR };
+enum TextureWrapping { eClamp, eClampToEdge, eRepeat, eRepeatMirrored };
+enum TextureFiltering { eNearest, eLinear, eNearestMipmapLinear, eNearestMipmapNearest, eLinearMipmapLinear, eLinearMipmapNearest };
 
 struct TextureParams {
-    TextureFormat format = eRGBA;
+    TextureFormat    format       = eRGBA;
     TextureFiltering minFilteting = eNearest;
     TextureFiltering magFilteting = eNearest;
-    TextureWrapping sideWrapping = eRepeat;
-    TextureWrapping topWrapping = eRepeat;
+    TextureWrapping  sideWrapping = eRepeat;
+    TextureWrapping  topWrapping  = eRepeat;
     int anisotropyLevel = 16;
 };
 
