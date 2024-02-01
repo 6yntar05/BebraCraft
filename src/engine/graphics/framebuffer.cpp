@@ -1,4 +1,3 @@
-#include <bits/types/struct_sched_param.h>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -9,7 +8,7 @@ namespace bebra {
 namespace graphics {
 
 // class GBuffer
-    void GBuffer::init(const uint width, const uint height) {
+    void GBuffer::init(const unsigned int width, const unsigned int height) {
         this->width = width;
         this->height = height;
 
@@ -51,10 +50,10 @@ namespace graphics {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    GBuffer::GBuffer(const uint width, const uint height) { this->init(width, height); }
+    GBuffer::GBuffer(const unsigned int width, const unsigned int height) { this->init(width, height); }
     GBuffer::~GBuffer() { this->deinit(); }
 
-    void GBuffer::updateMode(uint width, uint height) {
+    void GBuffer::updateMode(unsigned int width, unsigned int height) {
         this->deinit();
         this->init(width, height);
     }
@@ -95,12 +94,12 @@ namespace graphics {
         glEnable(GL_DEPTH_TEST);
     }
 
-    void ScreenObject::updateMode(uint width, uint height) {
+    void ScreenObject::updateMode(unsigned int width, unsigned int height) {
         gbuffer->updateMode(width, height);
         glViewport(0, 0, width, height);
     }
 
-    ScreenObject::ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader)
+    ScreenObject::ScreenObject(const unsigned int width, const unsigned int height, const graphics::ShaderProgram shader)
         : shader(shader)
     {
         this->gbuffer = new bebra::graphics::GBuffer {width, height};

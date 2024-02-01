@@ -19,13 +19,13 @@ private:
     const objects::chunk* const rawChunk;   // Source data
 
     // Loading params:
-    static constexpr uint quantHeight = 16; // split chunk by height and gen mesh for every piece
+    static constexpr unsigned int quantHeight = 16; // split chunk by height and gen mesh for every piece
 
 public:
     // Chunk contants:
-    static constexpr uint lenght  = 16;
-    static constexpr uint widht   = 16;
-    //static constexpr uint height  = 256;
+    static constexpr unsigned int lenght  = 16;
+    static constexpr unsigned int widht   = 16;
+    //static constexpr unsigned int height  = 256;
 
     // Chunk:
     // struct ? {
@@ -38,11 +38,11 @@ public:
 
     // Service
     void meshGen() { // simple for now
-		for (uint iLayer = 0; iLayer < rawChunk->size(); iLayer++) {
+		for (unsigned int iLayer = 0; iLayer < rawChunk->size(); iLayer++) {
 			auto& layer = rawChunk->at(iLayer);
-			for (uint iRow = 0; iRow < layer.size(); iRow++) {
+			for (unsigned int iRow = 0; iRow < layer.size(); iRow++) {
 				auto& row = layer.at(iRow);
-				for (uint iObj = 0; iObj < row.size(); iObj++) {
+				for (unsigned int iObj = 0; iObj < row.size(); iObj++) {
 					auto& obj = row.at(iObj);
 
 					if (obj->id == objects::esolid)

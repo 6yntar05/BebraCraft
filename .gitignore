@@ -4,6 +4,7 @@ cmake-build-*
 .cache
 CMakeLists.txt.user
 .kdev4
+*.bak
 
 # Prerequisites
 *.d

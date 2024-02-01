@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     // Creating screen object and G-Buffer
     bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"};
     bebra::graphics::ScreenObject screen {
-        (uint)window.mode.w, (uint)window.mode.h, screenShader
+        (unsigned int)window.mode.w, (unsigned int)window.mode.h, screenShader
     };
 
     // Loading font
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     auto start = SDL_GetPerformanceCounter();
 
     while (window.isRunning) { // Render cycle
-        uint callsCounter = 0;
+        unsigned int callsCounter = 0;
 
         { // Handling input and window events
             bool isModeChanged = false;
@@ -221,7 +221,7 @@ int main(int argc, char* argv[]) {
 
             // Render HUD
             if (!window.debug.nohud) {
-                static std::function topOffset = [&](uint lineFromTop) {
+                static std::function topOffset = [&](unsigned int lineFromTop) {
                     return float(window.mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
                 };
 
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
                             " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                             projectionFont, 10.0, topOffset(0));
                 text.render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
-                text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
+text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
                 text.render("Testchunk", projectionFont, 10.0, topOffset(3));
             }
         }

@@ -35,7 +35,7 @@ public:
     int height;
     int mode;
     int channels;
-    uint uvCount = 1;
+    unsigned int uvCount = 1;
 
     // Service
     unsigned char* getData() { return image.data(); }
@@ -48,17 +48,17 @@ public:
 
 // Texture loading:
 GLuint createTexture(
-    const GLint internalformat, const uint width, const uint height,
+    const GLint internalformat, const unsigned int width, const unsigned int height,
     const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
 );
 GLuint createMultisampleTexture(
-    const GLint internalformat, const uint width, const uint height,
+    const GLint internalformat, const unsigned int width, const unsigned int height,
     const GLenum format = GL_RGBA, const GLenum type = GL_UNSIGNED_BYTE
 );
 
 void loadTexture(GLuint* const texture, Texture raw, const TextureParams params = {});
 void loadTexture(GLuint* const texture, const std::vector<unsigned char> data,
-    uint width, uint height, uint channels, const TextureParams params = {}
+    unsigned int width, unsigned int height, unsigned int channels, const TextureParams params = {}
 );
 GLuint loadTexture(Texture raw, const TextureParams params = {});
 

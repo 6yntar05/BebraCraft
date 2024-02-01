@@ -19,19 +19,19 @@ namespace graphics {
         GLuint normal;
         GLuint position;
 
-        uint width;
-        uint height;
+        unsigned int width;
+        unsigned int height;
 
       private:
         GLuint depth;   // RBO
 
-		void init(const uint width, const uint height);
+		void init(const unsigned int width, const unsigned int height);
 		void deinit();
 
       public:
-        GBuffer(const uint width, const uint height);
+        GBuffer(const unsigned int width, const unsigned int height);
         ~GBuffer();
-        void updateMode(uint width, uint height);
+        void updateMode(unsigned int width, unsigned int height);
 
 		void bind();
         void unbind();
@@ -60,9 +60,9 @@ namespace graphics {
         
         void clear() const;
         void render(bool renderHud = true) const;
-        void updateMode(uint width, uint height);
+        void updateMode(unsigned int width, unsigned int height);
 
-        ScreenObject(const uint width, const uint height, const graphics::ShaderProgram shader);
+        ScreenObject(const unsigned int width, const unsigned int height, const graphics::ShaderProgram shader);
         ~ScreenObject();
     };
 

@@ -96,7 +96,7 @@ static void glSetTextureParams(GLuint textureType = GL_TEXTURE_2D, const Texture
     //glTexParameteri(textureType, GL_TEXTURE_BASE_LEVEL, 0);
 }
 
-GLuint createTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
+GLuint createTexture(const GLint internalformat, const unsigned int width, const unsigned int height, const GLenum format, const GLenum type) {
     GLuint texture;
     // Bind
     glGenTextures(1, &texture);
@@ -111,7 +111,7 @@ GLuint createTexture(const GLint internalformat, const uint width, const uint he
     return texture;
 }
 
-GLuint createMultisampleTexture(const GLint internalformat, const uint width, const uint height, const GLenum format, const GLenum type) {
+GLuint createMultisampleTexture(const GLint internalformat, const unsigned int width, const unsigned int height, const GLenum format, const GLenum type) {
     GLuint texture;
     // Bind
     glGenTextures(1, &texture);
@@ -139,7 +139,7 @@ void loadTexture(GLuint* const texture, Texture raw, TextureParams const params)
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, uint width, uint height, uint channels, const TextureParams params) {
+void loadTexture(GLuint* const texture, const std::vector<unsigned char> data, unsigned int width, unsigned int height, unsigned int channels, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
@@ -166,7 +166,7 @@ void loadTextureArray(GLuint* const texture, std::vector<Texture> textures, cons
     glSetTextureParams(GL_TEXTURE_2D_ARRAY, params);
     // Reading texture & creating mipmaps
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, textures.at(0).width, textures.at(0).height, textures.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    for (uint i = 0; i < textures.size(); i++) {
+    for (unsigned int i = 0; i < textures.size(); i++) {
         glTexSubImage3D(
             GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
             textures.at(i).width, textures.at(i).height, 1,
@@ -188,7 +188,7 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::string> path
     // Reading texture & creating mipmaps
     Texture image {pathes.at(0).c_str(), true};
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, image.width, image.height, pathes.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    for (uint i = 0; i < pathes.size(); i++) {
+    for (unsigned int i = 0; i < pathes.size(); i++) {
         Texture image {pathes.at(i).c_str(), true};
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, image.width, image.height, 1, image.mode, GL_UNSIGNED_BYTE, image.getData());
     }
@@ -197,7 +197,7 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::string> path
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, uint width, uint height, uint channels, const TextureParams params) {
+void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsigned char>> data, unsigned int width, unsigned int height, unsigned int channels, const TextureParams params) {
     // Bind
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, *texture);
@@ -206,7 +206,7 @@ void loadTextureArray(GLuint* const texture, const std::vector<std::vector<unsig
     // Reading texture & creating mipmaps
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 5, GL_RGBA, width, height, data.size());
         // Create array
-    for (uint i = 0; i < data.size(); i++) {
+    for (unsigned int i = 0; i < data.size(); i++) {
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height, 1, (channels==4)?GL_RGBA:GL_RGB, GL_UNSIGNED_BYTE, data.at(i).data());
     }
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);

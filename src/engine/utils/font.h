@@ -24,11 +24,11 @@ static std::map<char, Character> Characters;
 class Font {
   private:
   	graphics::ShaderProgram shader;
-    uint VAO, VBO;
+    unsigned int VAO, VBO;
 
   public:
-	const uint width;
-	const uint height;
+	const unsigned int width;
+	const unsigned int height;
 
     void render(std::string text, glm::mat4& projection, float x, float y, glm::vec3 color = {1.0, 1.0, 1.0}, float scale = 1.0) {
 		// Load shaders & projection
@@ -75,7 +75,7 @@ class Font {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Font(const std::string path, const graphics::ShaderProgram shader, const uint width, const uint height = 0)
+    Font(const std::string path, const graphics::ShaderProgram shader, const unsigned int width, const unsigned int height = 0)
 	: shader(shader), width(width), height(height) {
 		FT_Library ft;
         if (FT_Init_FreeType(&ft))

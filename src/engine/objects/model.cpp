@@ -104,7 +104,7 @@ bebra::objects::Mesh Model::processMesh(const tinygltf::Mesh& srcmesh, bebra::ob
             case TINYGLTF_COMPONENT_TYPE_INT:           readIndices<int32_t> (model, primitive, mesh.indices); break;
             case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:  readIndices<uint32_t>(model, primitive, mesh.indices); break;
             default:
-                std::cerr << "Unknown index component type! Trying uint\n";
+                std::cerr << "Unknown index component type! Trying unsigned int\n";
                 readIndices<uint32_t>(model, primitive, mesh.indices);
                 break;
         }
