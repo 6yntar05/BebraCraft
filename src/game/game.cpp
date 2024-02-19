@@ -20,6 +20,7 @@
 #include <vector>
 #include <cctype>
 #include <map>
+#include <memory>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -28,68 +29,91 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL_log.h>
 
-int main(int argc, char* argv[]) {
-    // Initialization & Creating window
-#ifdef __ANDROID__
-    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGLES); // Only GLES or Vulkan(not implemented(And unlikely to be :З))
-#else
-    SDL_DisplayMode display = bebra::init(bebra::GApi::OpenGL); // TODO: OpenGLES
+#ifdef __EMSCRIPTEN__
+    #include <emscripten.h>
+    #include <emscripten/html5_webgl.h>
+    #include <emscripten/wasmfs.h>
 #endif
-    bebra::Window window {"BebraCraft", display, SDL_WINDOW_OPENGL};
-    bebra::glContextCreate(window, bebra::AA | bebra::Multisample | bebra::Debug); // TODO: Multisample buffer
 
-    // Creating camera in postision:
-    bebra::Camera camera { glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05};
+class Scene {
+public:
+    virtual void init() = 0;        //
+    virtual void handleInput() = 0; //
+    virtual void render() = 0;
+    virtual void cleanup() = 0;     //
+    virtual void setWindow(bebra::Window* window) = 0;  //
 
-    // Creating screen object and G-Buffer
-    bebra::graphics::ShaderProgram screenShader {"shaders/screen.vert", "shaders/screen.frag"};
-    bebra::graphics::ScreenObject screen {
-        (unsigned int)window.mode.w, (unsigned int)window.mode.h, screenShader
-    };
+private:
+    // std::vector<Object> objects_;
+    // std::vector<Script> scripts_;
+    // std::vector<Scene> scenes_;
+};
 
-    // Loading font
-    bebra::graphics::ShaderProgram fontShader {"shaders/font.vert", "shaders/font.frag"};
-    bebra::utils::Font text {"./fonts/Monocraft.ttf", fontShader, 18};
+class MenuScene : public Scene { // реализация для меню
+public:
+    MenuScene() {}
+private:
+    // std::vector<Object> objects_;
+    // std::vector<Script> scripts_;
+    // std::vector<Scene> scenes_;
+};
 
-    // Objects
-        // Creating skybox
-    craft::skybox skybox { bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} };
-        // Loading shaders
-    bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
-    bebra::graphics::BlockShaderApi blockShaderSet {blockShader};
-        // Buffers
-    GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
-    bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
-    bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
-    bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
+class GameScene : public Scene {
+private:
+    // GAME RESOURCES
+    bebra::Camera camera;
+    bebra::graphics::ScreenObject screen;
+    bebra::utils::Font text;
+    craft::skybox skybox;
+    bebra::objects::chunk chunk;
+    bebra::world::Chunk testCoolChunk;
+    uint64_t time;
 
-    // Test models:
-    bebra::objects::Model gltfModel {"./model.glb"};
-    bebra::graphics::ShaderProgram entityShader {"shaders/entity.vert", "shaders/entity.frag"};
-    bebra::graphics::BlockShaderApi entityShaderSet {entityShader}; // compatible
-    
-    // Loading chunks
-    auto chunk = craft::genChunk();
-    bebra::world::Chunk testCoolChunk {&chunk, 0, 0};
-
-    // Runtime vars
     std::list<SDL_Keycode> keyPressed;
     float worldTime = 0.0, rawTime = 0.0;
     float maxFrametime = 0.0;
-    auto start = SDL_GetPerformanceCounter();
+    uint64_t start = SDL_GetPerformanceCounter();
+    bebra::Window* window;
 
-    while (window.isRunning) { // Render cycle
+public:
+    GameScene()
+        : camera (glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05)
+        , screen (640, 480, bebra::graphics::ShaderProgram { "shaders/screen.vert", "shaders/screen.frag" })
+        , text ("./fonts/Monocraft.ttf", bebra::graphics::ShaderProgram {"shaders/font.vert", "shaders/font.frag"}, 18)
+        , skybox ( bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} )
+        , chunk ( craft::genChunk() )
+        , testCoolChunk ( &chunk, 0, 0 )
+    {
+        std::cout << "GameConstruct" << std::endl;
+    }
+
+    void setWindow(bebra::Window* window) override {
+        this->window = window;
+    }
+
+    void init() override {}
+
+    void handleInput() override {
+        bool isModeChanged = false;
+        ::handleInput(keyPressed, camera, *window, isModeChanged);
+        if (isModeChanged)
+            screen.updateMode(window->mode.w, window->mode.h);
+    };
+
+    void render() override {
         unsigned int callsCounter = 0;
 
-        { // Handling input and window events
-            bool isModeChanged = false;
-            handleInput(keyPressed, camera, window, isModeChanged);
-            if (isModeChanged)
-                screen.updateMode(window.mode.w, window.mode.h);
-        }
+            // Loading shaders
+        bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
+        bebra::graphics::BlockShaderApi blockShaderSet {blockShader};
+            // Buffers
+        GLuint VBO, plantVAO, fluidVAO, blockVAO, EBO;
+        bebra::objects::Plant::loadObject(VBO, plantVAO, EBO);
+        bebra::objects::Fluid::loadObject(VBO, fluidVAO, EBO);
+        bebra::objects::Block::loadObject(VBO, blockVAO, EBO);
 
         // Calculate shadertime
-        //worldTime += 0.001;
+        worldTime += 0.001;
         rawTime = 0.5 + (glm::cos(worldTime) / 2.0);
 
         // Position calculation // Todo: put into a camera class
@@ -98,10 +122,10 @@ int main(int argc, char* argv[]) {
         glm::mat4 viewIdenpedent = glm::mat4(glm::mat3(view));
         glm::mat4 projection     = glm::perspective(
                                         glm::radians(camera.fov),
-                                        float(window.mode.w) / float(window.mode.h),
+                                        float(window->mode.w) / float(window->mode.h),
                                         0.1f, 3000.0f
                                     ); // 3000 - render distance
-        glm::mat4 projectionFont = glm::ortho(0.0f, float(window.mode.w), 0.0f, float(window.mode.h));
+        glm::mat4 projectionFont = glm::ortho(0.0f, float(window->mode.w), 0.0f, float(window->mode.h));
 
         glm::vec3 direction;
             direction.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
@@ -110,11 +134,11 @@ int main(int argc, char* argv[]) {
         camera.front = glm::normalize(direction);
 
         // Offscreen rendering in G-Buffer // TODO: fix for opengles
-		screen.gbuffer->bind();
+        //screen.gbuffer->bind();
         screen.clear();
         skybox.render(viewIdenpedent, projection, rawTime);
-        if (window.debug.lines)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //if (window->debug.lines)
+        //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         { // Chunks rendering
             static std::function chunkPass = [&](bebra::objects::ObjIdent who, int chunkX, int chunkY) {
@@ -187,13 +211,13 @@ int main(int argc, char* argv[]) {
                 chunkPass(bebra::objects::esolid, x, y);
                 chunkPass(bebra::objects::etransparent, x, y); // Mipmaps turns transparent textures to semitranspaent on some fragments
 
-                entityShaderSet.program.use();
-                entityShaderSet.model(model);
-                entityShaderSet.view(view);
-                entityShaderSet.projection(projection);
-                entityShaderSet.worldTime(rawTime);
+                //entityShaderSet.program.use();
+                //entityShaderSet.model(model);
+                //entityShaderSet.view(view);
+                //entityShaderSet.projection(projection);
+                //entityShaderSet.worldTime(rawTime);
                 //gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
-                gltfModel.render({}, entityShaderSet);
+                //gltfModel.render({}, entityShaderSet);
                 
                 chunkPass(bebra::objects::esemitransparent, x, y);
                 // Mesh test:
@@ -201,13 +225,12 @@ int main(int argc, char* argv[]) {
             }
 
         }
-        // TODO: game::objectsIds
 
         {// Render from G-Buffer
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            screen.gbuffer->unbind();
-            screen.clear();
-            screen.render(!window.debug.nohud);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            //screen.gbuffer->unbind();
+            //screen.clear();
+            //screen.render(!window->debug.nohud);
         }
 
         { // Calculate frametime & FPS
@@ -220,9 +243,10 @@ int main(int argc, char* argv[]) {
             start = end;
 
             // Render HUD
-            if (!window.debug.nohud) {
-                static std::function topOffset = [&](unsigned int lineFromTop) {
-                    return float(window.mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
+            if (!window->debug.nohud) {
+                static std::function topOffset =[&](unsigned int lineFromTop) {
+                    return 10;
+                    //return float(window->mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
                 };
 
                 text.render("Frametime: " + std::to_string(Frametime) + "ms" +
@@ -235,8 +259,74 @@ text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10
         }
 
         bebra::utils::glHandleError(glGetError());
-        SDL_GL_SwapWindow(window.itself);
     }
+
+    void cleanup() override {};
+};
+
+class SceneManager {
+private:
+    std::shared_ptr<Scene> currentScene;
+
+public:
+    SceneManager() {
+        currentScene = std::make_shared<GameScene>();
+        currentScene->init();
+    }
+
+    void switchScene(std::shared_ptr<Scene> newScene) {
+        currentScene->cleanup();
+        currentScene = std::move(newScene);
+        currentScene->init();
+    }
+
+    void handleInput() {
+        currentScene->handleInput();
+    }
+
+    void render() {
+        currentScene->render();
+    }
+
+    std::shared_ptr<Scene> getSceneInstance() {
+        return currentScene;
+    }
+};
+
+SDL_Window *window = nullptr;
+SDL_GLContext glContext = nullptr;
+
+static void mainLoop(void* SceneManagerPtr) {
+    auto sceneManager = reinterpret_cast<SceneManager*>(SceneManagerPtr);
+    sceneManager->handleInput();
+    sceneManager->render();
+    bebra::utils::glHandleError(glGetError());
+    SDL_GL_SwapWindow(window);
+#ifdef __EMSCRIPTEN__
+    emscripten_webgl_commit_frame();
+#endif
+}
+
+int main(int argc, char* argv[]) {
+    SDL_DisplayMode display =
+#ifdef __EMSCRIPTEN__
+        bebra::init(bebra::GApi::WebGL);
+#else 
+        bebra::init(bebra::GApi::OpenGL);
+#endif
+    bebra::Window windowObj {"BebraCraft", display, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE};
+    bebra::glContextCreate(windowObj, bebra::AA | bebra::Multisample | bebra::Debug); // TODO: Multisample buffer
+    window = windowObj.itself;
+
+    SceneManager SceneManager;
+    SceneManager.getSceneInstance()->setWindow(&windowObj);
+
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(mainLoop, reinterpret_cast<void*>(&SceneManager), 0, 1);
+#else
+    while (windowObj.isRunning) // TODO: exit flag
+        mainLoop(&SceneManager);
+#endif
 
     SDL_Quit();
     return 0;

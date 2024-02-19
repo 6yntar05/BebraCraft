@@ -5,6 +5,8 @@ cmake-build-*
 CMakeLists.txt.user
 .kdev4
 *.bak
+.vscode
+CMakeUserPresets.json
 
 # Prerequisites
 *.d

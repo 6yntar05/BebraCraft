@@ -21,8 +21,9 @@ namespace bebra::graphics {
         std::stringstream stream;
         stream << file.rdbuf();
         file.close();
-        std::string code {stream.str()};
+        std::string code = {stream.str()};
         shaderCode = code.c_str();
+        //std::cout << shaderCode << std::endl;
             
         // Compile shader
         std::string shaderName;
