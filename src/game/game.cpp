@@ -35,13 +35,47 @@
     #include <emscripten/wasmfs.h>
 #endif
 
-class Scene {
+class SystemContextSingleton {
+public:
+    static SystemContextSingleton& getInstance() {
+        static SystemContextSingleton instance;
+        return instance;
+    }
+
+    void init() {
+        bebra::init();
+    }
+
+    void createWindow() {
+        SDL_DisplayMode display = bebra::getDisplay();
+        window_ = new bebra::Window {"BebraCraft", std::move(display), SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE};
+    }
+
+    void createRenderContext(std::bitset<4> flags = {0}) {
+        #ifdef __EMSCRIPTEN__
+            bebra::glContextCreate(*window_, bebra::GApi::WebGL, std::move(flags)); // TODO: Multisample buffer
+        #else 
+            bebra::glContextCreate(*window_, bebra::GApi::OpenGL, std::move(flags));
+        #endif
+        // -> SDL_GLContext
+    }
+
+    bebra::Window* getWindow() {
+        return window_;
+    }
+    
+private:
+    bebra::Window* window_; // default constuctor with no pointer is jopa
+};
+
+class Scene { // TODO: Move to engine
 public:
     virtual void init() = 0;        //
     virtual void handleInput() = 0; //
     virtual void render() = 0;
     virtual void cleanup() = 0;     //
     virtual void setWindow(bebra::Window* window) = 0;  //
+    virtual bebra::Window* getWindow() = 0;
 
 private:
     // std::vector<Object> objects_;
@@ -73,9 +107,10 @@ private:
     float worldTime = 0.0, rawTime = 0.0;
     float maxFrametime = 0.0;
     uint64_t start = SDL_GetPerformanceCounter();
-    bebra::Window* window;
 
 public:
+    bebra::Window* window;
+
     GameScene()
         : camera (glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05)
         , screen (640, 480, bebra::graphics::ShaderProgram { "shaders/screen.vert", "shaders/screen.frag" })
@@ -89,6 +124,10 @@ public:
 
     void setWindow(bebra::Window* window) override {
         this->window = window;
+    }
+
+    bebra::Window* getWindow() override {
+        return this->window;
     }
 
     void init() override {}
@@ -293,38 +332,33 @@ public:
     }
 };
 
-SDL_Window *window = nullptr;
-SDL_GLContext glContext = nullptr;
-
 static void mainLoop(void* SceneManagerPtr) {
     auto sceneManager = reinterpret_cast<SceneManager*>(SceneManagerPtr);
     sceneManager->handleInput();
     sceneManager->render();
     bebra::utils::glHandleError(glGetError());
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(sceneManager->getSceneInstance()->getWindow()->itself);
 #ifdef __EMSCRIPTEN__
     emscripten_webgl_commit_frame();
 #endif
 }
 
 int main(int argc, char* argv[]) {
-    SDL_DisplayMode display =
-#ifdef __EMSCRIPTEN__
-        bebra::init(bebra::GApi::WebGL);
-#else 
-        bebra::init(bebra::GApi::OpenGL);
-#endif
-    bebra::Window windowObj {"BebraCraft", display, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE};
-    bebra::glContextCreate(windowObj, bebra::AA | bebra::Multisample | bebra::Debug); // TODO: Multisample buffer
-    window = windowObj.itself;
+    auto systemContext = SystemContextSingleton::getInstance();
+
+    systemContext.init();
+    systemContext.createWindow();
+    systemContext.createRenderContext(bebra::AA | bebra::Multisample | bebra::Debug);
+
+    auto window = systemContext.getWindow();
 
     SceneManager SceneManager;
-    SceneManager.getSceneInstance()->setWindow(&windowObj);
+    SceneManager.getSceneInstance()->setWindow(window);
 
 #ifdef __EMSCRIPTEN__
     emscripten_set_main_loop_arg(mainLoop, reinterpret_cast<void*>(&SceneManager), 0, 1);
 #else
-    while (windowObj.isRunning) // TODO: exit flag
+    while (window->isRunning)
         mainLoop(&SceneManager);
 #endif
 

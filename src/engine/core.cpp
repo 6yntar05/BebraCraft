@@ -21,20 +21,52 @@
 
 namespace bebra {
 
-SDL_DisplayMode init(const GApi gapi) {
+void init() {
     // Init SDL
-    SDL_DisplayMode displayMode;
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cout << "[ERROR] SDL::INIT" << std::endl << SDL_GetError() << std::endl;
         throw std::exception();
     }
-    SDL_GetDesktopDisplayMode(0,&displayMode);
 
     // Init FreeType
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
         std::cerr << "FREETYPE::INIT::ERROR. Ignoring..." << std::endl;
+}
 
+SDL_DisplayMode getDisplay() {
+    SDL_DisplayMode displayMode;
+    SDL_GetDesktopDisplayMode(0,&displayMode);
+    return displayMode;
+}
+
+Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api)
+: windowName(windowName), mode(mode), isRunning(true), itself(nullptr) {
+    // SDL hints
+#ifndef __EMSCRIPTEN__ //or android
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
+#endif
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
+
+    // -1 - Adaptive VSYNC,
+    SDL_GL_SetSwapInterval(1);
+
+    // Creating window
+    this->itself = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        mode.w, mode.h, properties_graphic_api);
+    if (this->itself == NULL) {
+        std::cerr << "ERROR::SDL::CREATE_WINDOW" << std::endl;
+        throw std::exception();
+    }
+
+    // Grabbing input
+    SDL_SetWindowGrab(this->itself, SDL_TRUE);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+    std::cerr << SDL_GetError() << std::endl;
+}
+
+SDL_GLContext glContextCreate(const Window& window, const GApi gapi, std::bitset<4> flags) {
     // Init Graphics API
     switch (gapi) {
         case OpenGL:
@@ -84,37 +116,7 @@ SDL_DisplayMode init(const GApi gapi) {
         default:
             throw std::invalid_argument("Not implemented gapi, or null");
     }
-    
-    return displayMode;
-}
 
-Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api)
-: windowName(windowName), mode(mode), isRunning(true), itself(nullptr) {
-    // SDL hints
-#ifndef __EMSCRIPTEN__ //or android
-    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "1"); //Keep X11 compositor enable
-#endif
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
-
-    // -1 - Adaptive VSYNC,
-    SDL_GL_SetSwapInterval(1);
-
-    // Creating window
-    this->itself = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        mode.w, mode.h, properties_graphic_api);
-    if (this->itself == NULL) {
-        std::cerr << "ERROR::SDL::CREATE_WINDOW" << std::endl;
-        throw std::exception();
-    }
-
-    // Grabbing input
-    SDL_SetWindowGrab(this->itself, SDL_TRUE);
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-    std::cerr << SDL_GetError() << std::endl;
-}
-
-SDL_GLContext glContextCreate(const Window& window, std::bitset<4> flags) {
     // Creating context itself
 #ifdef __EMSCRIPTEN__
     SDL_GLContext context = nullptr;

@@ -34,13 +34,16 @@ struct Window {
     std::bitset<4> contextFlags;
     bool isRunning;
 
-    Window(){}; //deleteme
+    //Window(){}; //deleteme !!!!!!!!!!!!
     Window(const std::string windowName, SDL_DisplayMode mode, const uint32_t properties_graphic_api);
     ~Window() { SDL_DestroyWindow(itself); }
+
+    // TODO: SwapBuffer
 };
 
-SDL_DisplayMode init(const GApi);
-SDL_GLContext glContextCreate(const Window& window, std::bitset<4> flags = {0});
+void init();
+SDL_DisplayMode getDisplay();
+SDL_GLContext glContextCreate(const Window& window, const GApi gapi, std::bitset<4> flags = {0});
 //SDL_GL_DeleteContext(glContext);
 
 }; // namespace bebra
