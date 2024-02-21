@@ -12,6 +12,7 @@
 #include "game/world/skybox.h"
 #include "game/control.h"
 
+#include <exception>
 #include <functional>
 #include <stdexcept>
 #include <typeinfo>
@@ -52,53 +53,89 @@ public:
         return window_;
     }
 
-    void createRenderContext(std::bitset<4> flags = {0}) {
+    void createRenderContext(const std::bitset<4> flags = {0}) {
+        // TODO: Multisample buffer
         #ifdef __EMSCRIPTEN__
-            bebra::glContextCreate(*window_, bebra::GApi::WebGL, std::move(flags)); // TODO: Multisample buffer
+            bebra::glContextCreate(*window_, bebra::GApi::WebGL, std::move(flags));
         #else 
             bebra::glContextCreate(*window_, bebra::GApi::OpenGL, std::move(flags));
         #endif
         // -> SDL_GLContext
     }
 
+public:
     bebra::Window* getWindow() {
         return window_;
     }
     
 private:
-    bebra::Window* window_; // default constuctor with no pointer is jopa
+    bebra::Window* window_;
+};
+
+class ObjectsManager {};
+
+class ResourceManager {
+public:
+    bebra::graphics::ScreenObject& getScreen() { return screen; }
+    bebra::utils::Font& getFont() { return text; }
+    bebra::Window* getWindow() { return window; }
+    void setWindow( bebra::Window* window_ ) { window = window_; }
+
+private:
+    // Low level resources
+    bebra::graphics::ScreenObject screen {640, 480, bebra::graphics::ShaderProgram { "shaders/screen.vert", "shaders/screen.frag" }};
+    bebra::utils::Font text {"./fonts/Monocraft.ttf", bebra::graphics::ShaderProgram {"shaders/font.vert", "shaders/font.frag"}, 18};
+    bebra::Window* window = nullptr;
+
+    // Managers
+    ObjectsManager mObjects_;
 };
 
 class Scene { // TODO: Move to engine
 public:
-    virtual void init() = 0;        //
+    Scene( std::shared_ptr<ResourceManager> mResource ) : mResource(mResource) {}
     virtual void handleInput() = 0; //
     virtual void render() = 0;
-    virtual void cleanup() = 0;     //
-    virtual void setWindow(bebra::Window* window) = 0;  //
-    virtual bebra::Window* getWindow() = 0;
+    std::shared_ptr<ResourceManager> mResource;
 
 private:
-    // std::vector<Object> objects_;
-    // std::vector<Script> scripts_;
-    // std::vector<Scene> scenes_;
+    // std::vector<Object> vObjects;
+    // std::vector<Script> vScripts;
+    // std::vector<Scene> vScenes;
 };
 
-class MenuScene : public Scene { // реализация для меню
-public:
-    MenuScene() {}
+class MenuScene : public Scene {
 private:
-    // std::vector<Object> objects_;
-    // std::vector<Script> scripts_;
-    // std::vector<Scene> scenes_;
+    bebra::Camera camera;
+    std::list<SDL_Keycode> keyPressed;
+    
+public:
+    MenuScene( std::shared_ptr<ResourceManager> mResource )
+        : Scene( mResource )
+        , camera (glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05)
+        {}
+
+    void handleInput() override {
+        bool isModeChanged = false;
+        auto window = mResource->getWindow();
+        ::handleInput(keyPressed, camera, *window, isModeChanged);
+        if (isModeChanged)
+            mResource->getScreen().updateMode(window->mode.w, window->mode.h);
+    };
+
+    void render() override {
+        auto window = mResource->getWindow();
+        glm::mat4 projectionOrtho = glm::ortho(0.0f, float(window->mode.w), 0.0f, float(window->mode.h));
+        mResource->getScreen().clear();
+        mResource->getFont().render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionOrtho, window->mode.w/2.0 - 200.0, window->mode.h/2.0);
+        bebra::utils::glHandleError(glGetError());
+    }
 };
 
 class GameScene : public Scene {
 private:
     // GAME RESOURCES
     bebra::Camera camera;
-    bebra::graphics::ScreenObject screen;
-    bebra::utils::Font text;
     craft::skybox skybox;
     bebra::objects::chunk chunk;
     bebra::world::Chunk testCoolChunk;
@@ -110,38 +147,25 @@ private:
     uint64_t start = SDL_GetPerformanceCounter();
 
 public:
-    bebra::Window* window;
-
-    GameScene()
-        : camera (glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05)
-        , screen (640, 480, bebra::graphics::ShaderProgram { "shaders/screen.vert", "shaders/screen.frag" })
-        , text ("./fonts/Monocraft.ttf", bebra::graphics::ShaderProgram {"shaders/font.vert", "shaders/font.frag"}, 18)
+    GameScene( std::shared_ptr<ResourceManager> mResource )
+        : Scene( mResource )
+        , camera (glm::vec3(-2.0f, 8.0f, 6.0f), 90, 0.05)
         , skybox ( bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} )
         , chunk ( craft::genChunk() )
         , testCoolChunk ( &chunk, 0, 0 )
-    {
-        std::cout << "GameConstruct" << std::endl;
-    }
-
-    void setWindow(bebra::Window* window) override {
-        this->window = window;
-    }
-
-    bebra::Window* getWindow() override {
-        return this->window;
-    }
-
-    void init() override {}
+    {}
 
     void handleInput() override {
         bool isModeChanged = false;
+        auto window = mResource->getWindow();
         ::handleInput(keyPressed, camera, *window, isModeChanged);
         if (isModeChanged)
-            screen.updateMode(window->mode.w, window->mode.h);
+            mResource->getScreen().updateMode(window->mode.w, window->mode.h);
     };
 
     void render() override {
         unsigned int callsCounter = 0;
+        auto window = mResource->getWindow();
 
             // Loading shaders
         bebra::graphics::ShaderProgram blockShader {"shaders/block.vert", "shaders/block.frag"};
@@ -175,7 +199,7 @@ public:
 
         // Offscreen rendering in G-Buffer // TODO: fix for opengles
         //screen.gbuffer->bind();
-        screen.clear();
+        mResource->getScreen().clear();
         skybox.render(viewIdenpedent, projection, rawTime);
         //if (window->debug.lines)
         //    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -289,48 +313,45 @@ public:
                     //return float(window->mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
                 };
 
-                text.render("Frametime: " + std::to_string(Frametime) + "ms" +
+                mResource->getFont().render("Frametime: " + std::to_string(Frametime) + "ms" +
                             " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                             projectionFont, 10.0, topOffset(0));
-                text.render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
-text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
-                text.render("Testchunk", projectionFont, 10.0, topOffset(3));
+                mResource->getFont().render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
+                mResource->getFont().render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
+                mResource->getFont().render("Testchunk", projectionFont, 10.0, topOffset(3));
             }
         }
 
         bebra::utils::glHandleError(glGetError());
     }
-
-    void cleanup() override {};
 };
 
 class SceneManager {
 private:
     std::shared_ptr<Scene> currentScene;
+    std::shared_ptr<ResourceManager> mResource;
 
 public:
-    SceneManager() {
-        currentScene = std::make_shared<GameScene>();
-        currentScene->init();
-    }
+    SceneManager( std::shared_ptr<ResourceManager> mResource ) : mResource(mResource) {}
 
     void switchScene(std::shared_ptr<Scene> newScene) {
-        currentScene->cleanup();
+        if ( currentScene == newScene ) return;
         currentScene = std::move(newScene);
-        currentScene->init();
     }
 
     void handleInput() {
         currentScene->handleInput();
+        static int i = 0;
+        if (i == 200) { // Switch scene
+            switchScene(std::make_shared<GameScene>( mResource ));
+            ++i;
+        } else if ( i < 200 ) ++i;
     }
 
-    void render() {
-        currentScene->render();
-    }
+    void render() { currentScene->render();}
 
-    std::shared_ptr<Scene> getSceneInstance() {
-        return currentScene;
-    }
+    std::shared_ptr<Scene> getSceneInstance() { return currentScene; }
+    std::shared_ptr<ResourceManager> getResourceManager() { return mResource; }
 };
 
 static void mainLoop(void* SceneManagerPtr) {
@@ -338,7 +359,7 @@ static void mainLoop(void* SceneManagerPtr) {
     sceneManager->handleInput();
     sceneManager->render();
     bebra::utils::glHandleError(glGetError());
-    SDL_GL_SwapWindow(sceneManager->getSceneInstance()->getWindow()->itself);
+    SDL_GL_SwapWindow(sceneManager->getResourceManager()->getWindow()->itself);
 #ifdef __EMSCRIPTEN__
     emscripten_webgl_commit_frame();
 #endif
@@ -351,14 +372,17 @@ int main(int argc, char* argv[]) {
     auto window = systemContext.createWindow();
     systemContext.createRenderContext(bebra::AA | bebra::Multisample | bebra::Debug);
 
-    SceneManager SceneManager;
-    SceneManager.getSceneInstance()->setWindow(window);
+    std::shared_ptr<ResourceManager> mResource = std::make_shared<ResourceManager>();
+    mResource->setWindow( window );
+
+    SceneManager mScene( mResource );
+    mScene.switchScene(std::make_shared<MenuScene>( mResource ));
 
 #ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop_arg(mainLoop, reinterpret_cast<void*>(&SceneManager), 0, 1);
+    emscripten_set_main_loop_arg(mainLoop, reinterpret_cast<void*>(&mScene), 0, 1);
 #else
     while (window->isRunning)
-        mainLoop(&SceneManager);
+        mainLoop(&mScene);
 #endif
 
     SDL_Quit();

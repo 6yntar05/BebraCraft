@@ -114,6 +114,8 @@ namespace graphics {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
         glBindVertexArray(0);
+
+        updateMode(width, height);
     }
 
     ScreenObject::~ScreenObject() {
