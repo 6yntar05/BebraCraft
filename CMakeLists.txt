@@ -41,7 +41,7 @@ include_directories(/usr/include/SDL2 SYSTEM)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(SDL2)
-find_package(freetype)
+#find_package(freetype)
 
 include_directories(src res libs libs/tinygltf libs/glm)
 target_include_directories(${PROJECT_NAME} PRIVATE

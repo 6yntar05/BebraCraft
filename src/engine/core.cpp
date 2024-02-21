@@ -49,9 +49,6 @@ Window::Window(const std::string windowName, SDL_DisplayMode mode, const uint32_
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "0");
 
-    // -1 - Adaptive VSYNC,
-    SDL_GL_SetSwapInterval(1);
-
     // Creating window
     this->itself = SDL_CreateWindow(windowName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         mode.w, mode.h, properties_graphic_api);
@@ -147,6 +144,9 @@ SDL_GLContext glContextCreate(const Window& window, const GApi gapi, std::bitset
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+    // -1 - Adaptive VSYNC,
+    SDL_GL_SetSwapInterval(1);
 
 #ifndef __EMSCRIPTEN__
     // Context flags:

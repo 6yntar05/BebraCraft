@@ -46,9 +46,10 @@ public:
         bebra::init();
     }
 
-    void createWindow() {
+    bebra::Window* createWindow() {
         SDL_DisplayMode display = bebra::getDisplay();
         window_ = new bebra::Window {"BebraCraft", std::move(display), SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE};
+        return window_;
     }
 
     void createRenderContext(std::bitset<4> flags = {0}) {
@@ -347,10 +348,8 @@ int main(int argc, char* argv[]) {
     auto systemContext = SystemContextSingleton::getInstance();
 
     systemContext.init();
-    systemContext.createWindow();
+    auto window = systemContext.createWindow();
     systemContext.createRenderContext(bebra::AA | bebra::Multisample | bebra::Debug);
-
-    auto window = systemContext.getWindow();
 
     SceneManager SceneManager;
     SceneManager.getSceneInstance()->setWindow(window);
