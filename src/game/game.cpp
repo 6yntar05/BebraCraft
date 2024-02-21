@@ -348,7 +348,7 @@ public:
         } else if ( i < 200 ) ++i;
     }
 
-    void render() { currentScene->render();}
+    void render() { currentScene->render(); }
 
     std::shared_ptr<Scene> getSceneInstance() { return currentScene; }
     std::shared_ptr<ResourceManager> getResourceManager() { return mResource; }

@@ -39,9 +39,12 @@ include_directories(/usr/include/freetype2 SYSTEM)
 include_directories(/usr/include/SDL2 SYSTEM)
 
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(SDL2)
-#find_package(freetype)
+find_package(GLEW   REQUIRED)
+find_package(SDL2   REQUIRED)
+if (EMSCRIPTEN)
+    find_package(freetype)
+    find_package(spdlog)
+endif()
 
 include_directories(src res libs libs/tinygltf libs/glm)
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -49,14 +52,28 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     glm
     spdlog::spdlog
     )
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${CONAN_LIBS}
-    GL
-    GLEW
-    freetype
-    SDL2
-    spdlog
-    )
+
+if (EMSCRIPTEN)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${CONAN_LIBS}
+        GL
+        GLEW
+        freetype
+        Freetype::Freetype
+        SDL2
+        spdlog::spdlog
+        fmt::fmt
+        )
+else ()
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${CONAN_LIBS}
+        GL
+        GLEW
+        freetype
+        SDL2
+        spdlog
+        )
+endif ()
 
 add_custom_command(TARGET ${PROJECT_NAME}
     PRE_BUILD #Prebuild for embeding

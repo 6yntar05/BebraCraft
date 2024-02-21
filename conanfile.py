@@ -21,7 +21,7 @@ class BebraCraftRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     # Deps
-    requires = "sdl/2.28.5", "freetype/2.13.2"#, "glm/0.9.9.8"
+    requires = "sdl/2.28.5", "freetype/2.13.2", "spdlog/1.13.0"#, "glm/0.9.9.8"
 
     def layout(self):
         cmake_layout(self)
