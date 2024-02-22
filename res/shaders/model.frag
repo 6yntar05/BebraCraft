@@ -1,6 +1,14 @@
 #version 300 es
 precision mediump float;
 
+/*
+#if __VERSION__ >= 300
+    #define TEXTURE_FUNC texture
+#else
+    #define TEXTURE_FUNC texture2D
+#endif
+*/
+
 // VBO & Textures
 in vec3 Position;
 in vec3 Normal;

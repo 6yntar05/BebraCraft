@@ -141,6 +141,11 @@ private:
     bebra::world::Chunk testCoolChunk;
     uint64_t time;
 
+    // Test models:
+    bebra::objects::Model gltfModel;
+    bebra::graphics::ShaderProgram modelShader;
+    bebra::graphics::BlockShaderApi modelShaderSet;
+
     std::list<SDL_Keycode> keyPressed;
     float worldTime = 0.0, rawTime = 0.0;
     float maxFrametime = 0.0;
@@ -153,6 +158,9 @@ public:
         , skybox ( bebra::graphics::ShaderProgram {"shaders/skybox.vert", "shaders/skybox.frag"} )
         , chunk ( craft::genChunk() )
         , testCoolChunk ( &chunk, 0, 0 )
+        , gltfModel {"./model.glb"}
+        , modelShader {"shaders/model.vert", "shaders/model.frag"}
+        , modelShaderSet {modelShader} // compatible
     {}
 
     void handleInput() override {
@@ -275,13 +283,12 @@ public:
                 chunkPass(bebra::objects::esolid, x, y);
                 chunkPass(bebra::objects::etransparent, x, y); // Mipmaps turns transparent textures to semitranspaent on some fragments
 
-                //entityShaderSet.program.use();
-                //entityShaderSet.model(model);
-                //entityShaderSet.view(view);
-                //entityShaderSet.projection(projection);
-                //entityShaderSet.worldTime(rawTime);
-                //gltfModel.render({10 + x*16, 6.5, 4 + y*16}, entityShaderSet);
-                //gltfModel.render({}, entityShaderSet);
+                modelShaderSet.program.use();
+                modelShaderSet.model(model);
+                modelShaderSet.view(view);
+                modelShaderSet.projection(projection);
+                modelShaderSet.worldTime(rawTime);
+                gltfModel.render({2, 6.4, 4}, modelShaderSet);
                 
                 chunkPass(bebra::objects::esemitransparent, x, y);
                 // Mesh test:
@@ -298,6 +305,7 @@ public:
         }
 
         { // Calculate frametime & FPS
+            auto text = mResource->getFont();
             auto end = SDL_GetPerformanceCounter();
             float Frametime = ((end - start) * 1000.0) / (float)SDL_GetPerformanceFrequency();
             if (Frametime > maxFrametime)
@@ -309,16 +317,15 @@ public:
             // Render HUD
             if (!window->debug.nohud) {
                 static std::function topOffset =[&](unsigned int lineFromTop) {
-                    return 10;
-                    //return float(window->mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
+                    return float(window->mode.h) - ((float(std::max(text.width, text.height)) + 5.0) * (lineFromTop + 1));
                 };
 
-                mResource->getFont().render("Frametime: " + std::to_string(Frametime) + "ms" +
+                text.render("Frametime: " + std::to_string(Frametime) + "ms" +
                             " / 2%Max: " + std::to_string(maxFrametime) + "ms",
                             projectionFont, 10.0, topOffset(0));
-                mResource->getFont().render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
-                mResource->getFont().render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
-                mResource->getFont().render("Testchunk", projectionFont, 10.0, topOffset(3));
+                text.render("Draw calls: " + std::to_string(callsCounter), projectionFont, 10.0, topOffset(1));
+                text.render("BebraCraft pre-alpha: " + std::string(__DATE__), projectionFont, 10.0, topOffset(2));
+                text.render("Testchunk", projectionFont, 10.0, topOffset(3));
             }
         }
 

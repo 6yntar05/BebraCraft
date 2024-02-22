@@ -25,6 +25,7 @@ if (EMSCRIPTEN)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sMIN_WEBGL_VERSION=2 -sUSE_WEBGL2=1 -sFULL_ES3=1 -sOFFSCREEN_FRAMEBUFFER=1 -sUSE_SDL=2") #-sFULL_ES2=1
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sFORCE_FILESYSTEM -sWASMFS -sMALLOC=emmalloc")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file ${CMAKE_BINARY_DIR}/textures@textures --preload-file ${CMAKE_BINARY_DIR}/shaders@shaders --preload-file ${CMAKE_BINARY_DIR}/fonts@fonts")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --preload-file ${CMAKE_BINARY_DIR}/model.glb@/")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sASSERTIONS -gsource-map")
     add_definitions(-D__EMSCRIPTEN__)
 endif ()
